@@ -1,0 +1,121 @@
+# Registre des arbitrages (ajout seul). Écrit par `cuisine arbitre` et `cuisine revise`, jamais à la main par un agent.
+- decision: D-0002
+  question: Q-RECOUVREMENT-06
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: defaut
+  version: v1-cerveau-recouvrement
+  motif: au-delà des cinq questions retenues
+- decision: D-0003
+  question: Q-RECOUVREMENT-07
+  choix: B
+  date: '2026-10-13'
+  statut: active
+  choix_par: defaut
+  version: v1-cerveau-recouvrement
+  motif: au-delà des cinq questions retenues
+- decision: D-0004
+  question: Q-RECOUVREMENT-08
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: defaut
+  version: v1-cerveau-recouvrement
+  motif: au-delà des cinq questions retenues
+- decision: D-0005
+  question: Q-RECOUVREMENT-09
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: defaut
+  version: v1-cerveau-recouvrement
+  motif: hors périmètre du propriétaire
+- decision: D-0006
+  question: Q-RECOUVREMENT-10
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: defaut
+  version: v1-cerveau-recouvrement
+  motif: hors périmètre du propriétaire
+- decision: D-0007
+  question: Q-RECOUVREMENT-11
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: defaut
+  version: v1-cerveau-recouvrement
+  motif: au-delà des cinq questions retenues
+- decision: D-0008
+  question: Q-RECOUVREMENT-12
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: defaut
+  version: v1-cerveau-recouvrement
+  motif: au-delà des cinq questions retenues
+- decision: D-0009
+  question: Q-RECOUVREMENT-13
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: defaut
+  version: v1-cerveau-recouvrement
+  motif: hors périmètre du propriétaire
+- decision: D-0010
+  question: Q-RECOUVREMENT-14
+  choix: B
+  date: '2026-10-13'
+  statut: active
+  choix_par: defaut
+  version: v1-cerveau-recouvrement
+  motif: hors périmètre du propriétaire
+- decision: D-0011
+  question: Q-RECOUVREMENT-15
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: defaut
+  version: v1-cerveau-recouvrement
+  motif: hors périmètre du propriétaire
+- decision: D-0012
+  question: Q-RECOUVREMENT-16
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: defaut
+  version: v1-cerveau-recouvrement
+  motif: hors périmètre du propriétaire
+- decision: D-0013
+  question: Q-RECOUVREMENT-17
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: defaut
+  version: v1-cerveau-recouvrement
+  motif: au-delà des cinq questions retenues
+- decision: D-0014
+  question: Q-RECOUVREMENT-18
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: defaut
+  version: v1-cerveau-recouvrement
+  motif: hors périmètre du propriétaire
+- decision: D-0015
+  question: Q-RECOUVREMENT-19
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: defaut
+  version: v1-cerveau-recouvrement
+  motif: hors périmètre du propriétaire
+- decision: D-0016
+  question: Q-RECOUVREMENT-20
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: defaut
+  version: v1-cerveau-recouvrement
+  motif: hors périmètre du propriétaire

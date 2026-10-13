@@ -1,0 +1,448 @@
+# Questions pour le propriétaire : specifications/recouvrement/implementation-plans/v1-cerveau-recouvrement/questions.yaml
+# Module recouvrement : première version, la numérotation commence à 01. Aucun identifiant n'existe dans une autre version
+# ni dans un registre arbitrages.yaml du module.
+# Chaque question est rattachée à une règle dédiée (une règle ne dépend que d'une question). La règle porte, dans les plans,
+# la provenance (inferred, default Q-RECOUVREMENT-NN) et énonce l'option par défaut.
+
+- id: Q-RECOUVREMENT-01
+  titre: Droits métier de l'administrateur du socle
+  regles: [rule-recouvrement-admin-no-business-access]
+  effet_recette: oui
+  decideur: proprietaire
+  observable: oui
+  situation: "Un administrateur du socle, auquel aucun profil de recouvrement n'a été attribué, demande la liste des dossiers."
+  options:
+    - code: A
+      libelle: L'administrateur du socle ne gère que les comptes, les profils, les groupes et le journal
+      cout: leger
+      ouvre: []
+      resultat: "Refus : sans profil Superviseur il n'accède à aucune route de recouvrement ; il lui faut un second compte portant le profil."
+      test: { route: "GET /cases", entree: "compte de rôle admin sans profil de recouvrement", attendu: "403 security.access_denied" }
+    - code: B
+      libelle: L'administrateur du socle exerce aussi les droits du superviseur
+      cout: leger
+      ouvre: [les droits du service litiges et du lecteur des indicateurs sont-ils aussi ouverts à l'administrateur]
+      resultat: "La liste des dossiers est rendue ; l'administrateur peut aussi importer, activer une politique et approuver des sorties comptables."
+      test: { route: "GET /cases", entree: "compte de rôle admin sans profil de recouvrement", attendu: "200 liste des dossiers" }
+  defaut: A
+
+- id: Q-RECOUVREMENT-02
+  titre: Un ou plusieurs profils par compte
+  regles: [rule-recouvrement-profile-single]
+  effet_recette: oui
+  decideur: proprietaire
+  observable: oui
+  situation: "L'administrateur du socle attribue le profil Superviseur à un compte, puis le profil Service litiges au même compte."
+  options:
+    - code: A
+      libelle: Un seul profil par compte ; la seconde attribution remplace la première
+      cout: leger
+      ouvre: []
+      resultat: "Le compte n'est plus superviseur : il lit les litiges et se voit refuser les dossiers."
+      test: { route: "PUT /user-profiles/:userId", entree: "{ profile: 'supervisor' } puis { profile: 'litigation' } ; ensuite GET /cases et GET /disputes avec ce compte", attendu: "PUT 200 ; GET /cases 403 security.access_denied ; GET /disputes 200" }
+    - code: B
+      libelle: Un compte peut cumuler plusieurs profils (hors compte agent)
+      cout: lourd
+      ouvre: [profils incompatibles avec le compte agent, écran des utilisateurs à choix multiple, règle de cumul avec la séparation des tâches]
+      resultat: "Le compte garde les deux profils : il lit les dossiers et les litiges."
+      test: { route: "PUT /user-profiles/:userId", entree: "{ profiles: ['supervisor', 'litigation'] } ; ensuite GET /cases et GET /disputes avec ce compte", attendu: "PUT 200 ; GET /cases 200 ; GET /disputes 200" }
+  defaut: A
+
+- id: Q-RECOUVREMENT-03
+  titre: Authentification des comptes agent
+  regles: [rule-recouvrement-agent-authentication]
+  effet_recette: oui
+  decideur: proprietaire
+  observable: oui
+  situation: "Le propriétaire met en service l'agent de la voix : son compte machine doit présenter un jeton porteur à chaque appel d'outil."
+  options:
+    - code: A
+      libelle: Connexion du socle (adresse et mot de passe) qui rend un jeton de 24 heures ; l'agent se reconnecte à l'expiration
+      cout: leger
+      ouvre: []
+      resultat: "L'agent obtient son jeton par la connexion du socle et l'utilise ; au bout de 24 heures il se reconnecte."
+      test: { route: "POST /auth/login", entree: "compte au profil agent, returnToken: true, puis GET /agent/cases/:id avec ce jeton", attendu: "login 200 avec jeton ; lecture du dossier 200" }
+    - code: B
+      libelle: Jeton d'agent de longue durée, créé par l'administrateur, affiché une seule fois et révocable
+      cout: lourd
+      ouvre: [durée de validité, affichage unique du jeton, révocation et rotation, stockage de l'empreinte du jeton, écran de gestion des jetons]
+      resultat: "L'administrateur crée un jeton propre à l'agent ; la révocation le rend aussitôt inutilisable."
+      test: { route: "POST /agent-tokens", entree: "administrateur, compte au profil agent ; puis révocation et nouvel appel d'outil avec ce jeton", attendu: "201 avec jeton affiché une fois ; après révocation 401 security.invalid_token" }
+  defaut: A
+
+- id: Q-RECOUVREMENT-04
+  titre: Libération du lot du jour
+  regles: [rule-recouvrement-batch-release-mode]
+  effet_recette: oui
+  decideur: proprietaire
+  observable: oui
+  situation: "Le superviseur prépare le lot du jour ; tous les contrôles passent."
+  options:
+    - code: A
+      libelle: Le lot est libéré aussitôt (marqué prêt) ; le superviseur n'intervient que pour un lot bloqué
+      cout: leger
+      ouvre: []
+      resultat: "Le lot est prêt dès la préparation, sans autre action."
+      test: { route: "POST /daily-batches", entree: "lot dont tous les contrôles passent", attendu: "201 statut ready" }
+    - code: B
+      libelle: Le lot attend la libération explicite du superviseur, même si tous les contrôles passent
+      cout: leger
+      ouvre: [motif demandé ou non à la libération d'un lot sain]
+      resultat: "Le lot est « à libérer » ; il devient prêt quand le superviseur le libère."
+      test: { route: "POST /daily-batches", entree: "lot dont tous les contrôles passent", attendu: "201 statut pending_release, puis POST /daily-batches/:id/release 200 statut ready" }
+  defaut: A
+
+- id: Q-RECOUVREMENT-05
+  titre: Intervention humaine demandée pour une entreprise
+  regles: [rule-recouvrement-human-request-companies]
+  effet_recette: oui
+  decideur: proprietaire
+  observable: oui
+  situation: "Un agent demande une intervention humaine pour le dossier d'une entreprise, dans une conversation ouverte."
+  options:
+    - code: A
+      libelle: L'outil est réservé aux familles ; pour une entreprise il est refusé
+      cout: leger
+      ouvre: []
+      resultat: "Refus ; la négociation continue, le dossier n'entre pas dans la file."
+      test: { route: "POST /agent/cases/:caseId/human-requests", entree: "dossier de nature company, conversation ouverte", attendu: "409 agent.human_request_not_available" }
+    - code: B
+      libelle: L'outil est offert pour toute nature de débiteur
+      cout: leger
+      ouvre: []
+      resultat: "La négociation est suspendue et le dossier entre dans la file du superviseur."
+      test: { route: "POST /agent/cases/:caseId/human-requests", entree: "dossier de nature company, conversation ouverte", attendu: "201, dossier en file (état supervisor_queue)" }
+  defaut: A
+
+- id: Q-RECOUVREMENT-06
+  titre: Contestation sans facture désignée
+  regles: [rule-recouvrement-contestation-without-invoices]
+  effet_recette: oui
+  decideur: proprietaire
+  observable: oui
+  situation: "Au téléphone, un débiteur dont le dossier compte trois factures non gelées conteste sa dette sans dire quelle facture ; l'agent signale la contestation sans numéro de facture."
+  options:
+    - code: A
+      libelle: Le numéro d'au moins une facture est obligatoire
+      cout: leger
+      ouvre: []
+      resultat: "L'appel est refusé ; l'agent doit demander quelles factures sont contestées ; rien n'est gelé."
+      test: { route: "POST /agent/cases/:caseId/contestations", entree: "motif seul, sans invoiceNumbers", attendu: "400 api.validation.incoming_failed, aucune facture gelée" }
+    - code: B
+      libelle: Sans numéro, toutes les factures non gelées du dossier sont visées
+      cout: leger
+      ouvre: []
+      resultat: "Les trois factures sont gelées et un litige est créé par facture."
+      test: { route: "POST /agent/cases/:caseId/contestations", entree: "motif seul, sans invoiceNumbers", attendu: "201 avec frozenInvoices = 3" }
+  defaut: A
+
+- id: Q-RECOUVREMENT-07
+  titre: Transfert à l'étape suivante d'un dossier d'entreprise
+  regles: [rule-recouvrement-company-transfer-proposed]
+  effet_recette: oui
+  decideur: proprietaire
+  observable: oui
+  situation: "À la préparation du lot, la politique fixe l'action « transfert proposé » pour le dossier d'une entreprise."
+  options:
+    - code: A
+      libelle: Le cerveau exécute le transfert des dossiers d'entreprise (seules les familles passent par le superviseur)
+      cout: leger
+      ouvre: []
+      resultat: "Le dossier passe tout de suite à l'état « transféré à l'étape suivante » ; une décision du cerveau est journalisée."
+      test: { route: "POST /daily-batches", entree: "dossier d'entreprise dont l'action du jour est le transfert", attendu: "GET /cases/:id état transferred, aucun élément de file" }
+    - code: B
+      libelle: Le transfert est toujours proposé dans la file et décidé par le superviseur, pour les entreprises comme pour les familles
+      cout: leger
+      ouvre: []
+      resultat: "Le dossier entre dans la file avec un transfert proposé ; il ne change d'étape que par la décision du superviseur."
+      test: { route: "POST /daily-batches", entree: "dossier d'entreprise dont l'action du jour est le transfert", attendu: "GET /cases/:id état supervisor_queue, élément de file transfer_proposed ouvert" }
+  defaut: B
+
+- id: Q-RECOUVREMENT-08
+  titre: Dossiers ouverts à un canal d'agent
+  regles: [rule-recouvrement-agent-case-channel-access]
+  effet_recette: oui
+  decideur: proprietaire
+  observable: oui
+  situation: "Un compte agent de la voix ouvre une conversation sur un dossier dont une facture non gelée autorise la voix, mais qui ne figure dans aucun ordre d'un lot prêt du jour."
+  options:
+    - code: A
+      libelle: Un dossier est ouvert à un canal dès qu'une facture non gelée l'autorise et que l'interlocuteur est joignable sur ce canal
+      cout: leger
+      ouvre: []
+      resultat: "La conversation s'ouvre : l'agent peut aussi répondre à un débiteur qui le rappelle."
+      test: { route: "POST /agent/conversations", entree: "dossier autorisant la voix, aucun lot prêt, interlocuteur joignable par téléphone", attendu: "201 conversation ouverte" }
+    - code: B
+      libelle: Un dossier n'est ouvert qu'aux canaux d'un ordre d'envoi du lot prêt du jour
+      cout: lourd
+      ouvre: [rappel entrant d'un débiteur, ordre de confirmation hors lot, durée de validité de l'ouverture]
+      resultat: "Le dossier est introuvable pour cet agent tant qu'aucun lot prêt du jour ne lui donne un ordre."
+      test: { route: "POST /agent/conversations", entree: "dossier autorisant la voix, aucun lot prêt, interlocuteur joignable par téléphone", attendu: "404 cases.not_found" }
+  defaut: A
+
+- id: Q-RECOUVREMENT-09
+  titre: Écart-type de l'arrêt automatique
+  regles: [rule-recouvrement-decision-share-sigma]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Dix lots précédents ont donné à la décision « relance » une part de 40 % et de 60 % en alternance (moyenne 50 %). Le lot du jour lui donne 81 %."
+  options:
+    - code: A
+      libelle: Écart-type de la population des lots retenus (division par n)
+      cout: leger
+      ouvre: []
+      resultat: "Écart-type 10 points, seuil 30 points, écart observé 31 : le lot est bloqué et une alerte entre dans la file."
+      test: { route: "POST /daily-batches", entree: "dix lots d'historique à 40 % et 60 % en alternance, lot du jour à 81 % de relances", attendu: "201 statut blocked, contrôle decision_share en échec" }
+    - code: B
+      libelle: Écart-type de l'échantillon (division par n moins 1)
+      cout: leger
+      ouvre: []
+      resultat: "Écart-type 10,54 points, seuil 31,62 points, écart observé 31 : le lot n'est pas bloqué."
+      test: { route: "POST /daily-batches", entree: "dix lots d'historique à 40 % et 60 % en alternance, lot du jour à 81 % de relances", attendu: "201 statut ready, contrôle decision_share réussi" }
+  defaut: A
+
+- id: Q-RECOUVREMENT-10
+  titre: Concessions à écarts égaux
+  regles: [rule-recouvrement-concessions-equal-gaps]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Une version de politique propose l'échelle 100 %, 90 %, 80 % de la somme due (écarts de 10 points, puis 10 points), tous les autres contrôles étant satisfaits."
+  options:
+    - code: A
+      libelle: Chaque écart doit être strictement inférieur au précédent
+      cout: leger
+      ouvre: []
+      resultat: "Le contrôle « concessions décroissantes » échoue ; l'activation est refusée."
+      test: { route: "POST /policy-versions/:id/activate", entree: "version dont l'échelle est 100 %, 90 %, 80 %", attendu: "409 policies.activation_blocked, contrôle decreasing_concessions en échec" }
+    - code: B
+      libelle: Un écart égal au précédent est accepté (l'écart ne doit pas augmenter)
+      cout: leger
+      ouvre: []
+      resultat: "Le contrôle réussit ; la version peut être activée."
+      test: { route: "POST /policy-versions/:id/activate", entree: "version dont l'échelle est 100 %, 90 %, 80 %", attendu: "200 version active" }
+  defaut: A
+
+- id: Q-RECOUVREMENT-11
+  titre: Montants autorisés dans un message vérifié
+  regles: [rule-recouvrement-message-known-amounts]
+  effet_recette: oui
+  decideur: proprietaire
+  observable: oui
+  situation: "Un agent fait vérifier le texte « Vous devez 1 200,00 € » : 1 200,00 € est le solde d'une facture non gelée du dossier, et aucune offre n'est encore débloquée."
+  options:
+    - code: A
+      libelle: Seuls les montants et dates des conditions débloquées (offres, engagements) sont admis
+      cout: leger
+      ouvre: []
+      resultat: "Le message est refusé : le montant n'appartient à aucune condition débloquée."
+      test: { route: "POST /agent/messages/check", entree: "texte « Vous devez 1 200,00 € », aucune offre débloquée", attendu: "200 allowed false, raison amount_not_unlocked" }
+    - code: B
+      libelle: Sont aussi admis les soldes, le montant négociable et les échéances que l'outil de lecture a rendus à l'agent
+      cout: leger
+      ouvre: [liste exacte des montants rappelables]
+      resultat: "Le message est accepté : le montant est un solde que l'agent a lu."
+      test: { route: "POST /agent/messages/check", entree: "texte « Vous devez 1 200,00 € », aucune offre débloquée", attendu: "200 allowed true" }
+  defaut: A
+
+- id: Q-RECOUVREMENT-12
+  titre: Avoirs ouverts et montant négociable
+  regles: [rule-recouvrement-negotiable-credit-notes]
+  effet_recette: oui
+  decideur: proprietaire
+  observable: oui
+  situation: "Un dossier compte une facture non gelée au solde de 1 000,00 € et un avoir ouvert au solde de moins 200,00 €."
+  options:
+    - code: A
+      libelle: Le montant négociable est la somme des soldes des factures seulement ; l'avoir reste visible sur la fiche
+      cout: leger
+      ouvre: []
+      resultat: "Le montant négociable est de 1 000,00 € ; l'avoir de 200,00 € n'est pas déduit."
+      test: { route: "GET /cases/:id", entree: "facture non gelée de 100000 centimes et avoir ouvert de -20000 centimes", attendu: "200 negotiableCents = 100000" }
+    - code: B
+      libelle: Le solde des avoirs ouverts du dossier est déduit du montant négociable
+      cout: leger
+      ouvre: [affectation de l'avoir à une facture précise]
+      resultat: "Le montant négociable est de 800,00 € : le débiteur n'est pas relancé sur ce que l'avoir couvre."
+      test: { route: "GET /cases/:id", entree: "facture non gelée de 100000 centimes et avoir ouvert de -20000 centimes", attendu: "200 negotiableCents = 80000" }
+  defaut: A
+
+# Questions ajoutées par l'agent backend (plan recouvrement-module-implementation-plan.md) : choix laissés ouverts par la demande,
+# dont la réponse change ce que la recette attend. Le plan construit l'option indiquée par `defaut`.
+
+- id: Q-RECOUVREMENT-13
+  titre: Offre suivante pendant un engagement en cours
+  regles: [rule-recouvrement-next-offer-while-committed]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un engagement du dossier est inscrit et en cours ; l'agent redemande l'offre suivante dans la même conversation."
+  options:
+    - code: A
+      libelle: L'outil est refusé tant qu'un engagement est en cours
+      cout: leger
+      ouvre: []
+      resultat: "Refus ; le dossier reste engagé et aucune nouvelle concession n'est débloquée."
+      test: { route: "POST /agent/cases/:caseId/next-offer", entree: "dossier avec un engagement au statut pending, contrepartie conforme", attendu: "409 negotiation.stopped, aucune offre créée, allowedActions sans next_offer" }
+    - code: B
+      libelle: L'outil reste ouvert et continue de descendre l'échelle
+      cout: lourd
+      ouvre: [état du dossier après une nouvelle offre, sort de l'engagement en cours, transition committed vers negotiating absente du référentiel]
+      resultat: "Une offre plus basse est rendue alors qu'un engagement est en cours."
+      test: { route: "POST /agent/cases/:caseId/next-offer", entree: "dossier avec un engagement au statut pending, contrepartie conforme", attendu: "200 status offer, offre de rang suivant" }
+  defaut: A
+
+- id: Q-RECOUVREMENT-14
+  titre: Dossier sans règle de politique applicable
+  regles: [rule-recouvrement-no-rule-segment]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un agent demande l'offre suivante pour un dossier dont le couple segment et nature n'a aucune règle dans la politique active (segment apparu dans un import ultérieur), ou alors qu'aucune politique n'est active."
+  options:
+    - code: A
+      libelle: Refus seul, sans rien signaler au superviseur
+      cout: leger
+      ouvre: []
+      resultat: "L'agent reçoit un refus ; la file du superviseur reste inchangée."
+      test: { route: "POST /agent/cases/:caseId/next-offer", entree: "dossier de segment sans règle dans la politique active", attendu: "409 offers.no_rule, GET /decision-queue/counts inchangé" }
+    - code: B
+      libelle: Refus et alerte dans la file du superviseur
+      cout: leger
+      ouvre: []
+      resultat: "L'agent reçoit le même refus et le superviseur voit une alerte (une par dossier tant qu'elle est ouverte)."
+      test: { route: "POST /agent/cases/:caseId/next-offer", entree: "dossier de segment sans règle dans la politique active", attendu: "409 offers.no_rule, GET /decision-queue/counts byType.alert = 1" }
+  defaut: B
+
+- id: Q-RECOUVREMENT-15
+  titre: Activer une version de politique plus ancienne que la version active
+  regles: [rule-recouvrement-policy-activation-date]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "La version active est datée du 01/10/2026 ; le superviseur active une version importée, datée du 15/09/2026, dont les six contrôles passent."
+  options:
+    - code: A
+      libelle: L'activation est permise ; l'ordre d'activation prime sur la date de la version
+      cout: leger
+      ouvre: []
+      resultat: "L'ancienne version devient remplacée et la plus ancienne devient active."
+      test: { route: "POST /policy-versions/:id/activate", entree: "version datée avant la version active, contrôles satisfaits", attendu: "200 version active, l'ancienne passe à superseded" }
+    - code: B
+      libelle: Une version plus ancienne que la version active n'est pas activable
+      cout: leger
+      ouvre: [sort des versions importées plus anciennes que la version active]
+      resultat: "Refus ; il faut importer une version datée après la version active."
+      test: { route: "POST /policy-versions/:id/activate", entree: "version datée avant la version active, contrôles satisfaits", attendu: "409 policies.not_activatable, version active inchangée" }
+  defaut: A
+
+- id: Q-RECOUVREMENT-16
+  titre: Rouvrir une conversation avec un identifiant déjà utilisé
+  regles: [rule-recouvrement-conversation-reuse]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un agent a ouvert la conversation « c-1 » sur un dossier et un interlocuteur ; il rappelle l'ouverture avec le même identifiant, les mêmes dossier et interlocuteur, une autre clé d'idempotence."
+  options:
+    - code: A
+      libelle: La conversation existante est rendue ; un autre dossier ou interlocuteur avec cet identifiant est refusé
+      cout: leger
+      ouvre: []
+      resultat: "L'agent retrouve sa conversation, sans doublon ; le même identifiant sur un autre dossier est refusé."
+      test: { route: "POST /agent/conversations", entree: "même X-Conversation-Id, même caseId et interlocutorId, nouvelle Idempotency-Key", attendu: "201 avec le openedAt d'origine ; avec un autre caseId : 409 agent.conversation_exists" }
+    - code: B
+      libelle: Tout identifiant déjà utilisé est refusé
+      cout: leger
+      ouvre: []
+      resultat: "L'agent doit choisir un nouvel identifiant de conversation à chaque ouverture."
+      test: { route: "POST /agent/conversations", entree: "même X-Conversation-Id, même caseId et interlocutorId, nouvelle Idempotency-Key", attendu: "409 agent.conversation_exists" }
+  defaut: A
+
+- id: Q-RECOUVREMENT-17
+  titre: Activation d'une politique pendant une négociation
+  regles: [rule-recouvrement-policy-change-midway]
+  effet_recette: oui
+  decideur: proprietaire
+  observable: oui
+  situation: "Un dossier a deux offres débloquées sous la version 1 de la politique ; le superviseur active la version 2 (échelle différente, plancher plus haut) ; l'agent demande l'offre suivante."
+  options:
+    - code: A
+      libelle: Les offres débloquées sont révoquées à l'activation ; la négociation reprend à l'ancrage de la nouvelle version
+      cout: leger
+      ouvre: []
+      resultat: "L'agent reçoit la première offre de la version 2 ; un engagement déjà inscrit est conservé tel quel."
+      test: { route: "POST /agent/cases/:caseId/next-offer", entree: "après POST /policy-versions/:id/activate, dossier ayant deux offres débloquées sous l'ancienne version", attendu: "200 status offer, offre d'ancrage de la nouvelle version ; commitments.offer_expired pour une offre de l'ancienne version" }
+    - code: B
+      libelle: Les offres débloquées restent valables ; la descente continue dans l'échelle de la nouvelle version
+      cout: lourd
+      ouvre: [offre de l'ancienne version sous le nouveau plancher, correspondance des rangs entre deux échelles, motif interne de chaque offre]
+      resultat: "L'agent reçoit la troisième offre de la version 2 ; les offres de la version 1 restent acceptables."
+      test: { route: "POST /agent/cases/:caseId/next-offer", entree: "après POST /policy-versions/:id/activate, dossier ayant deux offres débloquées sous l'ancienne version", attendu: "200 status offer, offre de rang 3 de la nouvelle version" }
+  defaut: A
+
+- id: Q-RECOUVREMENT-18
+  titre: Changement de segment ou de nature d'un débiteur entre deux clichés
+  regles: [rule-recouvrement-debtor-attribute-change]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Le cliché précédent donnait au débiteur D1 le segment « standard » ; le nouveau fichier de créances lui donne le segment « premium » (lignes cohérentes entre elles)."
+  options:
+    - code: A
+      libelle: Le changement est accepté ; le dossier prend le nouveau segment et ses offres débloquées sont révoquées
+      cout: leger
+      ouvre: []
+      resultat: "Le dossier est rattaché au segment « premium » et la négociation repart de l'ancrage de sa règle."
+      test: { route: "POST /recovery-imports/receivables/:importId/confirm", entree: "second cliché changeant le segment de D1 (dossier avec une offre débloquée)", attendu: "200, GET /cases/:id segment premium, unlockedOffers en statut revoked" }
+    - code: B
+      libelle: Le changement est refusé et le fichier est refusé en entier
+      cout: leger
+      ouvre: [procédure de correction du segment d'un dossier existant]
+      resultat: "Le superviseur doit faire corriger le fichier à la source ; le portefeuille n'est pas modifié."
+      test: { route: "POST /recovery-imports/receivables/preview", entree: "second cliché changeant le segment de D1", attendu: "200 accepted false, errorRows 1, confirm 409 imports.file_refused" }
+  defaut: A
+
+- id: Q-RECOUVREMENT-19
+  titre: Rejeu d'un appel d'outil et journal d'audit
+  regles: [rule-recouvrement-replay-audit]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un agent a inscrit un engagement (une entrée d'audit) ; il rejoue exactement le même appel avec la même clé d'idempotence."
+  options:
+    - code: A
+      libelle: Le rejeu rend la même réponse et écrit une entrée d'audit « rejoué »
+      cout: leger
+      ouvre: []
+      resultat: "Aucun effet nouveau, mais le journal du socle compte une entrée de plus pour le rejeu."
+      test: { route: "POST /agent/cases/:caseId/commitments", entree: "même appel et même Idempotency-Key, deux fois", attendu: "second appel 201 avec Idempotent-Replayed true ; GET /audit-logs compte 2 entrées de l'action agent:register-commitment" }
+    - code: B
+      libelle: Le rejeu n'écrit aucune entrée d'audit
+      cout: lourd
+      ouvre: [sortir le rejeu de la transaction d'audit, intercepteur à placer avant celui de la plateforme gelée, contestation sur la plateforme]
+      resultat: "Le journal du socle ne montre qu'une entrée pour l'engagement, quel que soit le nombre de rejeux."
+      test: { route: "POST /agent/cases/:caseId/commitments", entree: "même appel et même Idempotency-Key, deux fois", attendu: "second appel 201 avec Idempotent-Replayed true ; GET /audit-logs compte 1 entrée de l'action agent:register-commitment" }
+  defaut: A
+
+- id: Q-RECOUVREMENT-20
+  titre: Éléments de file qui placent le dossier en file du superviseur
+  regles: [rule-recouvrement-case-state-queue-types]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Une prescription proche est constatée sur une facture d'un dossier ouvert, sans autre élément de file ni gel."
+  options:
+    - code: A
+      libelle: Seuls les éléments qui arrêtent la négociation (seuil, échelle épuisée, intervention humaine, transfert proposé) placent le dossier en file
+      cout: leger
+      ouvre: []
+      resultat: "L'élément « Prescription proche » est dans la file, mais le dossier reste ouvert et l'agent peut négocier."
+      test: { route: "GET /cases/:id", entree: "dossier ouvert avec un élément prescription_near ouvert", attendu: "200 state open, openQueueItems contient prescription_near" }
+    - code: B
+      libelle: Tout élément de file ouvert rattaché au dossier le place en file du superviseur
+      cout: lourd
+      ouvre: [négociation arrêtée par une simple alerte ou prescription, retour à l'état précédent à chaque décision]
+      resultat: "Le dossier passe à « En file du superviseur » et la négociation est arrêtée jusqu'à la décision."
+      test: { route: "GET /cases/:id", entree: "dossier ouvert avec un élément prescription_near ouvert", attendu: "200 state supervisor_queue" }
+  defaut: A
