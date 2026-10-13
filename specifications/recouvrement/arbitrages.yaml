@@ -119,3 +119,43 @@
   choix_par: defaut
   version: v1-cerveau-recouvrement
   motif: hors périmètre du propriétaire
+- decision: D-0017
+  question: Q-RECOUVREMENT-01
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: proprietaire
+  version: v1-cerveau-recouvrement
+  defaut_propose: A
+- decision: D-0018
+  question: Q-RECOUVREMENT-02
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: proprietaire
+  version: v1-cerveau-recouvrement
+  defaut_propose: A
+- decision: D-0019
+  question: Q-RECOUVREMENT-03
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: proprietaire
+  version: v1-cerveau-recouvrement
+  defaut_propose: A
+- decision: D-0020
+  question: Q-RECOUVREMENT-04
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: proprietaire
+  version: v1-cerveau-recouvrement
+  defaut_propose: A
+- decision: D-0021
+  question: Q-RECOUVREMENT-05
+  choix: A
+  date: '2026-10-13'
+  statut: active
+  choix_par: proprietaire
+  version: v1-cerveau-recouvrement
+  defaut_propose: A
