@@ -89,17 +89,18 @@ operations:
   - method: GET
     path: /audit-logs
     action: audit:list
-    allow: [admin]
+    # Version v1-cerveau-recouvrement: admin OR profile supervisor, through a custom guard (allow: [] observed).
+    allow: []
     ownership: none
-    rules: [rule-foundation-audit-admin-only, rule-foundation-audit-filters, rule-foundation-audit-trace-content]
+    rules: [rule-foundation-audit-admin-only, rule-foundation-audit-filters, rule-foundation-audit-trace-content, rule-recouvrement-journal-supervisor, rule-recouvrement-journal-others-refused, rule-recouvrement-journal-agent-never]
     provenance: user
     cross_owner_tests: []
   - method: GET
     path: /audit-logs/filters
     action: audit:filters
-    allow: [admin]
+    allow: []
     ownership: none
-    rules: [rule-foundation-audit-admin-only, rule-foundation-audit-filter-options-from-journal]
+    rules: [rule-foundation-audit-admin-only, rule-foundation-audit-filter-options-from-journal, rule-recouvrement-journal-supervisor, rule-recouvrement-journal-others-refused, rule-recouvrement-journal-agent-never]
     provenance: user
     cross_owner_tests: []
   # Version socle-import-excel: import of accounts (generic mechanism of the foundation applied to users).
@@ -140,3 +141,499 @@ operations:
     provenance: user
     cross_owner_tests:
       - "[rule-foundation-import-preview-owner] another administrator confirming a preview gets the same 404 import.preview_not_found as for an unknown id and nothing is created"
+  # ----------------------------------------------------------------------------------------------
+  # Version v1-cerveau-recouvrement. Every business route is guarded by a PROFILE read from
+  # base.user_profiles on each request (rule-recouvrement-profile-server-enforced), not by the role:
+  # `allow: []` means that no role alone admits the route (the observed matrix is anonymous 401,
+  # user 403, admin 403 for an account without the profile). The profile required is given in `rules`
+  # and in the comment of each block. A profile-less admin is refused everywhere (D-0017).
+  # ----------------------------------------------------------------------------------------------
+  # Profiles
+  - method: GET
+    path: /profiles/me
+    action: profiles:me
+    allow: [user, admin]
+    ownership: none
+    rules: [rule-recouvrement-profile-server-enforced]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /user-profiles
+    action: profiles:list
+    allow: [admin]
+    ownership: none
+    rules: [rule-recouvrement-profiles-assigned-by-admin]
+    provenance: user
+    cross_owner_tests: []
+  - method: PUT
+    path: /user-profiles/:userId
+    action: profiles:set
+    allow: [admin]
+    ownership: none
+    rules: [rule-recouvrement-profiles-assigned-by-admin, rule-recouvrement-profile-single, rule-recouvrement-agent-channel-required, rule-recouvrement-agent-one-per-channel, rule-recouvrement-own-profile-locked]
+    provenance: user
+    cross_owner_tests: []
+  # Recovery imports (profile supervisor). A preview is private to the supervisor who created it.
+  - method: GET
+    path: /recovery-imports/:type/specification
+    action: recovery-imports:specification
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-import-pivot-format, rule-recouvrement-import-green-light]
+    provenance: user
+    cross_owner_tests: []
+  - method: POST
+    path: /recovery-imports/:type/preview
+    action: recovery-imports:preview
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-import-pivot-format, rule-recouvrement-import-green-light, rule-recouvrement-import-refuse-whole, rule-recouvrement-receivables-control-total]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /recovery-imports/:type/:importId/errors
+    action: recovery-imports:errors
+    allow: []
+    ownership: own
+    rules: [rule-recouvrement-import-green-light, rule-recouvrement-import-pivot-format]
+    provenance: user
+    cross_owner_tests:
+      - "[rule-recouvrement-import-green-light] another supervisor listing the errors of a preview gets the same 404 import.preview_not_found as for an unknown id"
+  - method: GET
+    path: /recovery-imports/:type/:importId/report
+    action: recovery-imports:report
+    allow: []
+    ownership: own
+    rules: [rule-recouvrement-import-report, rule-recouvrement-import-green-light]
+    provenance: user
+    cross_owner_tests:
+      - "[rule-recouvrement-import-green-light] another supervisor reading the report or the report items of a preview gets the same 404 import.preview_not_found as for an unknown id"
+  - method: GET
+    path: /recovery-imports/:type/:importId/report/items
+    action: recovery-imports:report-items
+    allow: []
+    ownership: own
+    rules: [rule-recouvrement-import-report, rule-recouvrement-import-green-light]
+    provenance: user
+    cross_owner_tests:
+      - "[rule-recouvrement-import-green-light] another supervisor reading the report or the report items of a preview gets the same 404 import.preview_not_found as for an unknown id"
+  - method: POST
+    path: /recovery-imports/:type/:importId/confirm
+    action: recovery-imports:confirm
+    allow: []
+    ownership: own
+    rules: [rule-recouvrement-import-green-light, rule-recouvrement-import-audited, rule-recouvrement-receivables-snapshot, rule-recouvrement-import-refuse-whole]
+    provenance: user
+    cross_owner_tests:
+      - "[rule-recouvrement-import-green-light] another supervisor confirming a preview gets the same 404 import.preview_not_found as for an unknown id and nothing is created; the creator can still confirm"
+  - method: GET
+    path: /recovery-imports/history
+    action: recovery-imports:history
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-import-report, rule-recouvrement-import-green-light]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /recovery-imports/status
+    action: recovery-imports:status
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-statement-fresh, rule-recouvrement-import-green-light]
+    provenance: user
+    cross_owner_tests: []
+  # Policy versions (profile supervisor). The agent never reads the policy (rule-recouvrement-agent-tools-only).
+  - method: GET
+    path: /policy-versions
+    action: policies:list
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-policy-versioned]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /policy-versions/:id
+    action: policies:get
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-policy-versioned, rule-recouvrement-policy-immutable]
+    provenance: user
+    cross_owner_tests: []
+  - method: POST
+    path: /policy-versions/previews
+    action: policies:preview
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-policy-format, rule-recouvrement-policy-json-not-spreadsheet, rule-recouvrement-policy-versioned]
+    provenance: user
+    cross_owner_tests: []
+  - method: POST
+    path: /policy-versions/previews/:previewId/confirm
+    action: policies:confirm
+    allow: []
+    ownership: own
+    rules: [rule-recouvrement-policy-versioned, rule-recouvrement-policy-format]
+    provenance: user
+    cross_owner_tests:
+      - "[rule-recouvrement-policy-versioned] a preview is private to its creator: another supervisor gets the same 404 policies.preview_not_found as for an unknown id, and nothing is created"
+  - method: POST
+    path: /policy-versions/:id/activate
+    action: policies:activate
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-policy-activation-checks, rule-recouvrement-policy-immutable, rule-recouvrement-policy-floor, rule-recouvrement-policy-concessions-decreasing, rule-recouvrement-concessions-equal-gaps, rule-recouvrement-policy-counterparts, rule-recouvrement-policy-activation-date]
+    provenance: user
+    cross_owner_tests: []
+  # Cases (profile supervisor)
+  - method: GET
+    path: /cases
+    action: cases:list
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-cases-supervisor-only, rule-recouvrement-admin-no-business-access, rule-recouvrement-debtor-attributes]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /cases/filters
+    action: cases:filters
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-cases-supervisor-only]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /cases/:id
+    action: cases:get
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-cases-supervisor-only, rule-recouvrement-negotiable-amount, rule-recouvrement-case-state-queue-types]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /cases/:id/decisions
+    action: cases:decisions
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-decision-journal, rule-recouvrement-internal-reason-private]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /cases/:id/state-history
+    action: cases:state-history
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-state-transitions-logged, rule-recouvrement-case-state-referential]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /invoices
+    action: invoices:search
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-cases-supervisor-only]
+    provenance: user
+    cross_owner_tests: []
+  # Agent tools, REST (profile agent; the conversation belongs to the agent account that opened it)
+  - method: POST
+    path: /agent/conversations
+    action: agent:open-conversation
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-agent-tools-only, rule-recouvrement-agent-ai-disclosure, rule-recouvrement-agent-case-channel-access, rule-recouvrement-conversation-reuse, rule-recouvrement-agent-context]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /agent/cases/:caseId
+    action: agent:read-case
+    allow: []
+    ownership: own
+    rules: [rule-recouvrement-agent-read-case, rule-recouvrement-agent-conversation-bound, rule-recouvrement-agent-no-internal-reason]
+    provenance: user
+    cross_owner_tests:
+      - "[rule-recouvrement-agent-conversation-bound] another agent account cannot use the conversation of an agent: 404 agent.conversation_not_found, and the conversation is unchanged"
+  - method: POST
+    path: /agent/cases/:caseId/next-offer
+    action: agent:next-offer
+    allow: []
+    ownership: own
+    rules: [rule-recouvrement-offer-anchor, rule-recouvrement-offer-descend, rule-recouvrement-offer-exhausted, rule-recouvrement-agent-conversation-bound, rule-recouvrement-agent-idempotency]
+    provenance: user
+    cross_owner_tests:
+      - "[rule-recouvrement-agent-conversation-bound] another agent account cannot use the conversation of an agent: 404 agent.conversation_not_found, and the conversation is unchanged"
+  - method: POST
+    path: /agent/cases/:caseId/commitments
+    action: agent:register-commitment
+    allow: []
+    ownership: own
+    rules: [rule-recouvrement-commitment-exact, rule-recouvrement-commitment-effects, rule-recouvrement-commitment-payment-method, rule-recouvrement-agent-conversation-bound]
+    provenance: user
+    cross_owner_tests:
+      - "[rule-recouvrement-agent-conversation-bound] another agent account cannot use the conversation of an agent: 404 agent.conversation_not_found, and the conversation is unchanged"
+  - method: POST
+    path: /agent/cases/:caseId/contestations
+    action: agent:report-dispute
+    allow: []
+    ownership: own
+    rules: [rule-recouvrement-contestation-stops-case, rule-recouvrement-contestation-without-invoices, rule-recouvrement-agent-conversation-bound]
+    provenance: user
+    cross_owner_tests:
+      - "[rule-recouvrement-agent-conversation-bound] another agent account cannot use the conversation of an agent: 404 agent.conversation_not_found, and the conversation is unchanged"
+  - method: POST
+    path: /agent/cases/:caseId/human-requests
+    action: agent:request-human
+    allow: []
+    ownership: own
+    rules: [rule-recouvrement-human-request, rule-recouvrement-human-request-companies, rule-recouvrement-agent-conversation-bound]
+    provenance: user
+    cross_owner_tests:
+      - "[rule-recouvrement-agent-conversation-bound] another agent account cannot use the conversation of an agent: 404 agent.conversation_not_found, and the conversation is unchanged"
+  - method: POST
+    path: /agent/cases/:caseId/complaints
+    action: agent:report-complaint
+    allow: []
+    ownership: own
+    rules: [rule-recouvrement-complaint, rule-recouvrement-agent-conversation-bound]
+    provenance: user
+    cross_owner_tests:
+      - "[rule-recouvrement-agent-conversation-bound] another agent account cannot use the conversation of an agent: 404 agent.conversation_not_found, and the conversation is unchanged"
+  - method: POST
+    path: /agent/messages/check
+    action: agent:check-message
+    allow: []
+    ownership: own
+    rules: [rule-recouvrement-message-check, rule-recouvrement-message-known-amounts, rule-recouvrement-message-parsing, rule-recouvrement-agent-conversation-bound]
+    provenance: user
+    cross_owner_tests:
+      - "[rule-recouvrement-agent-conversation-bound] another agent account cannot use the conversation of an agent: 404 agent.conversation_not_found, and the conversation is unchanged"
+  # MCP server (profile agent): one JSON-RPC operation; GET and DELETE answer 405 once authenticated.
+  - method: POST
+    path: /mcp
+    action: agent:mcp
+    allow: []
+    ownership: own
+    rules: [rule-recouvrement-agent-two-transports, rule-recouvrement-agent-tools-only, rule-recouvrement-agent-conversation-bound]
+    provenance: user
+    cross_owner_tests:
+      - "[rule-recouvrement-agent-two-transports][rule-recouvrement-agent-conversation-bound] a conversation opened on REST is usable on MCP and the reverse; another account cannot use it"
+  - method: GET
+    path: /mcp
+    action: agent:mcp
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-agent-two-transports]
+    provenance: user
+    cross_owner_tests: []
+  - method: DELETE
+    path: /mcp
+    action: agent:mcp
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-agent-two-transports]
+    provenance: user
+    cross_owner_tests: []
+  # Daily batches (profile supervisor)
+  - method: GET
+    path: /daily-batches
+    action: batches:list
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-batch-prepared-by-supervisor]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /daily-batches/:id
+    action: batches:get
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-batch-prepared-by-supervisor, rule-recouvrement-batch-auto-stop]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /daily-batches/:id/orders
+    action: batches:orders
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-batch-orders-structured, rule-recouvrement-batch-channel-order]
+    provenance: user
+    cross_owner_tests: []
+  - method: POST
+    path: /daily-batches
+    action: batches:prepare
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-batch-prepared-by-supervisor, rule-recouvrement-batch-brain-decides, rule-recouvrement-batch-release-mode, rule-recouvrement-batch-one-per-day]
+    provenance: user
+    cross_owner_tests: []
+  - method: POST
+    path: /daily-batches/:id/release
+    action: batches:release
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-batch-blocked-release-by-decision, rule-recouvrement-batch-release-when-checks-pass]
+    provenance: user
+    cross_owner_tests: []
+  # Decision queue (profile supervisor)
+  - method: GET
+    path: /decision-queue/items
+    action: queue:list
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-queue-contents, rule-recouvrement-queue-order]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /decision-queue/counts
+    action: queue:counts
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-queue-contents]
+    provenance: user
+    cross_owner_tests: []
+  - method: POST
+    path: /decision-queue/items/:id/decision
+    action: queue:decide
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-queue-decision-motivated, rule-recouvrement-queue-allowed-decisions, rule-recouvrement-queue-decided-final, rule-recouvrement-queue-effects]
+    provenance: user
+    cross_owner_tests: []
+  # Ledger outputs (profile supervisor)
+  - method: GET
+    path: /ledger-outputs
+    action: ledger:list
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-ledger-supervisor-only, rule-recouvrement-ledger-output-content]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /ledger-outputs/counts
+    action: ledger:counts
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-ledger-supervisor-only, rule-recouvrement-ledger-states]
+    provenance: user
+    cross_owner_tests: []
+  - method: POST
+    path: /ledger-outputs/approvals
+    action: ledger:approve
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-ledger-approve-batch, rule-recouvrement-ledger-supervisor-only, rule-recouvrement-ledger-audited]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /ledger-outputs/export
+    action: ledger:export
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-ledger-export, rule-recouvrement-ledger-no-direct-accounting]
+    provenance: user
+    cross_owner_tests: []
+  - method: POST
+    path: /ledger-outputs/write-offs
+    action: ledger:write-off
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-ledger-write-off-proposal, rule-recouvrement-ledger-output-creation, rule-recouvrement-ledger-audited]
+    provenance: user
+    cross_owner_tests: []
+  # Disputes (profile litigation; the supervisor has no access)
+  - method: GET
+    path: /disputes
+    action: disputes:list
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-disputes-litigation-only]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /disputes/invoices
+    action: disputes:invoice-search
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-disputes-litigation-only]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /disputes/:id
+    action: disputes:get
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-disputes-litigation-only, rule-recouvrement-dispute-contestation-origin]
+    provenance: user
+    cross_owner_tests: []
+  - method: POST
+    path: /disputes
+    action: disputes:open
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-dispute-open-freezes, rule-recouvrement-dispute-one-open-per-invoice, rule-recouvrement-dispute-text-plain]
+    provenance: user
+    cross_owner_tests: []
+  - method: POST
+    path: /disputes/:id/close
+    action: disputes:close
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-dispute-close-unfreezes, rule-recouvrement-dispute-no-delete]
+    provenance: user
+    cross_owner_tests: []
+  # Weekly review (profile supervisor)
+  - method: GET
+    path: /review-samples
+    action: reviews:list
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-review-supervisor-only, rule-recouvrement-review-weekly-sample]
+    provenance: user
+    cross_owner_tests: []
+  - method: POST
+    path: /review-samples
+    action: reviews:draw
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-review-weekly-sample, rule-recouvrement-review-manual-trigger, rule-recouvrement-review-reproducible, rule-recouvrement-review-pool]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /review-samples/:id
+    action: reviews:get
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-review-supervisor-only]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /review-samples/:id/items
+    action: reviews:items
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-review-blind, rule-recouvrement-review-supervisor-only]
+    provenance: user
+    cross_owner_tests: []
+  - method: POST
+    path: /review-samples/:id/items/:itemId/review
+    action: reviews:review
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-review-final, rule-recouvrement-review-gap-feeds-indicator, rule-recouvrement-review-supervisor-only]
+    provenance: user
+    cross_owner_tests: []
+  # Indicators (profile supervisor OR indicators)
+  - method: GET
+    path: /indicators
+    action: indicators:list
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-indicators-five, rule-recouvrement-indicators-no-score, rule-recouvrement-indicators-aggregate-only]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /indicators/filters
+    action: indicators:filters
+    allow: []
+    ownership: none
+    rules: [rule-recouvrement-indicators-aggregate-only, rule-recouvrement-indicators-dimensions]
+    provenance: user
+    cross_owner_tests: []

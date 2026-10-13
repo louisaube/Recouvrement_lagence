@@ -22,7 +22,7 @@ Objet : remplacer l'accueil provisoire (`rule-foundation-home-replaceable`) par 
 | Barre de navigation | nom accessible « Recouvrement » ; onglets selon le profil (règle `rule-recouvrement-nav-by-profile`) | placée sous l'en-tête, au-dessus de la barre « Administration » ; défile horizontalement sur petit écran | `GET /profiles/me` |
 | Carte « File de décisions » | « File de décisions : N à traiter » | lien vers `/file-de-decisions` ; N = éléments ouverts | `GET /decision-queue/counts` |
 | Carte « Sorties comptables » | « Sorties comptables : N à approuver » | lien vers `/sorties-comptables` | `GET /ledger-outputs/counts` |
-| Carte « Lot du jour » | « Lot du jour : » puis « Pas encore préparé », « Bloqué », « À libérer » ou « Prêt » | lien vers `/lot-du-jour` ; l'état est celui du lot daté d'aujourd'hui (Europe/Paris) | `GET /daily-batches?from=0&size=1` |
+| Carte « Lot du jour » | « Lot du jour : » puis « Pas encore préparé », « Bloqué » ou « Prêt » | lien vers `/lot-du-jour` ; l'état est celui du lot daté d'aujourd'hui (Europe/Paris) | `GET /daily-batches?from=0&size=1` |
 | Carte « Relevé bancaire » | « Relevé bancaire : » puis « Frais (relevé du JJ/MM/AAAA) » ou « Périmé ou absent : aucune offre ni aucun ordre d'envoi » | lien vers `/imports?fichier=paiements` ; état d'alerte si périmé | `GET /recovery-imports/status` |
 | Carte « Litiges ouverts » | « Litiges ouverts : N » | lien vers `/litiges` | `GET /disputes?status=open&from=0&size=1` (`total`) |
 | Carte « Indicateurs » | « Indicateurs » | lien vers `/indicateurs` | aucune |

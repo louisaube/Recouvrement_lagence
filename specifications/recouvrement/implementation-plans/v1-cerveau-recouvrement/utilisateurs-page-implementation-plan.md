@@ -24,7 +24,7 @@ Objet : l'administrateur du socle crée les comptes et leur attribue un profil d
 - `rule-recouvrement-users-profile-screen` (inferred) : l'administrateur du socle attribue les profils (énoncé de la demande) depuis l'écran des comptes ; aucun autre écran ne le permet.
 - `rule-recouvrement-users-profile-local-validation` (inferred) : validation locale sans appel : « Compte agent » exige un « Canal » ; « Canal » est masqué et non envoyé pour tout autre profil ; « Compte agent » avec le rôle « Administrateur » est refusé avec le message de `profiles.agent_requires_user_role`. Les règles font foi côté API (`profils-api-modification-request.md`).
 - `rule-recouvrement-users-profile-two-calls` (inferred) : l'attribution est un second appel après la création ou la modification du compte ; « Aucun profil » sur un compte sans profil n'envoie rien ; « Aucun profil » sur un compte qui en a un envoie `{ profile: null, channel: null }`.
-- `rule-recouvrement-users-single-profile` (inferred, default Q-RECOUVREMENT-02) : un seul profil par compte, champ « Profil » à choix unique. (Option B : champ « Profils » à choix multiple sans « Compte agent » cumulable.)
+- `rule-recouvrement-users-single-profile` (user, Q-RECOUVREMENT-02 arbitrée par le propriétaire, decision D-0018) : un seul profil par compte, champ « Profil » à choix unique.
 
 ## Accès
 Administrateur du socle seulement (`rule-foundation-admin-screens-guard` inchangée). Un utilisateur ordinaire, même superviseur, voit « Accès refusé » et aucun appel n'est fait.

@@ -39,10 +39,9 @@ Toute transition est journalisée (table d'historique du dossier : instant, éta
 | `open`, `negotiating`, `committed` | `supervisor_queue` | `queue_item_opened` | cerveau, agent | Élément de file ouvert sur le dossier (voir §4) |
 | `supervisor_queue` | état de précédence | `queue_item_decided` | superviseur | Dernier élément du dossier décidé, hors transfert |
 | `supervisor_queue`, `open`, `negotiating`, `committed` | `transferred` | `transfer_approved` | superviseur | Décision « Approuver le transfert » ou « Transférer » |
-| `open`, `negotiating`, `committed` | `transferred` | `transfer_executed` | cerveau | Seulement si une entreprise et option A de Q-RECOUVREMENT-07 ; jamais pour une famille |
 | `open`, `negotiating`, `committed`, `frozen`, `supervisor_queue` | `settled` | `balance_cleared` | import, lettrage | Plus aucune facture ouverte |
 
-Rappels : le cerveau n'exécute jamais le transfert d'un dossier de famille (`rule-recouvrement-family-transfer-never-executed`). Aucune transition ne part de `transferred`.
+Rappels : le cerveau n'exécute jamais le transfert d'un dossier de famille (`rule-recouvrement-family-transfer-never-executed`) ni d'une entreprise (Q-RECOUVREMENT-07, décision D-0003) : il le propose, seul le superviseur le décide. Aucune transition ne part de `transferred`.
 
 ## 3. Gels
 Un gel est une ligne de la fiche (portée, code, depuis, référence). Un gel lève la négociation de ce qu'il couvre ; le montant négociable exclut les factures gelées.
@@ -77,7 +76,7 @@ Statut d'un élément : `open` (Ouvert) ou `decided` (Décidé). Une décision p
 | Version de politique | `imported`, `active`, `superseded` | Importée, Active, Remplacée |
 | Sortie comptable | `to_approve`, `approved`, `recognized`, `gap` | À approuver, Approuvée, Constatée, En écart |
 | Type de sortie comptable | `discount_credit`, `write_off` | Avoir de remise, Passage en perte |
-| Lot du jour | `blocked`, `pending_release`, `ready`, `replaced` | Bloqué, À libérer, Prêt, Remplacé |
+| Lot du jour | `blocked`, `ready`, `replaced` | Bloqué, Prêt, Remplacé |
 | Ordre d'envoi | `planned`, `blocked`, `cancelled` | Prévu, Bloqué, Annulé |
 | Type d'ordre | `reminder`, `proposal`, `commitment_confirmation` | Relance, Proposition, Confirmation d'engagement |
 | Engagement | `pending`, `held`, `broken` | En cours, Tenu, Rompu |
