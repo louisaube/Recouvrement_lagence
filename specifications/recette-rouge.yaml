@@ -55,3 +55,1565 @@
   titre: is replaced by acceptance-garde-metier-declarations.test.ts
   vu_rouge: '2026-10-11'
   sur: 3746bc6
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-pivot-format] the specification of ${type} lists the columns of the pivot format with their required flag, the limits and the refusal mode'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-pivot-format] an unknown file type answers 400'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-pivot-format][rule-recouvrement-import-green-light] a valid file gives an accepted preview with the computed and the entered totals and writes no business data before
+    the confirmation'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-money-cents][rule-recouvrement-import-pivot-format] amounts with a comma decimal and spaces as thousands separators, and dates written JJ/MM/AAAA, are read exactly'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-receivables-control-total] the control total is a query parameter: absent gives 400 imports.control_total_required, unreadable 400 imports.control_total_invalid'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-receivables-control-total] spaces are ignored and a comma decimal is read: « 1 000,00 » is the total of a 1 000,00 file'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-receivables-control-total] the control total is refused for the other file types: 400 api.validation.incoming_failed'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-receivables-control-total][rule-recouvrement-import-refuse-whole] a total of the balances different from the entered control total refuses the whole file: one error on row 1,
+    column solde, accepted false, confirmation 409 imports.file_refused'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-receivables-control-total] credit notes count negatively in the total of the balances'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-receivables-duplicate-number][rule-recouvrement-import-refuse-whole] a number repeated for the same creditor entity refuses the whole file with one error naming the first row'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-receivables-duplicate-number] the same number for two different creditor entities is not a duplicate'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-refuse-whole][rule-recouvrement-debtor-siren] ${name}: the whole file is refused with one error on row 2, column ${column}'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-refuse-whole] a file with several faulty rows is refused at the first error: errorRows 1 and a single entry'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-receivables-extraction-date] the extraction date must be the same on every row'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-receivables-extraction-date] an extraction date older than the last confirmed snapshot is refused'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-receivables-extraction-date] a snapshot made stale between its preview and its confirmation is refused: 409 imports.stale_extraction, nothing changes'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-receivables-case-grouping] every row of a debtor carries the same nature, SIREN and segment, otherwise the file is refused'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-receivables-case-grouping][rule-recouvrement-debtor-attributes][rule-recouvrement-case-grouping][rule-recouvrement-debtor-siren] one case per customer id groups the invoices
+    of several creditor entities; the case carries nature, segment and, for a company only, the SIREN'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-receivables-snapshot][rule-recouvrement-import-green-light] the confirmation replaces the portfolio: cases and invoices are created, with a creation transition and the effects
+    listed'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-receivables-snapshot][rule-recouvrement-closed-case-only-invoices] a following snapshot updates balances, adds invoices, closes absent invoices (balance 0), settles absent debtors
+    and reopens a settled case when an invoice reappears'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-closed-case-only-invoices] a case whose only open piece is a credit note is settled; an open credit note keeps its negative balance on the card'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-report] the first report has no previous import and counts every case as new; the report is readable at the preview and after the confirmation'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-report] the second report compares with the last confirmed import of the same type: new, settled and modified cases, items by category sorted by key'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-report] the report writes no business data: the portfolio is unchanged after the preview'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-report] report items need a valid category and answer 404 for an unknown preview'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-no-double][rule-recouvrement-import-green-light] a file confirmed once is refused again: 409 import.already_imported at the preview and at the confirmation of another
+    preview of the same file'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-green-light] another supervisor listing the errors of a preview gets the same 404 import.preview_not_found as for an unknown id'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-green-light] another supervisor reading the report or the report items of a preview gets the same 404 import.preview_not_found as for an unknown id'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-green-light] another supervisor confirming a preview gets the same 404 import.preview_not_found as for an unknown id and nothing is created; the creator can still confirm'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-green-light] no business data is written by a preview whatever the type; a malformed or unknown preview id answers 404 or 400'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-pivot-format] the file mechanism of the foundation applies: a PDF renamed .csv, a header-only file and a file without the expected columns are refused with the codes
+    of the foundation'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-pivot-format] the import types appear in the preview table of the foundation (one memory of confirmed files per type)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-audited] the confirmation is traced once per import with the object type of the file and a summary without any cell, customer id, invoice number or coordinate; the preview
+    is not traced'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-audited] the object types of the five imports are « Import de créances », « de paiements », « de litiges », « d''interlocuteurs » and « de pièces »'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-money-cents] a snapshot of 2 000 rows is read and confirmed with exact totals'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-debtor-attribute-change][D-0014] a following snapshot that changes the segment of a debtor is accepted: the case takes the new segment and its unlocked offers are revoked'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-debtor-attribute-change][D-0014] a following snapshot that changes the nature of a debtor is accepted as well'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-payments-columns] a valid statement gives an accepted preview and is confirmed with its effects'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-refuse-whole][rule-recouvrement-payments-columns] ${name}: the whole file is refused at the first error (column ${column}), confirmation 409 imports.file_refused'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-statement-fresh] a statement older than today minus the maximum age of the active policy is refused as a whole: row 1, column date_releve, « Relevé trop ancien »'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-statement-fresh] a statement exactly as old as the maximum age is accepted'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-statement-fresh] without an active policy the freshness control is skipped (an old statement is accepted) and the status stays not fresh'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-payments-columns] a reference already confirmed in a previous statement is ignored at the confirmation and counted in skippedCount'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-report] the report of a statement is compared with the previous statement by reference'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-statement-fresh] the status of a platform without import: no statement, not fresh, no extraction date, nothing confirmed'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-statement-fresh] with an active policy and a statement of the day the status is fresh, with the maximum age of the policy; the last confirmed import of each type is listed'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-statement-fresh] a statement dated 31 days ago, confirmed before the policy was active, makes the status not fresh once the policy (30 days) is active'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-pivot-format] the history lists the confirmed imports, newest first, with the author and the counts, and filters by type'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-lettrage-after-extraction] a payment dated on or before the extraction date of the snapshot is already in the balances and changes nothing'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-lettrage-after-extraction][rule-recouvrement-lettrage-order] a payment strictly after the extraction date whose reference contains the number of one open invoice (whole word,
+    any case) is applied to it'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-lettrage-order] the reference must contain the number as a whole word: FA-001X does not match; the payment then follows the amount rule or stays unassigned'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-lettrage-order] without a number in the reference, an amount equal to the balance of exactly one open invoice applies to it'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-lettrage-order] a reference with the numbers of two invoices does not match the first rule; the amount rule then decides'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-lettrage-order] credit notes receive no payment: a reference with a credit note number leaves the payment unassigned'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-lettrage-excess][rule-recouvrement-unassigned-payment-freeze] an excess over the balance of the invoice found by its number settles the invoice and becomes an unassigned payment
+    in the queue'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-unassigned-payment-freeze][rule-recouvrement-queue-unassigned-until-assigned] an unassigned payment whose amount equals the total balance of a case freezes the case and offers
+    its invoices as candidates'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-unassigned-payment-freeze] an amount that equals the balance of open invoices of two cases freezes both cases'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-payment-on-frozen-invoice] a payment is applied to a frozen invoice too: the freeze stops the negotiation, not the bookkeeping of the balance'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-lettrage-after-extraction][rule-recouvrement-receivables-snapshot] a payment already applied is not applied twice when the next snapshot reflects it'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-unassigned-payment-freeze][rule-recouvrement-queue-auto-close] a following snapshot that includes the payment in the balances closes the unassigned payment item without decision
+    and lifts the freeze'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-disputes-import-freeze] each valid row opens a dispute of origin import and freezes the invoice, out of the negotiable amount'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-disputes-import-freeze] when every open invoice of a case is frozen the case is frozen (transition dispute_opened or all_invoices_frozen)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-disputes-import-freeze] ${name}: a row error on column ${column}, the other rows are still imported'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-disputes-import-freeze] an invoice number shared by two creditor entities is resolved by the creditor SIREN'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-disputes-import-additive] an invoice already in an open dispute is counted in skippedCount; the file never closes a dispute'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-import-report] the report of a disputes file lists new lines by natural key (entity and number)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-contacts-columns] valid contacts are imported: a payer for a family, accounts-payable, buyer and approver for a company'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-contacts-columns] ${name}: a row error (the other rows are imported)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-contact-invalid-suspends-channel] an invalid e-mail is not a row error: it suspends the e-mail and SMS channel of this contact; the report counts the suspended contacts'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-contact-invalid-suspends-channel] a contact with an empty coordinate is not suspended on that account: an empty value only makes the channel unavailable'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-contacts-columns] the confirmation replaces the whole set of contacts and keeps the identifier of those whose debtor, role and coordinates are unchanged'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-contacts-columns] a row repeated identically in the file is a duplicate: ignored and counted in skippedCount, not an error'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-documents-columns] valid rows are imported; the whole index is replaced by the next file'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-documents-columns] ${name}: a row error on column ${column}'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-documents-columns] a repeated (invoice, type) is a duplicate: ignored and counted in skippedCount'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-imports.test.ts
+  titre: '[rule-recouvrement-documents-columns] the creditor SIREN resolves an invoice number shared by two entities'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-tools-only] without a token every agent route answers 401; the other profiles, the plain user and the profile-less admin get 403 security.access_denied'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-tools-only] the agent account is refused on every other business route'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-authentication][D-0019] the agent logs in with the socle login (returnToken: true) and reads a case with the bearer token received'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-context] a missing or malformed context header gives 400 agent.missing_context before any business check, after authentication'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-context] the channel header must be the channel of the account: 403 agent.channel_mismatch'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-calls-logged] every call, refusals included, leaves a row of the calls table with tool, inputs, status and response; no route reads it'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-ai-disclosure] without the AI disclosure the conversation is refused 403 agent.ai_disclosure_required and nothing is recorded; no other tool works without an opened conversation'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-conversation-bound] the conversation is bound to its case, interlocutor, account and channel: it carries them back, and a tool called with another case answers 404 cases.not_found'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-conversation-bound] another agent account cannot use the conversation of an agent: 404 agent.conversation_not_found, and the conversation is unchanged'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-conversation-bound] an unknown case or a malformed case id: 404 cases.not_found at the opening, 400 for the malformed one'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-case-channel-access][D-0004] a case with no ready batch is open to the voice channel as soon as a non frozen invoice allows it and the interlocutor is reachable by phone'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-case-channel-access] a channel no invoice allows, a settled case and an unknown case all give the same 404 cases.not_found; an unreachable interlocutor gives 409 agent.interlocutor_unreachable'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-case-channel-access] an interlocutor of another case is not reachable: 404 cases.not_found'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-conversation-reuse][D-0012] opening again with the same identifier, case and interlocutor and a new key returns the conversation with its original openedAt; another case with
+    that identifier gives 409 agent.conversation_exists'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-conversation-bound] the conversation identifier of one agent account is not usable by another: opening it with the same identifier gives 409 agent.conversation_exists'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-read-case] the reading carries the reachable interlocutors with the channel coordinates only, the non frozen invoices, the negotiable amount, no offer yet, no commitment
+    and the allowed actions'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-read-case] by mail the postal address alone is given, by email_sms the email and the phone'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-read-case] a frozen invoice is left out of the reading and of the negotiable amount'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-read-case] the current offer is the last unlocked one, not replaced nor revoked'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-read-case][rule-recouvrement-offer-stale-statement] when the bank statement is stale the actions next_offer and register_commitment disappear'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-read-case] a read is subject to the idempotency key: replayed, it returns the recorded state'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-offer-anchor][rule-recouvrement-offer-computation] the first offer is the first rung of the ladder, computed by the brain, without counterpart'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-offer-computation] sums are rounded half up in cents; each counterpart carries its detail; the schedule is split in equal parts with the cents left on the last one, one due
+    date every interval'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-offer-computation] a company schedule adds the delay fee of the rule on the negotiable amount'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-policy-no-business-value-in-code][rule-recouvrement-offer-computation] a custom policy changes the values: no business figure lives in the code'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-offer-descend] from the second call the counterpart is required (409 offers.counterpart_required) and must be the one of the next concession (409 offers.counterpart_mismatch);
+    nothing is unlocked by a refusal'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-offer-descend] the body is strict: an unknown counterpart type or an extra key gives 400'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-offer-exhausted] the ladder exhausted gives { status: exhausted, offer: null }, one ladder_exhausted item and the case in the supervisor queue; a replay with another key adds
+    no second item'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-offer-stale-statement] without a fresh bank statement no offer is given and no commitment is registered: 409 offers.statement_stale'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-offer-exposure-ceiling][rule-recouvrement-agent-evaluation] at the ceiling of the agent version and segment no schedule offer is given: exhausted without ladder_exhausted item'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-offer-exposure-ceiling] a schedule commitment that would exceed the ceiling is refused: 409 commitments.exposure_ceiling_reached'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-commitment-exact][rule-recouvrement-commitment-effects][rule-recouvrement-commitment-figures] a commitment reproducing an unlocked offer is registered pending; the offer is
+    accepted, the other offers superseded, the case committed, the decision journaled, the confirmation order emitted'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-commitment-exact] an engagement that differs from the offer (total, count, date or amount of an installment) is refused 409 commitments.offer_mismatch and registers nothing'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-commitment-exact] an offer of another case is not an offer of this case'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-commitment-payment-method] the payment method must belong to the list of the active policy; with another list the answer changes'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-commitment-effects] a second commitment is refused while one is pending: 409 commitments.already_committed'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-commitment-exact] the body is strict and bounded: 1 to 60 installments, positive integer amounts up to 10 000 000 000, payment method 1 to 30 characters, offer id a uuid'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-next-offer-while-committed][D-0009] while a commitment is pending the next offer is refused 409 negotiation.stopped, no offer is created and next_offer leaves the allowed actions'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-policy-change-midway][D-0013] after the activation of another version the unlocked offers are revoked: the next offer is the anchor of the new version and the old offer is expired
+    for a commitment; a registered commitment is kept'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-contestation-stops-case] a contestation freezes the case scope, creates one dispute per invoice aimed at, freezes those invoices, opens a contestation item and puts the case
+    in the frozen state; the negotiation tools answer 409 negotiation.stopped'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-contestation-without-invoices][D-0002] a contestation without invoice numbers (absent or empty) is refused 400 api.validation.incoming_failed and nothing is frozen'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-contestation-stops-case] an invoice number that is not an open invoice of the case: 404 contestations.invoice_not_found, nothing frozen; bounds of the body: reason 1..1000 trimmed,
+    1..100 distinct numbers of 1..50 characters'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-human-request] for a family the human intervention suspends the negotiation and puts the case in the supervisor queue with a human_request item'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-human-request-companies][D-0021] for a company the tool is refused 409 agent.human_request_not_available, the case does not enter the queue and the action is not allowed'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-complaint] a complaint is recorded with its text, conversation and agent version, counts in the complaints indicator and does not change the state of the case'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-message-check] amounts and dates of the unlocked conditions are allowed; the text is neither sent nor modified'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-message-known-amounts][D-0007] the balance of an invoice is not an unlocked amount: « Vous devez 1 200,00 € » with no offer is refused amount_not_unlocked with the excerpt'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-message-check] an amount or a date that is not in the unlocked conditions, and an internal term, are reported one by one'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-message-known-amounts] the discount, the installments, the first payment and the counterpart dates of unlocked offers are admitted, those of an offer not yet unlocked are not'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-message-parsing] amounts need a currency, with space, non-breaking space or dot as thousands separator and one or two decimals; a number without currency is not an amount'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-message-parsing] dates are read as DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY, YYYY-MM-DD and « D mois YYYY » (1er accepted); without a year only day and month are compared'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-message-parsing] the internal terms plancher, règle, version and segment are recognised as whole words, singular or plural, without regard to case or accents'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-message-check] the text is required and bounded (1 to 5000 characters), the case id a uuid, the body strict; at most 50 violations are reported'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-no-rule-segment][D-0010] a case whose segment has no rule in the active policy gets 409 offers.no_rule and an alert in the supervisor queue, one per case while it stays open'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-no-rule-segment][D-0010] with no active policy the answer is the same 409 offers.no_rule'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-idempotency] a call replayed with the same key returns the same status and body with Idempotent-Replayed: true and no new effect'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-idempotency] the same key with another request gives 409 agent.idempotency_conflict and no effect; a refusal is replayed as well'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-idempotency] two simultaneous calls with the same key have one effect'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-idempotency] the key is per account and tool: another account may use the same key'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-replay-audit][D-0015] the replay of a commitment writes a second audit entry « agent:register-commitment »; the effect is not doubled'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-calls-logged] writes are traced in the audit journal with the agent actions and a summary without free text or coordinates'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-agents.test.ts
+  titre: '[rule-recouvrement-agent-no-internal-reason] no response given to the agent carries rule, policy version, floor, segment, rank or reference amount, on the whole scenario'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-cases-supervisor-only][rule-recouvrement-debtor-attributes] each summary carries the identifier, nature, segment, creditor SIRENs, state, amounts, delay and update instant'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-cases-supervisor-only] cases are sorted by negotiable amount descending then by customer id; the page and the total follow from and size'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-cases-supervisor-only] filters by state, nature, segment and creditor SIREN, combinable'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-cases-supervisor-only] the search is a case-insensitive substring of the customer id, with % and _ taken literally'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-cases-supervisor-only] invalid filters answer 400: unknown state, nature, short creditor, empty or long search, long segment, bad pagination'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-cases-supervisor-only] the filters route lists the segments and creditor SIRENs present, sorted and without duplicate'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-cases-supervisor-only][rule-recouvrement-debtor-attributes] the card carries the invoices with their creditor entity, the freezes, offers, commitments, ledger outputs, open
+    queue items and the active policy'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-cases-supervisor-only] without an active policy the card has no active policy'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-cases-supervisor-only] an unknown case answers 404 repository.not_found, a malformed id 400, on the card, the decisions and the state history'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-cases-supervisor-only] searches open invoices by number prefix, without regard to case, sorted by number; settled invoices and credit notes are left out'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-cases-supervisor-only] the number is required (1 to 50 characters); the pagination is bounded'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-negotiable-amount] the negotiable amount is the sum of the balances of the non frozen invoices'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-negotiable-credit-notes][D-0008] the negotiable amount is the sum of the invoices only: an open credit note stays visible on the card and is not deducted'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-invoice-dispute-frozen] an invoice in an open dispute is frozen and out of the negotiable amount'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-prescription] the prescription date is the start date (invoice date or due date, by the policy) plus the delay: out of the negotiable amount from that day, « near » from the
+    alert delay before'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-prescription][rule-recouvrement-batch-prescription-flow] the batch preparation opens one « prescription échue » item per expired invoice and one « prescription proche » item
+    (with the proposed next step) per invoice near; a second preparation opens no duplicate'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-case-state-queue-types][D-0016] a near prescription item does not put the case in the supervisor queue: the case stays open, the item is listed on the card'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-amount-threshold] a negotiable amount above the threshold of the rule stops the negotiation: one item « montant au-delà du seuil », the case in the supervisor queue, a journal
+    decision of kind threshold'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-amount-threshold][rule-recouvrement-negotiation-stopped] the agent tools answer 409 negotiation.stopped for a case over the threshold, the reading stays possible'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-decision-journal][rule-recouvrement-batch-brain-decides] a batch journals one decision per case with the complete inputs, the policy version, the rule applied and the probability
+    1'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-decision-journal] decisions are listed newest first and paginated; the journal is append-only in the database'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-internal-reason-private] the internal reason is read by the supervisor only: the litigation service, the indicators reader and the agent get 403 on the decisions of a case'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-state-transitions-logged][rule-recouvrement-case-state-referential] every transition is logged with instant, from, to, cause, actor and reference; newest first; only transitions
+    of the referential exist'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-case-state-referential] the precedence frozen over supervisor queue over committed over negotiating over open is applied: a case in the queue that receives a freeze is frozen'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-case-state-referential] a case with every open invoice frozen is frozen; closing the last dispute gives back the state of precedence (cause freeze_released)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-dossiers.test.ts
+  titre: '[rule-recouvrement-case-grouping] one case per customer id, whatever the number of rows and creditor entities'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-engagements.test.ts
+  titre: '[rule-recouvrement-commitment-held][rule-recouvrement-evaluation-points] a commitment whose installments are paid by affected payments is held; the case with no open invoice left is settled (cause
+    commitment_held)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-engagements.test.ts
+  titre: '[rule-recouvrement-commitment-held] a held commitment with invoices left open gives back the open state (cause commitment_held)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-engagements.test.ts
+  titre: '[rule-recouvrement-commitment-held] an installment payment short of the cumulative amount due keeps the commitment pending while an installment is still to come'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-engagements.test.ts
+  titre: '[rule-recouvrement-commitment-broken][rule-recouvrement-agent-evaluation] a missed installment is noticed by the next read of the agent: the commitment is broken, its offers are revoked, the case
+    is open again and the negotiation starts again at the anchor'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-engagements.test.ts
+  titre: '[rule-recouvrement-commitment-broken] a missed installment is also noticed by a batch preparation and by a new import, with the same effect'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-engagements.test.ts
+  titre: '[rule-recouvrement-commitment-held][rule-recouvrement-commitment-broken] a held schedule requires the cumulative due at each installment: paying everything after the last due date still counts
+    as held only if the cumulative amount reaches the total'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-engagements.test.ts
+  titre: '[rule-recouvrement-commitment-covers-negotiable][rule-recouvrement-ledger-output-creation][rule-recouvrement-ledger-output-per-creditor] a held commitment with a discount produces one to_approve
+    output per creditor entity, the discount being shared in proportion of the balances at registration, the cents left on the invoice with the greatest balance'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-engagements.test.ts
+  titre: '[rule-recouvrement-commitment-held] a commitment with no discount produces no ledger output'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-engagements.test.ts
+  titre: '[rule-recouvrement-payment-on-frozen-invoice] a payment is applied to a frozen invoice as well: the balance is reduced'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-contents] only the supervisor reads and decides: 403 for the other profiles, a plain user, an admin without profile; 401 without token; the 403 comes before the validation'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-contents] the counts give the ten types, only the open items; an empty queue counts zeros'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-order][rule-recouvrement-queue-contents] the open queue reads from the oldest to the newest, the decided one from the most recently decided; items carry their summary
+    and details in French, the types are filterable, the pagination bounded'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-allowed-decisions] each type allows exactly the decisions of the referential and refuses another with 409 queue.decision_not_allowed'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-decision-motivated] the reason is required (1 to 1000 characters after trimming), the code 1 to 50 characters, the body strict, the id a uuid; an unknown item is 404'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-decision-motivated] the decision keeps its code, trimmed reason, author and instant; it enters the audit journal without the reason'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-decided-final] a decided item does not change: 409 queue.already_decided; two simultaneous decisions give one success and one 409'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-single-open] a repeated event creates no second open item for the same type and object'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-effects] « authorize » memorizes the authorized negotiable amount: the case goes back to the open state and is no longer put in the queue for the threshold while its amount
+    does not exceed it; the agent can negotiate'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-effects] a negotiable amount above the authorized one puts the case in the queue again'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-effects][rule-recouvrement-family-transfer-never-executed] « transfer » (and « approve_transfer ») brings the case to transferred (cause transfer_approved), a final state'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-effects] « reject_transfer » closes the item and the brain does not reproduce the proposal while the rule applied to the case is the same'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-effects][rule-recouvrement-human-request] « resume » lifts the suspension of the negotiation; « transfer » transfers the case'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-effects] « acknowledge » and « keep » only close the item: the state of the case does not change by themselves'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-unassigned-until-assigned][rule-recouvrement-unassigned-payment-freeze] an ambiguous payment opens an item with its candidate invoices and freezes the cases until the
+    supervisor assigns it'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-effects] « assign » requires an invoice (400 without it, 400 with it for another decision), applies the payment, lifts the freeze of the cases and gives them back to the
+    brain'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-effects] the applied amount is the minimum of the payment and the balance; the excess becomes an unassigned payment and opens a new item'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-file-decisions.test.ts
+  titre: '[rule-recouvrement-queue-effects] an invoice that is unknown, settled or not open is refused: 409 queue.invoice_not_open'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-indicateurs.test.ts
+  titre: '[rule-recouvrement-indicators-aggregate-only] the supervisor and the indicators reader read the two routes; the litigation service, the agent, a plain user and a profile-less admin get 403; 401
+    without token'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-indicateurs.test.ts
+  titre: '[rule-recouvrement-indicators-aggregate-only] the indicators reader gets 403 security.access_denied on every other recouvrement route'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-indicateurs.test.ts
+  titre: '[rule-recouvrement-indicators-five][rule-recouvrement-indicators-no-score][rule-recouvrement-indicators-dimensions] each row is a triple (segment, policy version, agent version) with the five
+    indicators in two terms; no ratio, no percentage, no score'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-indicateurs.test.ts
+  titre: '[rule-recouvrement-indicators-aggregate-only] no row carries a customer id, a SIREN, a contact or an invoice number'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-indicateurs.test.ts
+  titre: '[rule-recouvrement-indicators-dimensions] a dimension without object is null: no agent version for the facts that come from the data alone'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-indicateurs.test.ts
+  titre: '[rule-recouvrement-indicator-commitments] commitments taken and held count per policy and agent version at the registration'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-indicateurs.test.ts
+  titre: '[rule-recouvrement-indicator-discounts] on held commitments, discounts granted over the negotiable amounts at the registration'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-indicateurs.test.ts
+  titre: '[rule-recouvrement-indicator-complaints] complaints over actions: reported complaints; actions are the conversations opened plus the orders of the ready batches (the latter without agent version)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-indicateurs.test.ts
+  titre: '[rule-recouvrement-indicator-complaints] a complaint does not change the state of the case, an unsent batch counts no action'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-indicateurs.test.ts
+  titre: '[rule-recouvrement-indicator-collected] before the horizon of the rule is reached nothing is due or collected; the two terms are integers in cents'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-indicateurs.test.ts
+  titre: '[rule-recouvrement-indicators-dimensions] rows are sorted by segment, then by policy version date (newest first), then by agent version with the null last'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-indicateurs.test.ts
+  titre: '[rule-recouvrement-indicators-period][rule-recouvrement-indicators-dimensions] the filters segment, policyVersionId and agentVersion narrow the rows; the period bounds are inclusive civil days'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-indicateurs.test.ts
+  titre: '[rule-recouvrement-indicators-period] the pagination of rows and the validation of the filters: from after to, bad dates, bad sizes, bad uuid, bad agent version'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-indicateurs.test.ts
+  titre: '[rule-recouvrement-indicators-dimensions] the filters route lists the segments, the policy versions (id, label, date) and the agent versions present'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-litiges.test.ts
+  titre: '[rule-recouvrement-disputes-litigation-only] only the litigation service reaches the dispute routes: the supervisor too gets 403 security.access_denied, as the agent, the indicators reader, a
+    plain user and an admin without profile; 401 without token; the 403 comes before the validation'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-litiges.test.ts
+  titre: '[rule-recouvrement-disputes-litigation-only] the litigation service reads neither the case card, the decisions, the policy, the queue nor the indicators'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-litiges.test.ts
+  titre: '[rule-recouvrement-dispute-open-freezes] opening a dispute freezes the invoice: it leaves the negotiable amount, the dispute shows the case summary; the case goes frozen only if all its open invoices
+    are frozen (cause dispute_opened)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-litiges.test.ts
+  titre: '[rule-recouvrement-dispute-one-open-per-invoice] a second open dispute on the same invoice is refused 409 disputes.already_open'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-litiges.test.ts
+  titre: '[rule-recouvrement-dispute-one-open-per-invoice] an unknown invoice or a settled one is 404 repository.not_found; the body is strict and bounded (reason 1..500, owner 1..100, trimmed)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-litiges.test.ts
+  titre: '[rule-recouvrement-dispute-text-plain] reasons and notes are kept as plain text, exactly as typed (no HTML interpretation or escaping on the server)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-litiges.test.ts
+  titre: '[rule-recouvrement-disputes-litigation-only] opening and closing are traced with the dispute object type and a summary without reason or note'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-litiges.test.ts
+  titre: '[rule-recouvrement-dispute-close-unfreezes][rule-recouvrement-dispute-no-delete] closing unfreezes the invoice and re-evaluates the case (freeze_released); a closed dispute is not reopened (409
+    disputes.already_closed) nor deleted'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-litiges.test.ts
+  titre: '[rule-recouvrement-dispute-close-unfreezes] closing a dispute born from an import unfreezes its invoice'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-litiges.test.ts
+  titre: '[rule-recouvrement-dispute-close-unfreezes][rule-recouvrement-dispute-contestation-origin] a dispute born from a contestation carries its text; the case freeze « contestation » is lifted when
+    the last dispute born from this contestation is closed'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-litiges.test.ts
+  titre: '[rule-recouvrement-dispute-one-open-per-invoice] a contestation on an invoice already in dispute creates no second dispute: the contestation is attached to the existing one'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-litiges.test.ts
+  titre: '[rule-recouvrement-dispute-close-unfreezes] the note is required (1..500 trimmed), the body strict, the id a uuid; unknown dispute: 404'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-litiges.test.ts
+  titre: '[rule-recouvrement-disputes-litigation-only] the list shows open disputes oldest first by default, closed ones newest closed first, all of them with status all; filters by origin and search (invoice
+    number or customer id, case-insensitive substring); pagination bounded'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-litiges.test.ts
+  titre: '[rule-recouvrement-disputes-litigation-only] the invoice search is by number prefix without regard to case, open invoices with a positive balance only, sorted by number; the number is required'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-prepared-by-supervisor] only the supervisor prepares, reads and releases batches: the other profiles, a plain user and a profile-less admin get 403, without a token 401'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-prepared-by-supervisor] nothing is prepared by itself: with no call there is no batch'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-release-mode][D-0020][rule-recouvrement-batch-release-when-checks-pass] when all the checks pass the batch is ready from the preparation, with no releaser; the four checks
+    are passed'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-brain-decides] without an active policy the preparation answers 409 batches.no_active_policy and creates nothing'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-brain-decides] the brain decides every non final case and journals each decision; settled and transferred cases are left out'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-orders-structured] a reminder carries the amount due and the due date of each invoice, a proposal the conditions of the anchor; orders are structured (case, interlocutor,
+    channel, conditions) and carry no drafted text'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-orders-structured] orders are sorted by customer id then type, filterable by type and channel and paginated; an unknown batch is 404, a malformed id 400'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-channel-order] the channel is the first eligible one in the order voice, email_sms, mail, the interlocutor the first by role then by identifier'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-order-eligibility] a channel is used only if a negotiable invoice authorizes it: an invoice open to mail only gives a mail order even when a phone is known'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-order-eligibility] a case with no reachable interlocutor on an authorized channel is excluded with its reason and does not block the batch; a frozen case or a null negotiable
+    amount gets no order'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-documents-required-blocks-reminder][rule-recouvrement-batch-order-eligibility] a document required by the policy and missing from the index excludes the invoice from the reminder;
+    the case is excluded as documents_missing when no invoice is left, and it is ordered once the document is indexed'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-statement-fresh] without a fresh bank statement the batch is blocked with no order, every case excluded statement_stale and the check failed with its problems in French'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-witnesses-replayed][rule-recouvrement-witness-no-order] the witnesses are replayed at each batch without creating an order, a decision on a real case, a queue item or
+    a transition'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-one-per-day] a second preparation the same day replaces a blocked batch: it becomes replaced, its orders cancelled and replacedBy set; the new one comes first in the list'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-one-per-day] when the batch of the day is ready a new preparation answers 409 batches.already_released and changes nothing'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-blocked-release-by-decision] a blocked batch is released only by a reasoned decision: it becomes ready, keeps the releaser, the reason and its failed checks'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-blocked-release-by-decision] the reason is required (1 to 1000 characters after trimming), the body strict, the id a uuid; an unknown batch is 404; a batch that is not
+    blocked answers 409 batches.not_releasable'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-release-when-checks-pass][rule-recouvrement-batch-blocked-release-by-decision] a ready batch and a replaced batch cannot be released: 409 batches.not_releasable'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-no-duplicate-order] a case has one active order per type and day: after a replacement the active orders are one per case and the check no_duplicate_order is passed'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-prepared-by-supervisor] preparation and release are traced in the audit journal with the batch object type, the actions and their summaries'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-company-transfer-proposed][D-0003][rule-recouvrement-batch-families-no-transfer][rule-recouvrement-family-transfer-never-executed] the transfer of a company is proposed to the
+    supervisor like the one of a family: the case is in the supervisor queue with an open transfer_proposed item, never transferred by the brain'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-company-transfer-proposed] a second preparation does not open a second item for the same case (a single open item per type and object)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-auto-stop] before ten previous batches the fixed cap of the type applies: a share strictly above the cap blocks the batch, a share equal to the cap does not; a block opens
+    one alert item'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-auto-stop][rule-recouvrement-decision-share-sigma][D-0005] with ten previous batches at 40 % and 60 % of reminders alternately, a batch at 81 % is blocked: population
+    standard deviation of 10 points, threshold of 30 points, gap of 31'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-auto-stop] with a gap within three standard deviations the batch passes in statistical mode'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-exposure-ceiling] when the ceiling of the agent version and segment is reached an alert item opens, once while the ceiling stays reached'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-commitment-confirmation-immediate] a commitment emits at once a confirmation order outside any batch, planned, on an authorized and reachable channel'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-lot-du-jour.test.ts
+  titre: '[rule-recouvrement-batch-prepared-by-supervisor] the list is paginated (from, size 1 to 100), newest date first, and the detail of an unknown batch is 404'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-mcp.test.ts
+  titre: '[rule-recouvrement-agent-two-transports] POST /mcp without a token answers 401; another profile, a plain user and an admin without profile answer 403'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-mcp.test.ts
+  titre: '[rule-recouvrement-mcp-405-after-auth][rule-recouvrement-agent-two-transports] GET /mcp and DELETE /mcp answer 405 once authenticated as an agent (401 without a token)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-mcp.test.ts
+  titre: '[rule-recouvrement-agent-two-transports] initialize answers with the protocol version and the tools capability; tools/list gives the eight tools with an input schema each'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-mcp.test.ts
+  titre: '[rule-recouvrement-agent-two-transports] an unknown tool, an unknown method and a malformed JSON-RPC body never give a server error'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-mcp.test.ts
+  titre: '[rule-recouvrement-agent-two-transports] a refusal is an error result: isError true and structuredContent { status, code, message } identical to the REST body'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-mcp.test.ts
+  titre: '[rule-recouvrement-agent-context][rule-recouvrement-agent-two-transports] a missing or malformed context argument gives agent.missing_context, the channel of the account is checked, and the arguments
+    are validated like the REST bodies'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-mcp.test.ts
+  titre: '[rule-recouvrement-agent-two-transports][rule-recouvrement-agent-conversation-bound] a conversation opened on REST is usable on MCP and the reverse; another account cannot use it'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-mcp.test.ts
+  titre: '[rule-recouvrement-agent-idempotency][rule-recouvrement-agent-two-transports] on MCP too a call replayed with the same key has one effect and the same result; the same key with another request
+    is a conflict'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-mcp.test.ts
+  titre: '[rule-recouvrement-agent-two-transports] the same scenario played on REST then on MCP, on the same data, gives the same responses (identifiers aside) and the same effects'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-format][rule-recouvrement-policy-versioned] a valid file gives a preview with the SHA-256 of the file, the global parameters, the rules, six checks and the witnesses'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-versioned] the preview writes no version: nothing is listed before the confirmation'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-json-not-spreadsheet] a spreadsheet or a text that is not JSON is refused: 400 policies.invalid_file_type'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-json-not-spreadsheet] a file that is not valid UTF-8 is refused: 400 policies.invalid_file_type'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-format] a file of 2 097 152 bytes is read (and judged invalid by its content); one more byte is refused with 413 policies.file_too_large'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-format] a body that is not a multipart upload, or has no file part, answers 400 api.validation.incoming_failed'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-format] ${name}: valid false, an error on the JSON path, empty checks, rules and witnesses'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-format] the confirmation of an invalid preview answers 409 policies.invalid_file and writes nothing'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-format] the decision graph is evaluated by the engine: an unmatched input gives the action none and the rule no_rule'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-versioned] the confirmation creates the version imported by the supervisor, with the hash, the date and the result of the checks'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-versioned] the same file (same SHA-256) is imported only once: 409 policies.already_imported at the preview and at the confirmation of another preview'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-versioned] a preview is consumed by its confirmation: confirming it again gives 409 policies.already_imported or 404 policies.preview_not_found, never a second version'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-versioned] an unknown preview answers 404 policies.preview_not_found; a malformed identifier answers 400'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-versioned] a preview is private to its creator: another supervisor gets the same 404 policies.preview_not_found as for an unknown id, and nothing is created'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-audited] the confirmation is traced (object type « Version de politique », action policies:confirm) without the content of the file; the preview is not'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-versioned] the list is ordered by version date then import date, newest first, and filters by status'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-activation-checks] the detail of a version carries the global parameters, the rules with their ladder, the six checks recomputed and the witnesses'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-versioned] an unknown version answers 404 repository.not_found, a malformed id 400'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-immutable] there is no route to modify or delete a version: PUT, PATCH and DELETE answer 404 api.route_not_found'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-versioned][rule-recouvrement-policy-immutable] the activation makes the version active (author, instant) and supersedes the previous one in the same transaction; one
+    active version at most'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-immutable] a version already active, or superseded, is not activatable: 409 policies.not_activatable'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-immutable] the database refuses to modify or delete the content of a version, active or not'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-immutable] the database allows at most one active version'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-versioned] an unknown version answers 404 repository.not_found, a malformed id 400'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-audited] the activation is traced (action policies:activate, « Version de politique », summary « … activée. ») without the content of the file'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-activation-date][D-0011] a version dated before the active version is activatable: 200, the older active version becomes superseded'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-floor][rule-recouvrement-policy-activation-checks] an offer under the floor of its segment blocks the activation (control floor)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-floor] an offer exactly at the floor passes the control'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-concessions-decreasing] values that do not decrease, or gaps that grow, block the activation (control decreasing_concessions)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-concessions-decreasing] a ladder of one or two offers satisfies the control of the gap'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-concessions-equal-gaps][D-0006] a ladder of 100 %, 90 %, 80 % (equal gaps) is refused: 409 policies.activation_blocked, control decreasing_concessions failed'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-concessions-equal-gaps] 100 %, 90 %, 81 % (gaps 10 then 9 points) is accepted'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-counterparts] a concession (second offer or later) without a counterpart blocks the activation; the anchor needs none'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-schedule-limits] a schedule longer than maxScheduleDays (payByDays + (count - 1) x intervalDays) blocks the activation'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-schedule-limits] a family delay carries no fee: a delayed offer with delayFeeBp above 0 blocks the activation for a family, not for a company'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-schedule-limits] a family offer without delay (payByDays 0, lump sum) may carry a fee'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-segments-covered] every segment and nature present in the confirmed receivables needs a rule: the missing pair is named'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-segments-covered] without confirmed receivables the control passes'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-witnesses] a witness case that does not give exactly the expected action and rule blocks the activation; the obtained value is listed'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-witnesses] a witness with the right action but another rule identifier fails'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-activation-checks] the activation reports every failed check at once and changes nothing, the previous active version staying active'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-activation-checks] the checks of a version are recomputed at the reading against the receivables confirmed at that moment'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-politiques.test.ts
+  titre: '[rule-recouvrement-policy-supervisor-only] the agent account, the litigation service and the indicators reader cannot read a version: 403 on the list and on the detail'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-cases-supervisor-only][rule-recouvrement-policy-supervisor-only][rule-recouvrement-import-green-light][rule-recouvrement-ledger-supervisor-only][rule-recouvrement-batch-prepared-by-supervisor][rule-recouvrement-review-supervisor-only][rule-recouvrement-profile-server-enforced]
+    the supervisor routes admit the supervisor only: visitor 401, agent, litigation, indicators, admin without profile and user without profile get 403 even with an invalid body'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-disputes-litigation-only] the dispute routes admit the litigation profile only (the supervisor is refused)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-indicators-aggregate-only] the indicator routes admit the supervisor and the indicators reader only'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-agent-tools-only][rule-recouvrement-mcp-405-after-auth][rule-recouvrement-agent-two-transports] the agent routes (REST and MCP) admit the agent profile only; GET and DELETE
+    /mcp answer 405 to the agent'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-journal-supervisor][rule-recouvrement-journal-others-refused][rule-recouvrement-journal-agent-never] the journal routes admit the administrator and the supervisor; agent, litigation,
+    indicators and user without profile get 403'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-journal-agent-never] the agent never reads the journal, whatever the filter'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-journal-supervisor] the supervisor reads the journal and sees the entry written by their own action'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-admin-no-business-access][D-0017] an administrator without a recovery profile gets 403 security.access_denied on GET /cases'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-admin-no-business-access] an administrator carrying the supervisor profile exercises it, and only it'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-profiles-assigned-by-admin] returns the profile and the channel of each kind of account, null for an account without profile'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-profiles-assigned-by-admin] a visitor gets 401'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-profiles-assigned-by-admin] lists only the accounts that have a profile, sorted by e-mail, with the exact shape'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-profiles-assigned-by-admin] paginates with from and size and rejects out-of-range values with 400'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-profiles-assigned-by-admin] an ordinary user, even a supervisor, gets 403 and a visitor 401'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-profiles-assigned-by-admin][rule-recouvrement-profile-server-enforced] the administrator gives the supervisor profile; effective on the very next request with the same token'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-profile-single][D-0018] a second profile replaces the first: the account reads the disputes and is refused the cases'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-profile-no-delete] profile null removes the profile: the object comes back with null and the very same token is refused at the next request'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-profile-no-delete] there is no DELETE and no PATCH on a user profile: 404 api.route_not_found'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-agent-channel-required] the agent profile requires a channel: 409 profiles.channel_required without it (absent or null)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-agent-channel-required] the agent profile with a channel is accepted and the object carries it'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-agent-channel-required] a channel on another profile is refused: 409 profiles.channel_not_allowed'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-agent-one-per-channel] a second agent account on the same channel is refused: 409 profiles.channel_taken (the database holds it too)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-agent-user-role] the agent profile is refused to an administrator account: 409 profiles.agent_requires_user_role'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-agent-user-role] the database refuses to turn an agent account into an administrator'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-own-profile-locked] an administrator cannot change their own profile: 409 profiles.cannot_change_own_profile'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-profiles-assigned-by-admin] invalid bodies answer 400: unknown profile, unknown key, unknown channel, missing profile, malformed user id'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-profiles-assigned-by-admin] an unknown account answers 404 repository.not_found'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-profiles-assigned-by-admin] a supervisor, a user without profile and a visitor cannot give a profile, before any validation'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-profiles-assigned-by-admin] the attribution is traced in the journal with the object type and the French summary'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-profile-server-enforced] a wrong profile gets 403 (never 400 or 404) on routes with invalid bodies and unknown identifiers'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-profils.test.ts
+  titre: '[rule-recouvrement-profile-server-enforced] the profile is read from the database at every request: a profile removed by SQL between two requests with the same token is refused'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-relecture.test.ts
+  titre: '[rule-recouvrement-review-supervisor-only] only the supervisor draws and reviews: 403 for the other profiles, a plain user, a profile-less admin; 401 without token'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-relecture.test.ts
+  titre: '[rule-recouvrement-review-weekly-sample][rule-recouvrement-review-manual-trigger] the supervisor draws the sample of a week: its size is reviewSampleSize of the active policy, the pool is the
+    daily decisions of the week; the week, its bounds, the seed and the author are given'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-relecture.test.ts
+  titre: '[rule-recouvrement-review-reproducible] the draw follows the published algorithm: SHA-256 seed, decisions sorted by identifier, Fisher-Yates driven by SHA-256(seed:i); the items are numbered from
+    1 in the order drawn'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-relecture.test.ts
+  titre: '[rule-recouvrement-review-reproducible] with a pool smaller than the sample size, all decisions are kept'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-relecture.test.ts
+  titre: '[rule-recouvrement-review-pool] a batch replaced the same day does not feed the pool'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-relecture.test.ts
+  titre: '[rule-recouvrement-review-weekly-sample] one sample per week: 409 reviews.already_drawn; a future week 409 reviews.week_in_future; a week without decision 409 reviews.no_decisions; without an
+    active policy 409 reviews.no_active_policy'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-relecture.test.ts
+  titre: '[rule-recouvrement-review-manual-trigger] without a week, the previous complete ISO week is drawn: no decision was taken then (409 reviews.no_decisions)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-relecture.test.ts
+  titre: '[rule-recouvrement-review-weekly-sample] the sample size comes from the active policy at the time of the draw: without an active policy the draw is refused'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-relecture.test.ts
+  titre: '[rule-recouvrement-review-weekly-sample] the week must look like YYYY-Www with ww from 01 to 53; the body is strict'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-relecture.test.ts
+  titre: '[rule-recouvrement-review-weekly-sample] the list goes from the most recent week to the oldest and is paginated; an unknown sample is 404'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-relecture.test.ts
+  titre: '[rule-recouvrement-review-blind] before the review an item gives the inputs as they were at the decision time, never the action, the rule or the agreement; the inputs do not follow the current
+    state of the case'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-relecture.test.ts
+  titre: '[rule-recouvrement-review-gap-feeds-indicator] after the review the item gives the brain action and rule and whether the supervisor agreed; the counts of the sample follow'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-relecture.test.ts
+  titre: '[rule-recouvrement-review-final] a review given is not modified: 409 reviews.already_reviewed'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-relecture.test.ts
+  titre: '[rule-recouvrement-review-final] the action is one of the four daily actions, the comment 1..1000 characters trimmed, the body strict, both ids uuids; an unknown item or sample is 404'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-relecture.test.ts
+  titre: '[rule-recouvrement-review-supervisor-only] the items are sorted by rank, filtered by status and paginated'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-relecture.test.ts
+  titre: '[rule-recouvrement-review-gap-feeds-indicator][rule-recouvrement-indicator-errors] each disagreement counts as an error in the « errors / reviewed decisions » indicator, per segment and policy
+    version, without agent version'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-relecture.test.ts
+  titre: '[rule-recouvrement-review-supervisor-only] the draw and the review are traced in the audit journal without free text or customer identifier'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-supervisor-only] only the supervisor reads, approves, exports and writes off: 403 for the other profiles, a plain user and an admin without profile, 401 without token'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-write-off-proposal][rule-recouvrement-ledger-output-content][rule-recouvrement-ledger-states] a write-off creates a to_approve output with its creditor entity, debtor,
+    lines, total, reason and a stable reference'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-write-off-proposal] the amount of a line, added to what the non recognized outputs already cover, cannot exceed the balance of the invoice: 409 ledger.amount_exceeds_balance,
+    and nothing is created'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-write-off-proposal] a settled case is refused 409 ledger.case_settled'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-write-off-proposal] unknown case, unknown invoice or an invoice of another case: 404 repository.not_found'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-write-off-proposal] the body is strict and bounded: 1 to 100 distinct invoices, amounts from 1 to 10 000 000 000, reason 1 to 500 characters trimmed'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-output-creation] lists are sorted newest first then by reference, filterable by status, type, creditor and case, paginated; counts per status'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-approve-batch] the approval records author and instant; it is traced once for the whole batch, the summary giving the count'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-states][rule-recouvrement-ledger-approve-batch] the approval is all or nothing: an output that is not to_approve gives 409 ledger.not_approvable and none is approved;
+    an unknown id gives 404'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-approve-batch] the ids are 1 to 500 distinct uuids in a strict body'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-states] the states are checked in the database: an output cannot leave recognized, jump from to_approve to recognized or be deleted'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-negotiable-outputs][rule-recouvrement-ledger-not-negotiable] an approved output deducts its lines from the negotiable amount and shows coveredByOutputsCents; a to_approve output
+    deducts nothing'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-not-negotiable] the deduction stops when the output is recognized'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-negotiable-outputs] an approved write-off lowers the amount of the first offer the agent gets'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-export] without an approved output the file holds the header only (200); it is repeatable and changes no state'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-export] approved outputs only are exported, one line each, with RFC 4180 quoting, invoice numbers joined by « ; », a positive amount with two decimals; neither gap nor
+    recognized outputs'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-audited] reads and the export leave no audit entry'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-recognition] a credit note carrying the reference of the output, of an absolute value at least equal to its amount, recognizes it at the next receivables import; the
+    output gets recognizedAt'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-recognition] a credit note smaller than the amount, or carrying another reference, does not recognize the output'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-recognition] a balance reduced by the amount in the imported snapshot recognizes the output; a smaller reduction does not'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-recognition] payments applied since the approval are not counted twice: balance 100000, payment of 20000, write-off of 30000, imported balance 50000 recognizes it'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-gap] an approved output that the import does not reflect sees its counter grow; at ledgerMaxImports it is in gap and one accounting_gap item opens; maxImports is given
+    for display'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-not-negotiable][rule-recouvrement-ledger-gap] an output in gap keeps deducting from the negotiable amount'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-recognition][rule-recouvrement-queue-auto-close] a late recognition moves the gap output to recognized and closes the accounting_gap item without decision (auto_closed,
+    no author)'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-queue-effects][rule-recouvrement-ledger-states] the decision « reapprove » puts a gap output back to approved with a counter at 0; it then counts imports again'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'
+- fichier: acceptance-v1-sorties-comptables.test.ts
+  titre: '[rule-recouvrement-ledger-no-direct-accounting] no route reads or writes an accounting tool: the only ledger routes are the five listed ones'
+  vu_rouge: '2026-10-13'
+  sur: '5878653'

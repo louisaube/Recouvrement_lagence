@@ -18,7 +18,35 @@ import yaml
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 os.chdir(ROOT)
 REG = 'specifications/recette-rouge.yaml'
-TEST_START = re.compile(r'''^\s*(?:it|test)(?:\.\w+)?\(\s*(['"`])(.*?)\1''', re.M)
+TEST_START = re.compile(r'''^\s*(?:it|test)(?:\.\w+)?\(\s*(['"`])((?:\\.|(?!\1).)*?)\1''', re.M)
+
+
+TPL = re.compile(r'\$\{[^}]*\}')
+
+
+def tpl_regex(t):
+    """Titre à gabarit (`${nom}` résolu à l'exécution par une boucle) : motif des titres réels qu'il engendre."""
+    return '.+?'.join(re.escape(p) for p in TPL.split(t))
+
+
+class Status(dict):
+    """Statuts par titre réel ; un titre à gabarit se résout sur l'ensemble des titres réels qu'il engendre."""
+
+    def get(self, t, default=None):
+        if not TPL.search(t or ''):
+            return super().get(t, default)
+        found = [v for k, v in self.items() if re.fullmatch(tpl_regex(t), k or '')]
+        if not found:
+            return default
+        if all(v == 'failed' for v in found):
+            return 'failed'
+        for v in ('passed', 'erreur'):
+            if v in found:
+                return v
+        return found[0]
+
+    def __contains__(self, t):
+        return self.get(t) is not None
 
 
 def committed():
@@ -37,13 +65,15 @@ def save(entries):
 
 
 def titles(path):
-    return [m.group(2) for m in TEST_START.finditer(open(os.path.join('acceptance', path), encoding='utf-8', errors='replace').read())]
+    src = open(os.path.join('acceptance', path), encoding='utf-8', errors='replace').read()
+    # un titre entre apostrophes ou guillemets s'écrit avec ses échappements (\') ; Jest rapporte le titre résolu
+    return [m.group(2) if m.group(1) == '`' else re.sub(r'\\(.)', r'\1', m.group(2)) for m in TEST_START.finditer(src)]
 
 
 def run(files, wanted, env=None):
     """Exécute la recette sur `files`, limitée aux titres voulus ; renvoie (code, {titre: statut})."""
     out = tempfile.NamedTemporaryFile(suffix='.json', delete=False).name
-    pattern = '|'.join(re.escape(t) for t in wanted)
+    pattern = '|'.join('.*'.join(re.escape(p) for p in TPL.split(t)) for t in wanted)
     r = subprocess.run(['bash', '.cuisine/scripts/acceptance.sh', '--json', f'--outputFile={out}', '-t', pattern, *files],
                        capture_output=True, text=True, env={**os.environ, **(env or {})})
     if r.returncode == 124:
@@ -53,7 +83,7 @@ def run(files, wanted, env=None):
     except (OSError, ValueError):
         print(r.stdout[-2000:], r.stderr[-2000:])
         return r.returncode or 2, {}
-    status = {}
+    status = Status()
     for f in data.get('testResults', []):
         for a in f.get('assertionResults', []):
             st = a.get('status')

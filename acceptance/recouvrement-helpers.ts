@@ -135,10 +135,16 @@ export type AccountName = keyof typeof ACCOUNTS
 export async function makeAccount(email: string, def: AccountDef): Promise<Acc> {
   const user = await createUser({ email, password: PASSWORD, role: def.role })
   if (def.profile) {
-    await sql(
-      'insert into base.user_profiles (user_id, profile, channel, created_at, updated_at) values ($1, $2, $3, now(), now())',
-      [user.id, def.profile, def.channel ?? null],
-    )
+    try {
+      await sql(
+        'insert into base.user_profiles (user_id, profile, channel, created_at, updated_at) values ($1, $2, $3, now(), now())',
+        [user.id, def.profile, def.channel ?? null],
+      )
+    } catch (e: any) {
+      // Table du module (recouvrement-module-implementation-plan.md) : tant qu'elle n'existe pas, le test échoue sur un attendu (rouge), non sur une erreur de mise en place.
+      if (e?.code === '42P01') expect({ table: 'base.user_profiles', existe: false }).toEqual({ table: 'base.user_profiles', existe: true })
+      throw e
+    }
   }
   const token = await login(email, PASSWORD)
   return { id: user.id, email, token }
