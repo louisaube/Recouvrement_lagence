@@ -6,5 +6,5 @@ export default defineConfig({
   schema: ['./src/features/**/*.tables.ts'],
   out: './drizzle',
   schemaFilter: ['base'],
-  dbCredentials: { url: process.env.DATABASE_URL ?? 'postgres://database:database@localhost:5432/monappli' },
+  dbCredentials: { url: process.env.DATABASE_URL ?? 'postgres://database:database@localhost:5432/recouvrement' },
 })

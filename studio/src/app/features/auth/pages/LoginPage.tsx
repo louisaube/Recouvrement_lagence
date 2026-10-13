@@ -49,7 +49,7 @@ export function LoginPage() {
       <Card sx={{ width: '100%', maxWidth: 400 }}>
         <CardContent component="form" onSubmit={onSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', gap: 2, p: 3 }}>
           <Typography variant="overline" color="primary">
-            Monappli
+            Recouvrement
           </Typography>
           <Typography variant="h5" component="h1">
             Connexion

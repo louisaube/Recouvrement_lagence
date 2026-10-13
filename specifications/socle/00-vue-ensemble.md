@@ -20,7 +20,7 @@ Le socle est livré en quatre versions successives, toutes à couvrir par la ré
 | `socle-journal-audit` | trace de toute action d'écriture, survivant à la suppression de l'auteur, jamais modifiable ; déclaration par route ; écran de consultation filtrable et partageable par lien. |
 | `socle-import-excel` | import `.xlsx`/`.csv` en flux avec `@maleus/xlsx`, très gros fichiers, colonnes déclarées par la fonctionnalité, aperçu puis confirmation, pas de double import, fichiers piégés refusés, respect des périmètres, trace d'audit ; démonstration sur l'import de comptes. |
 
-Le nom d'application par défaut est **« Monappli »** ; il apparaît dans l'en-tête du studio, sur l'écran de connexion et dans le nom du cookie de session (`monappli-jwt-<hôte>`).
+Le nom d'application par défaut est **« Recouvrement »** ; il apparaît dans l'en-tête du studio, sur l'écran de connexion et dans le nom du cookie de session (`recouvrement-jwt-<hôte>`).
 
 ## 2. Documents de la spécification
 

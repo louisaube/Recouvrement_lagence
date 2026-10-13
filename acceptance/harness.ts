@@ -15,7 +15,7 @@ const slug = (() => {
   try {
     return JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf8')).name as string
   } catch {
-    return 'monappli'
+    return 'recouvrement'
   }
 })()
 const DATABASE_URL = process.env.ACCEPTANCE_DATABASE_URL ?? `postgres://database:database@localhost:5432/${slug}_test`

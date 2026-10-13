@@ -43,7 +43,7 @@ Le mot de passe est comparé à son empreinte bcrypt (coût 10, préfixe `$2b$10
 
 ### `rule-foundation-session-persists` (user) — La session survit au rechargement
 En mode navigateur (`POST /auth/login` avec `Origin` et `returnToken: false`) :
-- la réponse pose **un seul** cookie nommé `monappli-jwt-<hôte>`, où `<hôte>` est le nom d'hôte de l'`Origin` **sans le port** (`http://localhost:4200` et `http://localhost:5173` donnent tous deux `monappli-jwt-localhost`) ;
+- la réponse pose **un seul** cookie nommé `recouvrement-jwt-<hôte>`, où `<hôte>` est le nom d'hôte de l'`Origin` **sans le port** (`http://localhost:4200` et `http://localhost:5173` donnent tous deux `recouvrement-jwt-localhost`) ;
 - attributs : `HttpOnly`, `SameSite=Strict`, `Domain=<hôte>`, `Path=/`, `Secure` en production uniquement ; durée de vie d'environ 24 heures (entre 23 h et 24 h + 1 min) ; valeur = le jeton de session ;
 - `GET /auth/current-user` avec ce cookie et un en-tête `Origin` (ou, à défaut, `Referer`, cas d'un rechargement de page) de la même origine renvoie le compte connecté ; le nom du cookie recherché est déduit de `Origin`, sinon de `Referer`, port exclu ;
 - chaque cookie identifie son propre compte ;
@@ -63,7 +63,7 @@ Le jeton est sans état côté serveur et dure 24 heures. Il porte le rôle du c
 ### `rule-foundation-logout` (inferred) — Déconnexion effective
 `POST /auth/logout`, route publique, sans corps :
 - répond **`201`** sans corps (statut documenté par le contrat, inchangé), pour un visiteur, un utilisateur et un administrateur (jamais 401 ni 403) ;
-- avec un en-tête `Origin`, la réponse expire le cookie de session : un unique `Set-Cookie` de **même nom, même `Domain`, même `Path`, mêmes `HttpOnly`, `SameSite` et `Secure`** que le cookie posé à la connexion, valeur vide, date d'expiration passée (ou `Max-Age` ≤ 0), de sorte que le navigateur le supprime réellement ; cela vaut pour toute origine (par exemple `http://app.example.com:3000` → nom `monappli-jwt-app.example.com`, `Domain=app.example.com`) ;
+- avec un en-tête `Origin`, la réponse expire le cookie de session : un unique `Set-Cookie` de **même nom, même `Domain`, même `Path`, mêmes `HttpOnly`, `SameSite` et `Secure`** que le cookie posé à la connexion, valeur vide, date d'expiration passée (ou `Max-Age` ≤ 0), de sorte que le navigateur le supprime réellement ; cela vaut pour toute origine (par exemple `http://app.example.com:3000` → nom `recouvrement-jwt-app.example.com`, `Domain=app.example.com`) ;
 - idempotente : sans cookie ni session, ou appelée deux fois de suite, elle répond `201` ; sans `Origin`, elle répond `201` et ne pose aucun cookie de session ;
 - elle ne supprime pas le compte : on peut se reconnecter ensuite ;
 - une fois le cookie supprimé par le navigateur, `GET /auth/current-user` répond `{}`.

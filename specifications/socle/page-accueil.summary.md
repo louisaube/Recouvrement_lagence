@@ -4,7 +4,7 @@ Page protégée provisoire et cadre commun de toutes les pages connectées. Code
 
 ## Ce qui existe
 - **Accueil** : titre « Bienvenue » puis, sur une ligne séparée, l'e-mail de l'utilisateur ; aucune carte, bouton, lien, champ ni appel d'API (`rule-foundation-home-welcome` user, `rule-foundation-home-replaceable` user). Tout chemin inconnu redirige vers `/`.
-- **En-tête commun** (`rule-foundation-layout-header`, user) : « Monappli » (lien vers `/`), e-mail tronqué, pastille de rôle (« Administrateur » / « Utilisateur », `rule-foundation-role-label` inferred) et « Se déconnecter » (icône seule sous 600 px).
+- **En-tête commun** (`rule-foundation-layout-header`, user) : « Recouvrement » (lien vers `/`), e-mail tronqué, pastille de rôle (« Administrateur » / « Utilisateur », `rule-foundation-role-label` inferred) et « Se déconnecter » (icône seule sous 600 px).
 - **Onglets d'administration** (`rule-foundation-admin-nav`, inferred), pour les administrateurs : navigation « Administration » avec Utilisateurs, Groupes, Périmètres, Journal ; l'onglet actif suit le début du chemin.
 - **Déconnexion** (`rule-foundation-logout`, inferred) : `POST /auth/logout`, état local effacé, retour à `/connexion` même si l'appel échoue.
 - **Garde de session** : sans session, redirection avec remplacement vers `/connexion?redirection=<chemin + paramètres encodés>` (`rule-foundation-protected-redirect`, user) ; tant que `current-user` n'a pas répondu, seul « Chargement… » est rendu (`rule-foundation-no-protected-flash`, inferred).

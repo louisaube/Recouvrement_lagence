@@ -86,7 +86,7 @@ importers:
         specifier: ^4.6.5
         version: 4.6.5
     devDependencies:
-      '@monappli/api-client':
+      '@recouvrement/api-client':
         specifier: workspace:*
         version: link:../packages/api-client
       '@types/bcryptjs':
@@ -144,7 +144,7 @@ importers:
       '@emotion/styled':
         specifier: ^11.14.0
         version: 11.14.1(@emotion/react@11.14.0(@types/react@18.3.31)(react@18.3.1))(@types/react@18.3.31)(react@18.3.1)
-      '@monappli/api-client':
+      '@recouvrement/api-client':
         specifier: workspace:*
         version: link:../packages/api-client
       '@mui/icons-material':

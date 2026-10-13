@@ -91,9 +91,9 @@ cmd_doctor() {
 cmd_init() {
   local s="${1:-}"
   [[ "$s" =~ ^[a-z][a-z0-9]{1,30}$ ]] || die "Usage : cuisine init <slug>   (minuscules et chiffres, ex. carnet)"
-  grep -rqI --exclude-dir=node_modules --exclude-dir=.git monappli . || die "Application déjà baptisée ($(slug))."
+  grep -rqI --exclude-dir=node_modules --exclude-dir=.git recouvrement . || die "Application déjà baptisée ($(slug))."
   local N="$(tr '[:lower:]' '[:upper:]' <<< "${s:0:1}")${s:1}"
-  grep -rlI --exclude-dir=node_modules --exclude-dir=.git -e monappli -e Monappli . | xargs sed -i -e "s/monappli/$s/g" -e "s/Monappli/$N/g"
+  grep -rlI --exclude-dir=node_modules --exclude-dir=.git -e recouvrement -e Recouvrement . | xargs sed -i -e "s/recouvrement/$s/g" -e "s/Recouvrement/$N/g"
   cmd_up || die "préparation impossible"
   git add -A && git -c user.name=cuisine -c user.email=cuisine@local commit -qm "socle : application $N baptisée" && echo "Application $N prête. Écrire prompts/v1-<sujet>.md puis : cuisine run v1-<sujet>"
 }

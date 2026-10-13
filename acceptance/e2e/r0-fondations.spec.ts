@@ -39,7 +39,7 @@ test.describe('Écran de connexion', () => {
   test('[rule-foundation-login-screen] [rule-foundation-french-ui] éléments de l\'écran de connexion, en français', async ({ page }) => {
     await ouvrirConnexion(page)
     await expect(page.locator('html')).toHaveAttribute('lang', 'fr')
-    await expect(page.getByText('Monappli', { exact: true })).toBeVisible()
+    await expect(page.getByText('Recouvrement', { exact: true })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Connexion' })).toBeVisible()
     await expect(page.getByLabel('Adresse e-mail', { exact: true })).toBeVisible()
     await expect(page.getByLabel('Mot de passe', { exact: true })).toBeVisible()
@@ -96,13 +96,13 @@ test.describe('Écran de connexion', () => {
   test('[rule-foundation-session-persists] la connexion pose un cookie de session HttpOnly SameSite=Strict, sans jeton accessible au script', async ({ page }) => {
     await connecte(page, 'user')
     const cookies = await page.context().cookies()
-    const session = cookies.filter((c) => c.name === 'monappli-jwt-localhost')
+    const session = cookies.filter((c) => c.name === 'recouvrement-jwt-localhost')
     expect(session).toHaveLength(1)
     expect(session[0].httpOnly).toBe(true)
     expect(session[0].sameSite).toBe('Strict')
     expect(session[0].path).toBe('/')
     const visible = await page.evaluate(() => document.cookie)
-    expect(visible).not.toContain('monappli-jwt')
+    expect(visible).not.toContain('recouvrement-jwt')
   })
 
   test('[rule-foundation-login-single-error] mot de passe faux : « Identifiants incorrects. » et on reste sur la connexion', async ({ page }) => {
@@ -112,7 +112,7 @@ test.describe('Écran de connexion', () => {
     await expect(page).toHaveURL(/\/connexion/)
     await expect(page.getByRole('button', { name: 'Se connecter' })).toBeEnabled()
     const cookies = await page.context().cookies()
-    expect(cookies.filter((c) => c.name.startsWith('monappli-jwt'))).toHaveLength(0)
+    expect(cookies.filter((c) => c.name.startsWith('recouvrement-jwt'))).toHaveLength(0)
   })
 
   test('[rule-foundation-login-single-error] e-mail inconnu : exactement le même message que pour un mot de passe faux', async ({ page }) => {
@@ -405,7 +405,7 @@ test.describe('Vérification de session', () => {
   test('[rule-foundation-session-expired] un cookie de session altéré ramène à la connexion', async ({ page }) => {
     await connecte(page, 'user')
     const ctx = page.context()
-    const cookies = (await ctx.cookies()).filter((c) => c.name.startsWith('monappli-jwt'))
+    const cookies = (await ctx.cookies()).filter((c) => c.name.startsWith('recouvrement-jwt'))
     expect(cookies.length).toBeGreaterThan(0)
     await ctx.clearCookies()
     await ctx.addCookies(cookies.map((c) => ({ ...c, value: 'invalid.token.value' })))
@@ -435,7 +435,7 @@ test.describe('Mise en page commune', () => {
   test('[rule-foundation-layout-header] [rule-foundation-role-label] en-tête d\'un utilisateur : nom, e-mail, pastille « Utilisateur », déconnexion', async ({ page }) => {
     const a = await connecte(page, 'user')
     const entete = page.getByRole('banner')
-    await expect(entete.getByRole('link', { name: 'Monappli' })).toHaveAttribute('href', '/')
+    await expect(entete.getByRole('link', { name: 'Recouvrement' })).toHaveAttribute('href', '/')
     await expect(entete.getByText(a.email, { exact: true })).toBeVisible()
     await expect(entete.getByText('Utilisateur', { exact: true })).toBeVisible()
     await expect(entete.getByText('Administrateur', { exact: true })).toHaveCount(0)
@@ -452,7 +452,7 @@ test.describe('Mise en page commune', () => {
 
   test('[rule-foundation-layout-header] le nom de l\'application ramène à l\'accueil', async ({ page }) => {
     await connecte(page, 'user')
-    await page.getByRole('banner').getByRole('link', { name: 'Monappli' }).click()
+    await page.getByRole('banner').getByRole('link', { name: 'Recouvrement' }).click()
     await expect(page.getByRole('heading', { name: 'Bienvenue' })).toBeVisible()
     expect(new URL(page.url()).pathname).toBe('/')
   })
@@ -524,7 +524,7 @@ test.describe('Déconnexion', () => {
     await expect(page.getByRole('heading', { name: 'Connexion' })).toBeVisible()
     expect(new URL(page.url()).pathname).toBe('/connexion')
     const cookies = await page.context().cookies()
-    expect(cookies.filter((c) => c.name.startsWith('monappli-jwt') && c.value !== '')).toHaveLength(0)
+    expect(cookies.filter((c) => c.name.startsWith('recouvrement-jwt') && c.value !== '')).toHaveLength(0)
   })
 
   test('[rule-foundation-logout] [rule-foundation-session-persists] après déconnexion, un rechargement ne restaure pas la session', async ({ page }) => {
@@ -616,7 +616,7 @@ test.describe('Accueil', () => {
     page.on('request', (r) => {
       if (r.resourceType() === 'fetch' || r.resourceType() === 'xhr') appels.push(new URL(r.url()).pathname)
     })
-    await page.getByRole('banner').getByRole('link', { name: 'Monappli' }).click()
+    await page.getByRole('banner').getByRole('link', { name: 'Recouvrement' }).click()
     await expect(page.getByRole('heading', { name: 'Bienvenue' })).toBeVisible()
     await page.waitForTimeout(500)
     expect(appels).toEqual([])

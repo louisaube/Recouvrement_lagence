@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import type { components } from '@monappli/api-client'
+import type { components } from '@recouvrement/api-client'
 import { api } from '../../../shared/api'
 import { useCall } from '../../../shared/useCall'
 import type { PageLoader } from '../../../shared/usePagedList'

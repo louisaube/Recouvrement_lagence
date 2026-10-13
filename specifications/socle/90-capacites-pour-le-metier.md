@@ -96,4 +96,4 @@ Chaque capacité doit être démontrée par des tests propres à la réécriture
 
 ## 6. Remplacer l'accueil et ajouter des pages
 
-Une fonctionnalité ajoute ses pages protégées dans la mise en page commune (garde de session, en-tête, gestion des échecs d'API `rule-foundation-api-failure-handling`, pagination `rule-foundation-list-pagination`) et peut remplacer la page d'accueil (`rule-foundation-home-replaceable`). Le nom de l'application (« Monappli » par défaut) est un paramètre à changer à la création d'une application.
+Une fonctionnalité ajoute ses pages protégées dans la mise en page commune (garde de session, en-tête, gestion des échecs d'API `rule-foundation-api-failure-handling`, pagination `rule-foundation-list-pagination`) et peut remplacer la page d'accueil (`rule-foundation-home-replaceable`). Le nom de l'application (« Recouvrement » par défaut) est un paramètre à changer à la création d'une application.

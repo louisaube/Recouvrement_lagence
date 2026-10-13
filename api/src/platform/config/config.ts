@@ -52,7 +52,7 @@ export function readSlug(): string {
     }
     dir = dirname(dir)
   }
-  return 'monappli'
+  return 'recouvrement'
 }
 
 let cached: AppConfig | undefined

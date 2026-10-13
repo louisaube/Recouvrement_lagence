@@ -3,7 +3,7 @@ import { raw } from './renfort-helpers'
 
 const PASSWORD = 'Passw0rd!x'
 const ORIGIN = 'http://localhost:4200'
-const COOKIE = 'monappli-jwt-localhost'
+const COOKIE = 'recouvrement-jwt-localhost'
 
 // Version `socle-bearer-rfc6750` : RFC 6750 §2.1 - « Bearer », une ou plusieurs espaces (U+0020), le jeton.
 describe('Socle - en-tête Authorization selon la RFC 6750', () => {

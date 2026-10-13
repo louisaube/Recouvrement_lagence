@@ -1,5 +1,5 @@
 {
-  "name": "@monappli/api",
+  "name": "@recouvrement/api",
   "version": "1.0.0",
   "private": true,
   "description": "API du socle (NestJS, Zod, Drizzle, PostgreSQL)",
@@ -30,7 +30,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@monappli/api-client": "workspace:*",
+    "@recouvrement/api-client": "workspace:*",
     "@types/bcryptjs": "^2.4.6",
     "@types/express": "^5.0.6",
     "@types/jest": "^29.5.14",

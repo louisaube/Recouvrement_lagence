@@ -3,7 +3,7 @@ import { raw, decodePayload, forgeHmac, forgeNone } from './renfort-helpers'
 
 const PASSWORD = 'Passw0rd!x'
 const ORIGIN = 'http://localhost:4200'
-const COOKIE = 'monappli-jwt-localhost'
+const COOKIE = 'recouvrement-jwt-localhost'
 
 const asHeader = (token: string) => ({ authorization: `Bearer ${token}` })
 const withCookie = (cookie: string) => ({ origin: ORIGIN, cookie })
@@ -110,7 +110,7 @@ describe('Socle renfort - lecture stricte du jeton', () => {
 
     const notSession: Array<[string, (t: string) => string]> = [
       ['another prefix', (t) => `other-jwt-localhost=${t}`],
-      ['another host in the name', (t) => `monappli-jwt-example.com=${t}`],
+      ['another host in the name', (t) => `recouvrement-jwt-example.com=${t}`],
       ['a name that only contains the right one', (t) => `x${COOKIE}=${t}`],
       ['a longer name starting with the right one', (t) => `${COOKIE}2=${t}`],
       ['a plain name', (t) => `session=${t}`],

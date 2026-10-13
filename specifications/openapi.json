@@ -997,7 +997,7 @@
     }
   },
   "info": {
-    "title": "monappli API",
+    "title": "recouvrement API",
     "description": "",
     "version": "1.0.0",
     "contact": {}
@@ -1014,7 +1014,7 @@
       "cookie": {
         "type": "apiKey",
         "in": "cookie",
-        "name": "monappli-jwt-<host>"
+        "name": "recouvrement-jwt-<host>"
       }
     },
     "schemas": {

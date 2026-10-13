@@ -70,7 +70,7 @@ Aucun appel aux routes d'administration n'est fait. C'est une commodité : la s�
 Public, sans la mise en page commune. Carte centrée étroite.
 
 ### `rule-foundation-login-screen` (user) — Écran de connexion
-Éléments, de haut en bas : le nom de l'application (« Monappli ») en surtitre, le titre « Connexion », le champ « Adresse e-mail » (focus initial, saisie automatique « nom d'utilisateur »), le champ « Mot de passe » (masqué, saisie automatique « mot de passe actuel »), la zone d'alerte d'erreur (rôle d'alerte, au-dessus du bouton), le bouton « Se connecter » (« Connexion en cours… » et désactivé pendant l'envoi). Aucun élément « se souvenir de moi ».
+Éléments, de haut en bas : le nom de l'application (« Recouvrement ») en surtitre, le titre « Connexion », le champ « Adresse e-mail » (focus initial, saisie automatique « nom d'utilisateur »), le champ « Mot de passe » (masqué, saisie automatique « mot de passe actuel »), la zone d'alerte d'erreur (rôle d'alerte, au-dessus du bouton), le bouton « Se connecter » (« Connexion en cours… » et désactivé pendant l'envoi). Aucun élément « se souvenir de moi ».
 
 ### `rule-foundation-login-single-error` (user) — rappel d'écran
 Tout échec — 401, 400, erreur réseau, 5xx, ou session non établie après la connexion (cookie non conservé) — affiche le seul message « Identifiants incorrects. ». Le message reste quand on modifie un champ et est remplacé à la soumission suivante.
@@ -93,7 +93,7 @@ Aucun lien de création de compte ; aucun lien ni formulaire « mot de passe oub
 ## 4. Mise en page commune (toutes les pages connectées)
 
 ### `rule-foundation-layout-header` (user) — En-tête commun
-Barre d'en-tête avec, à gauche, le nom de l'application « Monappli » (lien vers `/`) ; à droite, l'e-mail de l'utilisateur connecté (tronqué avec « … » s'il est long), une pastille de rôle (« Administrateur » / « Utilisateur ») et le bouton « Se déconnecter » (icône seule, avec un nom accessible, sous 600 px de large). Les données viennent de `GET /auth/current-user` (`{ id, email, role }`). Le rôle n'est pas revérifié pendant la session. Contenu des pages centré, largeur maximale d'environ 1 200 px.
+Barre d'en-tête avec, à gauche, le nom de l'application « Recouvrement » (lien vers `/`) ; à droite, l'e-mail de l'utilisateur connecté (tronqué avec « … » s'il est long), une pastille de rôle (« Administrateur » / « Utilisateur ») et le bouton « Se déconnecter » (icône seule, avec un nom accessible, sous 600 px de large). Les données viennent de `GET /auth/current-user` (`{ id, email, role }`). Le rôle n'est pas revérifié pendant la session. Contenu des pages centré, largeur maximale d'environ 1 200 px.
 
 ### `rule-foundation-admin-nav` (inferred) — Onglets d'administration
 Pour les administrateurs seulement, une seconde barre sous l'en-tête porte les onglets (navigation nommée « Administration ») : « Utilisateurs » (`/utilisateurs`), « Groupes » (`/groupes`), « Périmètres » (`/perimetres`), « Journal » (`/journal`). L'onglet actif suit le début du chemin (« Utilisateurs » reste actif sur `/utilisateurs/import` ; « Journal » quels que soient les paramètres) ; aucun onglet actif sur les autres pages. Les onglets défilent horizontalement sur petit écran. Un utilisateur ordinaire a l'en-tête sans onglets.

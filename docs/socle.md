@@ -428,14 +428,14 @@ The messages for each refusal code are in `importMessages.ts`. The file is sent 
 
 ## Studio: screens and navigation
 
-Stack: React 18, MUI 6, React Router, French labels, `<html lang="fr">`, types from `@monappli/api-client`.
+Stack: React 18, MUI 6, React Router, French labels, `<html lang="fr">`, types from `@recouvrement/api-client`.
 
 - `studio/src/app/shared/api.ts` exports `api`, the typed client (`credentials: 'include'`, base URL `VITE_API_URL`).
 - `SessionProvider` / `useSession()` (`features/auth/hooks`) restores the session with `GET /auth/current-user` (`{}`, 401 or
   network error = not connected) and exposes `state` (`loading` | `anonymous` | `authenticated`), `refresh`, `logout`.
 - `RequireSession` shows a full-screen "Chargement…" while the session is checked, then redirects to
   `/connexion?redirection=<path+query>` when anonymous. `safeRedirect.ts` accepts only internal paths.
-- `AppLayout` is the common layout: header with the application name (a literal "Monappli" in the code; change it when
+- `AppLayout` is the common layout: header with the application name (a literal "Recouvrement" in the code; change it when
   naming the application), the user's e-mail, a role chip (`roleLabel` in `shared/labels.ts`) and "Se déconnecter". For
   administrators only, a second bar named "Administration" holds the tabs *Utilisateurs* (`/utilisateurs`), *Groupes*
   (`/groupes`), *Périmètres* (`/perimetres`), *Journal* (`/journal`); the active tab follows the start of the path. The

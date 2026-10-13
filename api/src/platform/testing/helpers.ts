@@ -2,7 +2,7 @@
  * Helpers of the Jest tests (never part of the build): the tests call the RUNNING test API through the typed client
  * (`NODE_ENV=test bash scripts/server/start.sh`) and seed `<slug>_test` with SQL, as the acceptance suite does.
  */
-import { createApiClient } from '@monappli/api-client'
+import { createApiClient } from '@recouvrement/api-client'
 import bcrypt from 'bcryptjs'
 import { Pool } from 'pg'
 import { getConfig } from '../config/config'

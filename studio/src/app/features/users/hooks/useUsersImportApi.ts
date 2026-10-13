@@ -10,7 +10,7 @@ import { useCall } from '../../../shared/useCall'
 const INLINE_LIMIT = 8 * 1024 * 1024
 
 async function multipart(file: File): Promise<{ body: Uint8Array; contentType: string }> {
-  const boundary = `----monappli${crypto.randomUUID().replace(/-/g, '')}`
+  const boundary = `----recouvrement${crypto.randomUUID().replace(/-/g, '')}`
   const encoder = new TextEncoder()
   const filename = file.name.replace(/"/g, '%22').replace(/\r/g, '%0D').replace(/\n/g, '%0A')
   const head = encoder.encode(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${filename}"\r\nContent-Type: application/octet-stream\r\n\r\n`)

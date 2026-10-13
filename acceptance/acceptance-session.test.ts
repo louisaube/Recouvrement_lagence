@@ -7,7 +7,7 @@ const expectError = (p: Promise<unknown>, status: number, code?: string) =>
 
 const PASSWORD = 'Passw0rd!x'
 const STUDIO_ORIGIN = 'http://localhost:4200'
-const COOKIE_PREFIX = 'monappli-jwt-'
+const COOKIE_PREFIX = 'recouvrement-jwt-'
 
 type ParsedCookie = { name: string; value: string; attrs: Record<string, string> }
 
@@ -79,7 +79,7 @@ describe('Socle connexion - session and logout', () => {
       expect(await res.json()).toEqual({})
       expect(cookies).toHaveLength(1)
       const c = cookies[0]
-      expect(c.name).toBe('monappli-jwt-localhost')
+      expect(c.name).toBe('recouvrement-jwt-localhost')
       expect(c.value.length).toBeGreaterThan(10)
       expect(c.attrs['httponly']).toBeDefined()
       expect(c.attrs['samesite']?.toLowerCase()).toBe('strict')
@@ -101,7 +101,7 @@ describe('Socle connexion - session and logout', () => {
     it('[rule-foundation-session-persists] the cookie name and domain follow the hostname of the Origin, port excluded', async () => {
       await createUser({ email: 'a@example.com', password: PASSWORD, role: 'user' })
       const { cookie } = await browserLogin('a@example.com', PASSWORD, 'http://localhost:5173')
-      expect(cookie.name).toBe('monappli-jwt-localhost')
+      expect(cookie.name).toBe('recouvrement-jwt-localhost')
       expect(cookie.attrs['domain']).toBe('localhost')
     })
 
@@ -318,7 +318,7 @@ describe('Socle connexion - session and logout', () => {
       expect(await sql('SELECT 1 FROM base.users')).toHaveLength(1)
       const again = await browserLogin('a@example.com', PASSWORD)
       expect(again.res.status).toBeLessThan(300)
-      expect(again.cookie.name).toBe('monappli-jwt-localhost')
+      expect(again.cookie.name).toBe('recouvrement-jwt-localhost')
     })
   })
 

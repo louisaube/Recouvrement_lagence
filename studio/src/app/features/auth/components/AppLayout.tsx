@@ -31,7 +31,7 @@ export function AppLayout() {
       <AppBar position="static" component="header">
         <Toolbar sx={{ gap: 1.5 }}>
           <MuiLink component={Link} to="/" color="inherit" underline="none" variant="h6" sx={{ flexShrink: 0, flexGrow: 1 }}>
-            Monappli
+            Recouvrement
           </MuiLink>
           <Typography noWrap sx={{ minWidth: 0, flexShrink: 1 }} title={user.email}>
             {user.email}

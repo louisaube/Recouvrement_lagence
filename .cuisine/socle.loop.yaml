@@ -354,7 +354,7 @@ nodes:
     prompt: |
       FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
       
-      The backend for this version is implemented and the typed client in `packages/api-client` has been regenerated. Implement the frontend plan(s) of this version in `studio/src/app/` following CLAUDE.md (wire routes in `studio/src/App.tsx`). Use the generated types of `@monappli/api-client`. Cite rule ids in comments. Then run `cd studio && pnpm type:check && pnpm build` and fix until green.
+      The backend for this version is implemented and the typed client in `packages/api-client` has been regenerated. Implement the frontend plan(s) of this version in `studio/src/app/` following CLAUDE.md (wire routes in `studio/src/App.tsx`). Use the generated types of `@recouvrement/api-client`. Cite rule ids in comments. Then run `cd studio && pnpm type:check && pnpm build` and fix until green.
     next: check-front
 
   check-front:

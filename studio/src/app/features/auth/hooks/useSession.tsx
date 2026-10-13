@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { components } from '@monappli/api-client'
+import type { components } from '@recouvrement/api-client'
 import { api } from '../../../shared/api'
 
 export type SessionUser = components['schemas']['AuthUserDto']

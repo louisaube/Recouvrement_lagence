@@ -1,4 +1,4 @@
-# Monappli
+# Recouvrement
 
 Application built on the Cuisine sauvage foundation (socle): NestJS 11 + Zod + Drizzle + PostgreSQL 16 (`api/`), React +
 MUI + Vite (`studio/`), typed client generated from the OpenAPI document (`packages/api-client/`), black-box acceptance
@@ -17,7 +17,7 @@ pnpm install
 .cuisine/bin/cuisine up                         # starts PostgreSQL, creates the databases, writes the env files, migrates, builds the typed client
 ```
 
-`cuisine up` does the following by hand if you prefer: create the databases `monappli` (development) and `monappli_test`
+`cuisine up` does the following by hand if you prefer: create the databases `recouvrement` (development) and `recouvrement_test`
 (tests); `.cuisine/bin/cuisine envs` (writes `api/.env.development` and `api/.env.test` from `api/.env.template`,
 git-ignored, plus the default variant of `acceptance/variants.yaml` in `api/.env.test`); `pnpm --dir api migrate:all`.
 
@@ -53,14 +53,14 @@ then sign in at `/connexion`. An administrator creates the other accounts in *Ut
 accounts in three steps: preview, list of faults, confirmation.
 
 Seeded accounts for the test database are created by the tests themselves (`pnpm --dir api test` truncates `base`), so keep
-your own data in the development database (`monappli`).
+your own data in the development database (`recouvrement`).
 
 ## Checks
 
 ```bash
 pnpm --dir api type:check
 pnpm --dir studio type:check && pnpm --dir studio build
-(cd api && NODE_ENV=test bash scripts/server/start.sh)   # tests run against the running test API and the monappli_test database
+(cd api && NODE_ENV=test bash scripts/server/start.sh)   # tests run against the running test API and the recouvrement_test database
 pnpm --dir api test
 pnpm acceptance                                          # black-box suite against the running API
 ```

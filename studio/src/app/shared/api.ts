@@ -1,4 +1,4 @@
-import { createApiClient } from '@monappli/api-client'
+import { createApiClient } from '@recouvrement/api-client'
 
 /** Typed API client; the session cookie is sent with every request. */
 export const api = createApiClient({

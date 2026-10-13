@@ -14,7 +14,7 @@ import {
 } from '../../../platform/testing/helpers'
 
 const ORIGIN = 'http://localhost:5173'
-const COOKIE = 'monappli-jwt-localhost'
+const COOKIE = 'recouvrement-jwt-localhost'
 
 const browserLogin = (email: string, password = PASSWORD, origin = ORIGIN) =>
   call('/auth/login', { method: 'POST', headers: { origin }, body: { email, password, returnToken: false } })
@@ -173,7 +173,7 @@ describe('auth routes', () => {
       await createUser({ email: 'alice@example.com' })
       const res = await browserLogin('alice@example.com', PASSWORD, 'https://app.example.com:8443')
       const line = setCookies(res)[0]
-      expect(line.startsWith('monappli-jwt-app.example.com=')).toBe(true)
+      expect(line.startsWith('recouvrement-jwt-app.example.com=')).toBe(true)
       expect(line).toMatch(/Domain=app\.example\.com/i)
       expect(line).toMatch(/Secure/i)
     })
@@ -334,7 +334,7 @@ describe('auth routes', () => {
       const origin = 'https://app.example.com:3000'
       const login = setCookies(await browserLogin('alice@example.com', PASSWORD, origin))[0]
       const out = setCookies(await call('/auth/logout', { method: 'POST', headers: { origin } }))[0]
-      expect(out.startsWith('monappli-jwt-app.example.com=;')).toBe(true)
+      expect(out.startsWith('recouvrement-jwt-app.example.com=;')).toBe(true)
       expect(/Secure/i.test(out)).toBe(/Secure/i.test(login))
     })
 

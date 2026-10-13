@@ -1,4 +1,4 @@
-# Monappli (socle Cuisine sauvage)
+# Recouvrement (socle Cuisine sauvage)
 
 > **Session opératrice.** Si l'on vous demande de fabriquer une version, de reconstruire le socle, de préparer la machine, de recetter ou de vérifier l'application, vous êtes l'opérateur de la cuisine : suivez le skill `cuisine` (`.claude/skills/cuisine/SKILL.md`) et n'écrivez jamais de code applicatif vous-même. Les règles ci-dessous s'adressent aux agents de fabrication lancés par la chaîne.
 
@@ -37,12 +37,12 @@ The database schema `base` is fixed by `specifications/socle/data-contract.md` (
 - Errors: a stable `code` per case, body `{ status, code, message }` (plus `details` for validation), never a stack, SQL or file path.
 - A bound added to an existing input or a response change is a breaking change of the contract of record: open a dispute.
 - Migrations: edit `*.tables.ts`, then `cd api && pnpm migrate:gen && pnpm migrate:all`.
-- Tests: Jest in `api/src/features/<feature>/tests/`, calling the running test API through `@monappli/api-client` and seeding with SQL; truncate in `beforeEach`.
+- Tests: Jest in `api/src/features/<feature>/tests/`, calling the running test API through `@recouvrement/api-client` and seeding with SQL; truncate in `beforeEach`.
 - After any API change: restart the server, then `pnpm api-client:generate` at the root.
 
 ## Frontend conventions
 - `studio/src/app/features/<feature>/{pages,components,hooks}/`; shared code in `studio/src/app/shared/`.
-- MUI components, French labels, `<html lang="fr">`; types from `@monappli/api-client`.
+- MUI components, French labels, `<html lang="fr">`; types from `@recouvrement/api-client`.
 - Accessible names are part of the specification: use the exact labels of `specifications/socle/70-ecrans.md` (the browser tests select by role and label).
 
 ## Specifications and provenance

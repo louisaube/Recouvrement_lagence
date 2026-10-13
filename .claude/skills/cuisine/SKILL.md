@@ -14,7 +14,7 @@ Vous êtes l'opérateur, pas un agent de fabrication : vous lancez la chaîne, v
 ## Déroulé
 
 1. **Machine** : `cuisine doctor`. Si un élément manque : `cuisine setup`. Puis `cuisine up` (machine neuve à chaque session : PostgreSQL, base, dépendances, migrations).
-2. **Baptême** (une seule fois, si `package.json` porte encore le nom `monappli`) : demander le nom court à l'utilisateur, puis `cuisine init <slug>`.
+2. **Baptême** (une seule fois, si `package.json` porte encore le nom `recouvrement`) : demander le nom court à l'utilisateur, puis `cuisine init <slug>`.
 3. **Demande de version** : l'utilisateur la donne en langage courant. L'écrire telle quelle dans `prompts/v<N>-<sujet>.md` (N = numéro suivant), sans l'enrichir ; si les droits ne sont pas dits (qui peut faire quoi, qui ne doit rien voir), poser la question avant. Committer ce fichier seul.
 4. **Fabrication** : la commande dure 25 à 60 minutes, plus que le délai d'un appel. La lancer en arrière-plan : `nohup .cuisine/bin/cuisine run <version> > .cuisine-run/<version>.out 2>&1 &`. Ne pas relancer tant que le processus tourne.
    - **Surveillance pendant le tour** : `cuisine veille` toutes les 8 à 10 minutes (une attente dans l'appel), plus `grep -E "node_end|run_end" .cuisine-run/<version>.log | tail -5` pour le parcours.
