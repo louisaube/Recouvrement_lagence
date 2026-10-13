@@ -1,0 +1,361 @@
+#!/usr/bin/env bash
+# Cuisine sauvage : usine logicielle par graphe d'agents. Linux, WSL2 ou session cloud Claude Code.
+#   cuisine setup              installe les outils (une fois par machine ; en session cloud : script d'environnement)
+#   cuisine up                 prépare une machine neuve : PostgreSQL, base, dépendances, migrations, client typé
+#   cuisine init <slug>        baptise l'application (une seule fois, juste après la création du dépôt)
+#   cuisine run [--socle] <version>   fabrique une version depuis prompts/<version>.md (--socle : version du socle lui-même)
+#   cuisine resume <version>   reprend une fabrication interrompue
+#   cuisine veille [--relance] état des services et de la dernière fabrication ; --relance : remet la machine en route
+#                              et reprend une fabrication interrompue par le recyclage de la machine (crochet de session)
+#   cuisine questions [version]           questions retenues pour le propriétaire (situation, options, coût, défaut)
+#   cuisine arbitre [version] "A/B/B"     inscrit les réponses (ou « defaut ») et lance la suite ; --relance : relance la suite seule
+#   cuisine revise <Q-ID> <choix> "motif" révise une décision et refabrique son seul périmètre
+#   cuisine accorde [--enregistrer "motif"]  reculs de la recette refusés par le cliquet (demande qui change un comportement
+#                              antérieur) ; --enregistrer : accord du propriétaire, test par test (commit « proprietaire »)
+#   cuisine reprendre <version> <nœud>   relance la suite d'une version à partir d'un nœud (après une intervention du propriétaire)
+#   cuisine rebuild [--resume] <lot>   reconstruit un lot du socle en salle blanche (.cuisine/rebuild/lots.yaml)
+#   cuisine envs               écrit api/.env.development et api/.env.test depuis api/.env.template
+#   cuisine variantes          variantes de l'API de test (acceptance/variants.yaml) et répartition des fichiers de recette
+#   cuisine resync             resynchronise les spécifications après une modification du code faite hors cuisine
+#   cuisine excel <classeur> <version>   tire d'un classeur métier la demande de version (analyse fine, puis rédaction)
+#   cuisine mutation [--seuil N] [motifs]   test de mutation (StrykerJS) de l'API par la recette et ses propres tests
+#   cuisine contamination <dossiers>   compare le code aux implémentations de référence (salle blanche)
+#   cuisine passe              prépare La Passe, le tableau de bord à publier
+#   cuisine couts [version]    coût estimé, cache, causes d'arrêt, santé des portes, propositions (lecture seule, sans LLM)
+#   cuisine couts --archiver   range les mesures dans la branche cuisine/couts (historique de l'estimation)
+#   cuisine check              rejoue toutes les portes à la main
+#   cuisine shots [--as user|admin] [chemins]   captures d'écran (recette en session cloud)
+#   cuisine serve              lance l'API et le studio (machine locale)
+set -uo pipefail
+
+ROOT="$(cd "$(dirname "$(readlink -f "$0")")/../.." && pwd)"
+LOOP="$ROOT/.cuisine/cuisine.loop.yaml"
+VENDOR="${CUISINE_VENDOR:-$HOME/.cuisine-vendor}"
+YAMLOOP="$VENDOR/yamloop/bin/yamloop"
+YAMLOOP_REPO="https://github.com/maleus-ai/yamloop.git"; YAMLOOP_COMMIT="444df9f"
+OASDIFF_VERSION="1.11.7"
+PG_ROLE="database"; PG_PASSWORD="database"
+export PATH="$HOME/.local/bin:$PATH" NO_PROXY="localhost,127.0.0.1${NO_PROXY:+,$NO_PROXY}" no_proxy="localhost,127.0.0.1${no_proxy:+,$no_proxy}"
+
+ok()   { printf '  \033[32mOK\033[0m  %s\n' "$*"; }
+ko()   { printf '  \033[31mKO\033[0m  %s\n' "$*"; FAILED=1; }
+info() { printf '\033[1m%s\033[0m\n' "$*"; }
+die()  { printf '\033[31m%s\033[0m\n' "$*" >&2; exit 1; }
+aspg() { if [ "$(id -u)" = 0 ]; then su postgres -c "psql $(printf '%q ' "$@")"; else sudo -u postgres psql "$@"; fi; }
+slug() { python3 -c "import json;print(json.load(open('$ROOT/package.json'))['name'])"; }
+cd "$ROOT"
+
+cmd_setup() {
+  info "Installation des outils de la cuisine"
+  command -v node >/dev/null || die "Installer Node.js 22 ou plus."
+  command -v pnpm >/dev/null || { corepack enable 2>/dev/null && corepack prepare pnpm@latest --activate; } || npm i -g pnpm
+  command -v claude >/dev/null || npm i -g @anthropic-ai/claude-code
+  command -v psql >/dev/null || { [ "$(id -u)" = 0 ] && apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq postgresql >/dev/null; } || sudo apt-get install -y postgresql
+  command -v fuser >/dev/null || { [ "$(id -u)" = 0 ] && apt-get install -y -qq psmisc >/dev/null; } || true
+  if [ ! -x "$YAMLOOP" ]; then
+    rm -rf "$VENDOR/yamloop" && mkdir -p "$VENDOR"
+    git clone -q "$YAMLOOP_REPO" "$VENDOR/yamloop" && (cd "$VENDOR/yamloop" && git checkout -q "$YAMLOOP_COMMIT" && npm install --silent && npm run -s build) || die "échec de la construction de yamloop"
+  fi
+  python3 -c "import yaml, bcrypt" 2>/dev/null || pip install --user -q pyyaml bcrypt 2>/dev/null || pip install -q --break-system-packages pyyaml bcrypt
+  command -v st >/dev/null || pip install --user -q schemathesis 2>/dev/null || pip install -q --break-system-packages schemathesis
+  if ! command -v oasdiff >/dev/null; then
+    tmp=$(mktemp -d); curl -sSL -o "$tmp/o.tgz" "https://github.com/oasdiff/oasdiff/releases/download/v${OASDIFF_VERSION}/oasdiff_${OASDIFF_VERSION}_linux_amd64.tar.gz" && tar -xzf "$tmp/o.tgz" -C "$tmp" && mkdir -p "$HOME/.local/bin" && mv "$tmp/oasdiff" "$HOME/.local/bin/" || die "échec du téléchargement d'oasdiff"
+  fi
+  cmd_doctor
+}
+
+pg_start() {
+  PGPASSWORD=$PG_PASSWORD psql -h localhost -U $PG_ROLE -d postgres -tc "select 1" >/dev/null 2>&1 && return 0
+  if [ -n "${CUISINE_PGDATA:-}" ]; then  # grappe PostgreSQL propre à la machine (sinon le service par défaut)
+    su postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $CUISINE_PGDATA -l $CUISINE_PGDATA/../pg.log -o '-p 5432 -k /tmp -c listen_addresses=localhost' start" >/dev/null 2>&1
+  else
+    (service postgresql start || sudo service postgresql start) >/dev/null 2>&1
+  fi; sleep 2
+  aspg -tc "select 1 from pg_roles where rolname='$PG_ROLE'" 2>/dev/null | grep -q 1 || aspg -qc "create role $PG_ROLE login superuser password '$PG_PASSWORD'" >/dev/null 2>&1
+  PGPASSWORD=$PG_PASSWORD psql -h localhost -U $PG_ROLE -d postgres -tc "select 1" >/dev/null 2>&1
+}
+
+cmd_doctor() {
+  FAILED=0; info "Vérification des prérequis"
+  node -e 'process.exit(+process.versions.node.split(".")[0] >= 22 ? 0 : 1)' 2>/dev/null && ok "Node $(node -v)" || ko "Node.js 22 ou plus"
+  command -v pnpm >/dev/null && ok "pnpm $(pnpm -v)" || ko "pnpm"
+  command -v claude >/dev/null && ok "Claude Code $(claude --version 2>/dev/null | head -1)" || ko "Claude Code"
+  [ -x "$YAMLOOP" ] && ok "yamloop (orchestrateur)" || ko "yamloop : cuisine setup"
+  python3 -c "import yaml" 2>/dev/null && ok "Python + PyYAML" || ko "python3 + PyYAML"
+  command -v st >/dev/null && ok "Schemathesis" || ko "Schemathesis"
+  command -v oasdiff >/dev/null && ok "oasdiff" || ko "oasdiff"
+  pg_start && ok "PostgreSQL (rôle $PG_ROLE)" || ko "PostgreSQL : sudo service postgresql start"
+  [ "$FAILED" = 0 ] && echo "Prêt." || { echo "Corriger les lignes KO."; return 1; }
+}
+
+cmd_init() {
+  local s="${1:-}"
+  [[ "$s" =~ ^[a-z][a-z0-9]{1,30}$ ]] || die "Usage : cuisine init <slug>   (minuscules et chiffres, ex. carnet)"
+  grep -rqI --exclude-dir=node_modules --exclude-dir=.git monappli . || die "Application déjà baptisée ($(slug))."
+  local N="$(tr '[:lower:]' '[:upper:]' <<< "${s:0:1}")${s:1}"
+  grep -rlI --exclude-dir=node_modules --exclude-dir=.git -e monappli -e Monappli . | xargs sed -i -e "s/monappli/$s/g" -e "s/Monappli/$N/g"
+  cmd_up || die "préparation impossible"
+  git add -A && git -c user.name=cuisine -c user.email=cuisine@local commit -qm "socle : application $N baptisée" && echo "Application $N prête. Écrire prompts/v1-<sujet>.md puis : cuisine run v1-<sujet>"
+}
+
+cmd_envs() {
+  local s; s="$(python3 -c "import json;print(json.load(open('package.json'))['name'])")"
+  [ -f api/.env.template ] || die "api/.env.template absent"
+  for env in development test; do
+    local db="$s"; [ "$env" = test ] && db="${s}_test"
+    grep -q "localhost:5432/$db\b" "api/.env.$env" 2>/dev/null && continue
+    sed -e "s#^DATABASE_URL=.*#DATABASE_URL=postgres://$PG_ROLE:$PG_PASSWORD@localhost:5432/$db#" \
+        -e "s/^JWT_SECRET=.*/JWT_SECRET=$(head -c 24 /dev/urandom | base64 | tr -dc A-Za-z0-9)/" \
+        -e "s/^COOKIE_SECRET=.*/COOKIE_SECRET=$(head -c 24 /dev/urandom | base64 | tr -dc A-Za-z0-9)/" \
+        api/.env.template > "api/.env.$env"
+  done
+  [ -f acceptance/variants.yaml ] && { python3 .cuisine/scripts/variantes.py env || die "acceptance/variants.yaml invalide"; }   # variante par défaut de la recette
+  echo "api/.env.development et api/.env.test prêts"
+}
+
+dbs() {
+  local s; s="$(python3 -c "import json;print(json.load(open('package.json'))['name'])")"
+  for db in "$s" "${s}_test"; do PGPASSWORD=$PG_PASSWORD psql -h localhost -U $PG_ROLE -d postgres -qc "create database $db" >/dev/null 2>&1 || true; done
+}
+
+cmd_up() {
+  info "Préparation de la machine pour $(python3 -c "import json;print(json.load(open('package.json'))['name'])")"
+  pg_start || die "PostgreSQL injoignable"
+  dbs; pnpm install --silent --frozen-lockfile 2>/dev/null || pnpm install --silent || die "pnpm install"
+  [ -d api ] || { ok "socle pas encore construit : cuisine rebuild r0-fondations"; return 0; }
+  cmd_envs >/dev/null || die "fichiers d'environnement"
+  (cd api && pnpm -s migrate:all >/dev/null) || die "migrations"
+  (cd api && NODE_ENV=test bash scripts/server/start.sh >/dev/null 2>&1) || die "démarrage de l'API"
+  pnpm -s api-client:generate >/dev/null || die "génération du client"
+  ok "machine prête (API sur http://localhost:4000)"
+}
+
+cmd_rebuild() {
+  local resume=0; [ "${1:-}" = "--resume" ] && { resume=1; shift; }
+  local lot="${1:-}"; [ -n "$lot" ] || die "Usage : cuisine rebuild <lot>   (lots : $(python3 -c "import yaml;print(' '.join(yaml.safe_load(open('.cuisine/rebuild/lots.yaml'))['ordre']))"))"
+  [ "$resume" = 1 ] || [ -z "$(git status --porcelain)" ] || die "Arbre de travail modifié : committer ou annuler avant une reconstruction."
+  [ -x "$YAMLOOP" ] || die "yamloop absent : cuisine setup"
+  mkdir -p .cuisine-run; pg_start >/dev/null || die "PostgreSQL injoignable"; dbs
+  python3 .cuisine/scripts/rebuild-lot.py "$lot" .cuisine-run/lot.env .cuisine-run/lot-$lot.md || die "lot inconnu : $lot"
+  [ -d api ] && { pnpm install --silent >/dev/null 2>&1; cmd_envs >/dev/null; (cd api && pnpm -s migrate:all >/dev/null 2>&1); }
+  local id="rebuild-$lot"
+  info "Lot $lot : début $(date '+%H:%M') (une à trois heures ; suivi : tail -f .cuisine-run/$id.log)"
+  if [ "$resume" = 1 ]; then
+    "$YAMLOOP" -c "$ROOT/.cuisine/rebuild.loop.yaml" --resume "$id" >> ".cuisine-run/$id.log" 2>&1
+  else
+    empreinte "$id"; "$YAMLOOP" -c "$ROOT/.cuisine/rebuild.loop.yaml" -i "$(cat .cuisine-run/lot-$lot.md)" --run-id "$id" > ".cuisine-run/$id.log" 2>&1
+  fi
+  local r=$?; info "Lot $lot : fin $(date '+%H:%M'), code $r"; report "$id"; return $r
+}
+
+# F14 : empreinte de la configuration de la chaîne, une par run (lue par couts.py) ; une reprise garde celle du départ
+empreinte() { mkdir -p .cuisine-run/empreintes; [ -f ".cuisine-run/empreintes/$1" ] || python3 .cuisine/scripts/couts.py empreinte > ".cuisine-run/empreintes/$1" 2>/dev/null || true; }
+
+cmd_run() {
+  if [ "${1:-}" = "--socle" ]; then LOOP="$ROOT/.cuisine/socle.loop.yaml"; shift; info "Mode socle : la cuisine travaille sur son propre socle"; fi
+  local v="${1:-}"; [ -n "$v" ] || die "Usage : cuisine run [--socle] <version>   (lit prompts/<version>.md)"
+  local f="prompts/$v.md"; [ -f "$f" ] || die "Il manque $f : écrire d'abord la demande de version."
+  [ -z "$(git status --porcelain)" ] || die "Arbre de travail modifié : committer ou annuler avant une fabrication."
+  [ -x "$YAMLOOP" ] || die "yamloop absent : cuisine setup"
+  mkdir -p .cuisine-run; rm -f .cuisine-run/lot.env; pg_start >/dev/null || die "PostgreSQL injoignable : cuisine up"
+  echo "$v" > .cuisine-run/version; git rev-parse HEAD > .cuisine-run/base; cp .cuisine-run/base ".cuisine-run/$v.base"; basename "$LOOP" .loop.yaml > ".cuisine-run/$v.mode"
+  info "Version $v : début $(date '+%H:%M') (25 à 60 minutes ; suivi : tail -f .cuisine-run/$v.log)"
+  rm -f ".cuisine-run/empreintes/$v"; empreinte "$v"; "$YAMLOOP" -c "$LOOP" -i "$(cat "$f")" --run-id "$v" > ".cuisine-run/$v.log" 2>&1
+  local r=$?; info "Version $v : fin $(date '+%H:%M'), code $r"; report "$v"
+  if grep -q "node_end\S* en-attente" ".cuisine-run/$v.log"; then
+    info "En attente d'arbitrage : répondre aux questions ci-dessous par cuisine arbitre \"A/B/...\" (ou cuisine arbitre defaut)"
+    python3 .cuisine/scripts/arbitrage.py show "$v"
+  fi
+  return $r
+}
+
+cmd_questions() { python3 .cuisine/scripts/arbitrage.py show "$@"; }
+
+cmd_arbitre() {
+  local relance=0; [ "${1:-}" = "--relance" ] && { relance=1; shift; }
+  local v; if [ $# -ge 2 ] || { [ $relance = 1 ] && [ $# -eq 1 ]; }; then v="$1"; shift; else v="$(cat .cuisine-run/version 2>/dev/null)"; fi
+  if [ $relance = 0 ]; then
+    [ -n "$v" ] && [ $# -eq 1 ] || die 'Usage : cuisine arbitre [version] "A/B/B" | defaut   (ou cuisine arbitre --relance [version])'
+    python3 .cuisine/scripts/arbitrage.py arbitre "$v" "$1" || die "réponses refusées"
+    git add specifications && git -c user.name=proprietaire -c user.email=proprietaire@local commit -qm "arbitrage : réponses du propriétaire pour $v" || true
+  fi
+  local mode; mode="$(cat ".cuisine-run/$v.mode" 2>/dev/null || echo cuisine)"
+  [ -x "$YAMLOOP" ] || die "yamloop absent : cuisine setup"; pg_start >/dev/null
+  echo "$v" > .cuisine-run/version; [ -f ".cuisine-run/$v.base" ] && cp ".cuisine-run/$v.base" .cuisine-run/base
+  info "Version $v : suite après arbitrage, début $(date '+%H:%M') (suivi : tail -f .cuisine-run/$v.log)"
+  local sid="$v-suite-$(date +%H%M%S)"; empreinte "$sid"
+  "$YAMLOOP" -c "$ROOT/.cuisine/$mode.suite.loop.yaml" -i "$(cat "prompts/$v.md")" --run-id "$sid" >> ".cuisine-run/$v.log" 2>&1
+  local r=$?; info "Version $v : fin $(date '+%H:%M'), code $r"; report "$v"; return $r
+}
+
+cmd_revise() {
+  [ $# -ge 3 ] || die 'Usage : cuisine revise <Q-ID> <choix> "motif"'
+  [ -z "$(git status --porcelain)" ] || die "Arbre de travail modifié : committer ou annuler avant une révision."
+  local out v; out="$(python3 .cuisine/scripts/arbitrage.py revise "$@")" || die "révision refusée"
+  echo "$out" | head -1; v="$(echo "$out" | tail -1)"
+  git add specifications prompts && git -c user.name=proprietaire -c user.email=proprietaire@local commit -qm "arbitrage : révision $v" || true
+  python3 - "$v" <<'PY'
+import json, sys
+p = '.cuisine-run/revision.json'; r = json.load(open(p))
+r['base'] = __import__('subprocess').run(['git', 'rev-parse', 'HEAD'], capture_output=True, text=True).stdout.strip()
+json.dump(r, open(p, 'w'), ensure_ascii=False, indent=1)
+PY
+  local q="$1" mode="cuisine" orig
+  orig="$(grep -l "id: $q\b" specifications/*/implementation-plans/*/questions.yaml | head -1 | cut -d/ -f4)"
+  [ -n "$orig" ] && mode="$(cat ".cuisine-run/$orig.mode" 2>/dev/null || echo cuisine)"
+  if [ "$mode" = socle ]; then cmd_run --socle "$v"; else cmd_run "$v"; fi
+  local r=$?; rm -f .cuisine-run/revision.json; return $r
+}
+
+# Accord du propriétaire sur le cliquet : la demande d'une version change un comportement antérieur et la recette
+# doit reculer après l'écriture du code, sans décision D-xxxx à citer. L'opérateur montre la liste, le propriétaire
+# accorde ; seul un commit « proprietaire » du fichier des accords compte pour le cliquet.
+cmd_accorde() {
+  local v; v="$(cat .cuisine-run/version 2>/dev/null)"; local seal; seal="$(cat .cuisine-run/acceptance.seal 2>/dev/null)"
+  [ -n "$v" ] && [ -n "$seal" ] || die "aucune version en cours ni sceau de recette (.cuisine-run/version, .cuisine-run/acceptance.seal)"
+  if [ "${1:-}" = "--enregistrer" ]; then
+    [ -n "${2:-}" ] || die 'Usage : cuisine accorde --enregistrer "motif"   (après accord explicite du propriétaire sur la liste)'
+    python3 .cuisine/scripts/cliquet.py --accorder "$seal" "$v" "$2" || die "rien n'a été accordé"
+    git add specifications/accords-cliquet.yaml && git -c user.name=proprietaire -c user.email=proprietaire@local \
+      commit -qm "cliquet : accord du propriétaire pour $v" -- specifications/accords-cliquet.yaml || die "commit de l'accord impossible"
+    info "Accord enregistré. Reprendre la suite à la porte bloquée : cuisine reprendre $v reseal"
+  else
+    python3 .cuisine/scripts/cliquet.py --lister "$seal"
+  fi
+}
+
+# Relance la suite d'une version à partir d'un nœud donné, dans un run neuf (compteurs de visites remis à zéro) :
+# après une intervention du propriétaire (accord, correction), quand la chaîne s'est arrêtée sur un nombre de visites.
+cmd_reprendre() {
+  local v="${1:-}" n="${2:-}"; [ -n "$v" ] && [ -n "$n" ] || die "Usage : cuisine reprendre <version> <nœud>"
+  [ -f "prompts/$v.md" ] || die "prompts/$v.md introuvable"
+  local mode; mode="$(cat ".cuisine-run/$v.mode" 2>/dev/null || echo cuisine)"
+  local src="$ROOT/.cuisine/$mode.suite.loop.yaml"; grep -q "^  $n:$" "$src" || die "nœud inconnu dans $mode.suite.loop.yaml : $n"
+  [ -x "$YAMLOOP" ] || die "yamloop absent : cuisine setup"; pg_start >/dev/null
+  # même nom de graphe que la suite : la veille reprend ce run avec cuisine.suite.loop.yaml après un recyclage
+  local tmp="$ROOT/.cuisine-run/$v.reprise.loop.yaml"; sed -e "s/^entry: .*/entry: $n/" "$src" > "$tmp"
+  echo "$v" > .cuisine-run/version; [ -f ".cuisine-run/$v.base" ] && cp ".cuisine-run/$v.base" .cuisine-run/base
+  local sid="$v-suite-$(date +%H%M%S)"; empreinte "$sid"
+  echo "[opérateur] $(date '+%d/%m %H:%M') reprise de la suite au nœud $n (run $sid)" >> ".cuisine-run/$v.log"
+  info "Version $v : reprise au nœud $n, début $(date '+%H:%M') (suivi : tail -f .cuisine-run/$v.log)"
+  "$YAMLOOP" -c "$tmp" -i "$(cat "prompts/$v.md")" --run-id "$sid" >> ".cuisine-run/$v.log" 2>&1
+  local r=$?; info "Version $v : fin $(date '+%H:%M'), code $r"; report "$v"; return $r
+}
+
+cmd_resume() {
+  if [ "${1:-}" = "--socle" ]; then LOOP="$ROOT/.cuisine/socle.loop.yaml"; shift; fi
+  local v="${1:-}"; [ -n "$v" ] || die "Usage : cuisine resume [--socle] <version>"
+  pg_start >/dev/null; "$YAMLOOP" -c "$LOOP" --resume "$v" >> ".cuisine-run/$v.log" 2>&1; local r=$?; report "$v"; return $r
+}
+
+# Une session cloud peut être recyclée pendant une attente : PostgreSQL ne redémarre pas et la chaîne meurt sans écrire
+# de fin. La veille le constate (veille.py) ; avec --relance, elle remet la machine en route et reprend la fabrication
+# interrompue en arrière-plan, au plus 5 fois par fabrication. Elle ne tranche jamais à la place du propriétaire.
+cmd_veille() {
+  local relance=0; [ "${1:-}" = "--relance" ] && relance=1
+  mkdir -p .cuisine-run/veille
+  [ "$relance" = 1 ] || { python3 .cuisine/scripts/veille.py etat; return $?; }  # constat seul : sans verrou
+  # Verrou contre deux relances simultanées. Tout ce qui est démarré ici (PostgreSQL, API, chaîne) l'est avec 9>&- :
+  # un service qui hériterait du descripteur garderait le verrou aussi longtemps qu'il tourne.
+  exec 9> .cuisine-run/veille/verrou
+  flock -n 9 || { echo "Relance déjà en cours dans une autre session"; python3 .cuisine/scripts/veille.py etat; return $?; }
+  python3 .cuisine/scripts/veille.py etat; local code=$?
+  local etat; etat="$(cat .cuisine-run/veille/etat 2>/dev/null)"
+  if [ "$etat" = en-cours ]; then
+    pg_start >/dev/null 9>&- || ko "PostgreSQL injoignable"  # l'API appartient à la chaîne en cours : ne pas la redémarrer
+    return 0
+  fi
+  if ! pg_isready -h localhost -p 5432 -q || ! curl -sf --noproxy localhost -o /dev/null http://localhost:4000/server/health-check; then
+    cmd_up >/dev/null 2>&1 9>&- && ok "machine remise en route (PostgreSQL, migrations, API de test)" || ko "remise en route incomplète : cuisine up"
+  fi
+  [ "$etat" = interrompue ] || return $code
+  local id graphe journal n
+  read -r id graphe journal < <(python3 .cuisine/scripts/veille.py reprise) || { ko "reprise impossible"; return 20; }
+  n="$(python3 .cuisine/scripts/veille.py compter)"
+  echo "[veille] reprise automatique n° $n le $(date '+%d/%m %H:%M')" >> "$journal"
+  nohup "$YAMLOOP" -c "$graphe" --resume "$id" >> "$journal" 2>&1 < /dev/null 9>&- &  # sans le verrou de la veille
+  sleep 3
+  if pgrep -f "yamloop.*--resume $id( |\$)" >/dev/null; then
+    ok "fabrication $id reprise automatiquement (reprise n° $n sur 5) ; suivi : cuisine veille"
+  else
+    ko "la reprise de $id s'est arrêtée aussitôt : voir $journal"; return 20
+  fi
+}
+
+report() {
+  local v="$1"
+  echo "Parcours dans le graphe :"; grep -oE 'node_end\S* [a-z-]+ exit=[0-9]+' ".cuisine-run/$v.log" | awk '{print $2, $3}' | sed 's/exit=124/bloqué/; s/exit=0/ok/; s/exit=[0-9]*/échoué/' | uniq -c | awk '{print "  " $2 " " $3 (($1>1)?" (x"$1")":"")}'
+  grep -rh "^OPEN\|^ACCEPTED\|^REJECTED" specifications --include=DISPUTES.md 2>/dev/null | cut -c1-160 | sed 's/^/  contestation : /' | tail -10
+  grep -E "run_end" ".cuisine-run/$v.log" | tail -1 | sed 's/^.*run_end[^ ]* /  fin : /'
+  echo "Commits :"; git log --format='  %h %an : %s' -6
+}
+
+cmd_resync() {
+  [ -z "$(git status --porcelain)" ] || die "Arbre de travail modifié : committer d'abord la modification faite hors cuisine."
+  pg_start >/dev/null; mkdir -p .cuisine-run; local id="resync-$(date +%Y%m%d-%H%M)"
+  info "Resynchronisation des spécifications depuis le code ($id)"
+  empreinte "$id"; "$YAMLOOP" -c "$ROOT/.cuisine/resync.loop.yaml" --run-id "$id" > ".cuisine-run/$id.log" 2>&1; local r=$?
+  grep -E "\[(detect|commit|acceptance-run|gates)\]" ".cuisine-run/$id.log" | grep -v "hook\|visit\|→" | sed 's/\x1b\[[0-9;]*m//g' | tail -30
+  git log --format='  %h %an : %s' -3; return $r
+}
+
+cmd_excel() {
+  local f="${1:-}" v="${2:-}"; [ -f "$f" ] && [ -n "$v" ] || die "Usage : cuisine excel <classeur.xlsx> <version>   (écrit prompts/<version>.md, à relire avant cuisine run)"
+  [ -e "prompts/$v.md" ] && die "prompts/$v.md existe déjà."
+  local W="$ROOT/.cuisine-run/excel-$v"; rm -rf "$W"; mkdir -p "$W"; cp "$f" "$W/classeur.xlsx"
+  python3 -c "import openpyxl, networkx, matplotlib" 2>/dev/null || pip install -q --break-system-packages openpyxl networkx matplotlib >/dev/null 2>&1 || pip install -q --user openpyxl networkx matplotlib
+  local effets=""; command -v soffice >/dev/null && effets="--effets"
+  info "Analyse fine du classeur (topographie, topologie, effets, anomalies)"
+  (cd "$W" && python3 -I "$ROOT/.cuisine/scripts/analyse_fine.py" classeur.xlsx $effets --md rapport.md --json carte.json > analyse.log 2>&1) || { tail -5 "$W/analyse.log"; die "analyse impossible"; }
+  head -8 "$W/rapport.md"
+  info "Rédaction de la demande de version prompts/$v.md"
+  local prompt; prompt="$(sed -e "s#{{RAPPORT}}#.cuisine-run/excel-$v/rapport.md#" -e "s#{{CARTE}}#.cuisine-run/excel-$v/carte.json#" -e "s#{{SORTIE}}#prompts/$v.md#" .cuisine/excel-prompt.md)"
+  claude -p "$prompt" --output-format text --permission-mode acceptEdits --disallowedTools Bash \
+    --allowedTools "Read(.cuisine-run/excel-$v/**),Read(CLAUDE.md),Read(specifications/**),Glob(specifications/**),Grep(specifications/**),Write(prompts/$v.md),Edit(prompts/$v.md)" > "$W/redaction.log" 2>&1
+  [ -s "prompts/$v.md" ] || { tail -5 "$W/redaction.log"; die "rédaction impossible"; }
+  echo; grep -c "À PRÉCISER" "prompts/$v.md" | sed 's/^/Points à préciser par vous : /'
+  echo "Relire et compléter prompts/$v.md, le committer, puis : cuisine run $v"
+}
+
+cmd_passe() {
+  python3 .cuisine/scripts/report.py .cuisine-run/report.json >/dev/null && python3 .cuisine/scripts/dashboard.py .cuisine-run/report.json .cuisine-run/la-passe.html
+  echo "À publier comme Artifact : .cuisine-run/la-passe.html (adresse existante dans .cuisine/dashboard-url)"
+}
+
+cmd_check() {
+  FAILED=0; local W="$ROOT/.cuisine-run/manual"; rm -rf "$W"; mkdir -p "$W"; pg_start >/dev/null
+  (cd api && NODE_ENV=test bash scripts/server/start.sh >/dev/null 2>&1; sleep 8)
+  (cd api && pnpm -s type:check) && ok "types" || ko "types"
+  (cd api && pnpm -s test > "$W/unit.log" 2>&1) && ok "tests unitaires : $(grep -E '^Tests:' "$W/unit.log")" || ko "tests unitaires ($W/unit.log)"
+  bash .cuisine/scripts/acceptance.sh > "$W/acc.log" 2>&1 && ok "recette : $(grep -E '^Tests:' "$W/acc.log" | tail -1)" || ko "recette ($W/acc.log)"
+  bash .cuisine/scripts/matrix-check.sh > "$W/matrix.log" 2>&1 && ok "$(tail -1 "$W/matrix.log")" || ko "$(tail -1 "$W/matrix.log")"
+  python3 .cuisine/scripts/permissions-check.py "$W/perm" --report "$W/permissions.md" > "$W/perm.log" 2>&1 && ok "$(tail -1 "$W/perm.log")" || ko "$(tail -1 "$W/perm.log") ($W/permissions.md)"
+  bash .cuisine/scripts/contract-check.sh "$W/contract" > "$W/contract.log" 2>&1 && ok "contrat : $(grep -E '^schemathesis:' "$W/contract.log")" || ko "contrat ($W/contract.log)"
+  (cd studio && pnpm -s type:check && pnpm -s build > "$W/studio.log" 2>&1) && ok "build du studio" || ko "build du studio ($W/studio.log)"
+  bash .cuisine/scripts/e2e.sh > "$W/e2e.log" 2>&1 && ok "navigateur : $(grep -E '[0-9]+ passed' "$W/e2e.log" | tail -1 | xargs)" || ko "navigateur ($W/e2e.log)"
+  [ "$FAILED" = 0 ]
+}
+
+cmd_shots() {
+  [ -d "$VENDOR/shots/node_modules/playwright-core" ] || npm i -s --prefix "$VENDOR/shots" playwright-core >/dev/null || die "playwright-core"
+  pg_start >/dev/null; (cd api && NODE_ENV=development bash scripts/server/start.sh >/dev/null 2>&1)
+  local role=""; if [ "${1:-}" = "--as" ]; then role="$2"; shift 2; fi
+  if [ -n "$role" ]; then
+    export SHOT_EMAIL="recette-$role@cuisine.test" SHOT_PASSWORD="Recette-$role-2026!"
+    python3 .cuisine/scripts/accounts.py user "$role" "$SHOT_EMAIL" "$SHOT_PASSWORD" --env development >/dev/null || die "compte de recette"
+  fi
+  (cd studio && pnpm -s build >/dev/null && (nohup npx vite preview --port 5173 --strictPort > "$ROOT/.cuisine-run/preview.log" 2>&1 &) ); sleep 4
+  NODE_PATH="$VENDOR/shots/node_modules" node .cuisine/scripts/shots.mjs "${@:-/}"
+}
+
+cmd_serve() {
+  pg_start >/dev/null; (cd api && NODE_ENV=development bash scripts/server/start.sh >/dev/null 2>&1) && echo "API : http://localhost:4000 (OpenAPI : /api)"
+  echo "Studio : http://localhost:5173 (Ctrl+C pour arrêter)"; cd studio && pnpm -s start
+}
+
+case "${1:-}" in
+  couts) shift; if [ "${1:-}" = "--archiver" ]; then python3 .cuisine/scripts/couts.py >/dev/null && python3 .cuisine/scripts/couts.py archiver; else python3 .cuisine/scripts/couts.py ${1:+--version "$1"}; fi ;;
+  setup) cmd_setup ;; doctor) cmd_doctor ;; up) cmd_up ;; init) shift; cmd_init "$@" ;; run) shift; cmd_run "$@" ;;
+  resume) shift; cmd_resume "$@" ;; veille) shift; cmd_veille "$@" ;; questions) shift; cmd_questions "$@" ;; arbitre) shift; cmd_arbitre "$@" ;; revise) shift; cmd_revise "$@" ;; accorde) shift; cmd_accorde "$@" ;; reprendre) shift; cmd_reprendre "$@" ;; rebuild) shift; cmd_rebuild "$@" ;; envs) cmd_envs ;; variantes) shift; python3 .cuisine/scripts/variantes.py list "$@" ;; mutation) shift; bash .cuisine/scripts/mutation.sh "$@" ;; contamination) shift; bash .cuisine/scripts/contamination-check.sh "$@" ;; resync) cmd_resync ;; excel) shift; cmd_excel "$@" ;; passe) cmd_passe ;; check) cmd_check ;; shots) shift; cmd_shots "$@" ;; serve) cmd_serve ;;
+  *) sed -n '2,/^set /p' "$0" | grep '^#' | sed 's/^# \{0,1\}//' ;;
+esac

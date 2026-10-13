@@ -1,0 +1,142 @@
+# Expected permission matrix of the operations (owned by the QA agent and the human).
+# Foundation routes that did not change (auth, health, POST /users) stay in .cuisine/permissions-foundation.yaml.
+# Version socle-groupes-perimetres: GET /users and GET /users/:id are arbitrated here (they were
+# `to-arbitrate` in the frozen foundation matrix); PATCH /users/:id, /scopes and /groups are new.
+roles: [anonymous, user, admin]
+operations:
+  - method: GET
+    path: /users
+    action: users:list
+    allow: [admin]
+    ownership: none
+    rules: [rule-foundation-users-list-admin-only]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /users/:id
+    action: users:get
+    # `allow` lists the roles admitted on ANY id, which is what the probe observes (it calls the route
+    # with an id that is nobody's). An ordinary user is admitted only on their own id (ownership: own,
+    # rule-foundation-users-get-self-or-admin, covered by cross_owner_tests); on any other id they get 403.
+    # The ownership check must therefore be a business guard (@UseGuards), so that the observed
+    # matrix prevails over the decorator roles.
+    allow: [admin]
+    ownership: own
+    rules: [rule-foundation-users-get-self-or-admin]
+    provenance: user
+    cross_owner_tests:
+      - "[rule-foundation-users-get-self-or-admin] an ordinary user cannot read another existing account: 403"
+      - "[rule-foundation-users-get-self-or-admin] an ordinary user cannot read an admin account: 403"
+      - "[rule-foundation-users-get-self-or-admin] an ordinary user gets the same 403 for an unknown UUID and for a malformed id"
+  - method: PATCH
+    path: /users/:id
+    action: users:update
+    allow: [admin]
+    ownership: none
+    rules: [rule-foundation-users-admin-screen, rule-foundation-user-groups-membership, rule-foundation-user-edit-scope, rule-foundation-user-own-role-locked]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /scopes
+    action: scopes:list
+    allow: [admin]
+    ownership: none
+    rules: [rule-foundation-scopes-admin-screen, rule-foundation-scope-definition]
+    provenance: user
+    cross_owner_tests: []
+  - method: POST
+    path: /scopes
+    action: scopes:create
+    allow: [admin]
+    ownership: none
+    rules: [rule-foundation-scopes-admin-screen, rule-foundation-scope-code-unique, rule-foundation-scope-code-format]
+    provenance: user
+    cross_owner_tests: []
+  - method: PATCH
+    path: /scopes/:id
+    action: scopes:update
+    allow: [admin]
+    ownership: none
+    rules: [rule-foundation-scopes-admin-screen, rule-foundation-scope-code-immutable]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /groups
+    action: groups:list
+    allow: [admin]
+    ownership: none
+    rules: [rule-foundation-groups-admin-screen, rule-foundation-group-definition]
+    provenance: user
+    cross_owner_tests: []
+  - method: POST
+    path: /groups
+    action: groups:create
+    allow: [admin]
+    ownership: none
+    rules: [rule-foundation-groups-admin-screen, rule-foundation-group-needs-scope, rule-foundation-group-members-optional, rule-foundation-group-name-unique]
+    provenance: user
+    cross_owner_tests: []
+  - method: PATCH
+    path: /groups/:id
+    action: groups:update
+    allow: [admin]
+    ownership: none
+    rules: [rule-foundation-groups-admin-screen, rule-foundation-group-definition, rule-foundation-group-needs-scope, rule-foundation-group-name-unique]
+    provenance: user
+    cross_owner_tests: []
+  # Version socle-journal-audit: the journal is read-only (no POST/PUT/PATCH/DELETE under /audit-logs,
+  # rule-foundation-audit-immutable) and reserved to administrators. The six traced routes keep their permissions.
+  - method: GET
+    path: /audit-logs
+    action: audit:list
+    allow: [admin]
+    ownership: none
+    rules: [rule-foundation-audit-admin-only, rule-foundation-audit-filters, rule-foundation-audit-trace-content]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /audit-logs/filters
+    action: audit:filters
+    allow: [admin]
+    ownership: none
+    rules: [rule-foundation-audit-admin-only, rule-foundation-audit-filter-options-from-journal]
+    provenance: user
+    cross_owner_tests: []
+  # Version socle-import-excel: import of accounts (generic mechanism of the foundation applied to users).
+  # The four routes are reserved to administrators. A preview is private to the administrator who created
+  # it (rule-foundation-import-preview-owner): errors and confirm are `ownership: own`, another administrator
+  # gets the same 404 as for an unknown id. The probe calls the routes without body: guards answer 401/403 first.
+  - method: GET
+    path: /users/imports/specification
+    action: users:import-specification
+    allow: [admin]
+    ownership: none
+    rules: [rule-foundation-import-users-admin-only, rule-foundation-import-users-columns, rule-foundation-import-formats]
+    provenance: user
+    cross_owner_tests: []
+  - method: POST
+    path: /users/imports/preview
+    action: users:import-preview
+    allow: [admin]
+    ownership: none
+    rules: [rule-foundation-import-users-admin-only, rule-foundation-import-two-steps, rule-foundation-import-preview-content, rule-foundation-import-trapped-files-refused]
+    provenance: user
+    cross_owner_tests: []
+  - method: GET
+    path: /users/imports/:importId/errors
+    action: users:import-errors
+    allow: [admin]
+    ownership: own
+    rules: [rule-foundation-import-users-admin-only, rule-foundation-import-preview-content, rule-foundation-import-preview-owner]
+    provenance: user
+    cross_owner_tests:
+      - "[rule-foundation-import-preview-owner] another administrator listing the errors of a preview gets the same 404 import.preview_not_found as for an unknown id"
+  - method: POST
+    path: /users/imports/:importId/confirm
+    action: users:import-confirm
+    allow: [admin]
+    ownership: own
+    rules: [rule-foundation-import-users-admin-only, rule-foundation-import-confirm-valid-only, rule-foundation-import-audited, rule-foundation-import-no-double, rule-foundation-import-preview-owner]
+    provenance: user
+    cross_owner_tests:
+      - "[rule-foundation-import-preview-owner] another administrator confirming a preview gets the same 404 import.preview_not_found as for an unknown id and nothing is created"

@@ -1,0 +1,7 @@
+Deux évolutions du socle, constatées sur la première version métier.
+
+Route réservée à une garde métier. Aujourd'hui, une route authentifiée doit admettre au moins un rôle du socle (`user` ou `admin`), sinon le serveur refuse de démarrer. Une version métier peut pourtant réserver une route à ses propres comptes : dans cette version métier, seul un compte métier actif accède à ses routes, ce que vérifie une garde métier, et la matrice des permissions attendue n'y admet donc aucun rôle du socle. La déclaration rapportée par `cuisine:routes` (`user` et `admin`) ne peut alors concorder ni avec la matrice attendue ni avec la matrice observée (personne parmi les comptes du socle). Permettre de déclarer une route authentifiée réservée à une garde métier, sans rôle du socle admis, de sorte que `cuisine:routes` la rapporte avec une liste `allow` vide. Le serveur continue de refuser de démarrer pour une route sans déclaration, et pour une route qui n'admet aucun rôle sans être protégée par une garde métier.
+
+Réponses autres que JSON. Le document OpenAPI ne sait déclarer que des réponses `application/json` : l'export de la version métier répond `text/csv; charset=utf-8` sans que le contrat puisse le dire. Permettre à une route de déclarer le type de contenu de sa réponse, au moins `text/csv`, qui apparaît alors dans le document OpenAPI.
+
+Aucun autre changement de comportement, de contrat ni de droits pour les routes existantes, socle et métier compris. Mettre à jour docs/socle.md.

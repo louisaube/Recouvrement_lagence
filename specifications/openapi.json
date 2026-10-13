@@ -1,0 +1,1942 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/audit-logs": {
+      "get": {
+        "description": "Use this API action to list the audit journal, newest first, with combinable filters (administrators only)",
+        "operationId": "AuditController_list",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Index of the first entry to return (default 0)",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "Number of entries to return (default 10)",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "actorId",
+            "required": false,
+            "in": "query",
+            "description": "Only the entries of this author (a deleted account included)",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "action",
+            "required": false,
+            "in": "query",
+            "description": "Exact action code, e.g. `groups:update`",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "objectType",
+            "required": false,
+            "in": "query",
+            "description": "Exact object type, e.g. `Groupe`",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "scope",
+            "required": false,
+            "in": "query",
+            "description": "Exact scope code",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50
+            }
+          },
+          {
+            "name": "occurredFrom",
+            "required": false,
+            "in": "query",
+            "description": "Lower bound, inclusive: ISO 8601 date-time with a zone (Z or offset)",
+            "schema": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 35,
+              "format": "date-time",
+              "example": "2026-01-31T23:59:59.999Z"
+            }
+          },
+          {
+            "name": "occurredTo",
+            "required": false,
+            "in": "query",
+            "description": "Upper bound, inclusive: ISO 8601 date-time with a zone (Z or offset), not before occurredFrom",
+            "schema": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 35,
+              "format": "date-time",
+              "example": "2026-01-31T23:59:59.999Z"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page of journal entries and number of entries matching the filters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditLogsListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Audit"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/audit-logs/filters": {
+      "get": {
+        "description": "Use this API action to get the values offered by the filters of the journal screen, taken from the journal itself (administrators only)",
+        "operationId": "AuditController_filters",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Authors, actions, object types and scopes found in the journal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditLogFiltersDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Audit"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/auth/current-user": {
+      "get": {
+        "description": "Get the current user. If there is no logged user (header or cookie), it returns an empty object",
+        "operationId": "AuthController_currentUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Only if cookie is not set to true",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUserResponseDTO"
+                }
+              }
+            }
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Auth"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "description": "Login with email and password",
+        "operationId": "AuthController_loginWithPassword",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginWithPasswordResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginWithPasswordParamsDto"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "description": "Delete the JWT from the cookies",
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/groups": {
+      "get": {
+        "description": "Use this API action to list the groups with their members and scopes",
+        "operationId": "GroupsController_list",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "The index of the first element to return (integer from 0 to 2147483647, default 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of elements to return (integer from 1 to 100, default 10)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupsListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Groups"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      },
+      "post": {
+        "description": "Use this API action to create a group with its members and scopes in one request",
+        "operationId": "GroupsController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Group created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupsCreateResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Groups"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupsCreateParamsDto"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/groups/{id}": {
+      "patch": {
+        "description": "Use this API action to change the name, members and/or scopes of a group. Provided fields replace the current values",
+        "operationId": "GroupsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Group updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupsUpdateResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Groups"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupsUpdateParamsDto"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/scopes": {
+      "get": {
+        "description": "Use this API action to list the scopes, sorted by code",
+        "operationId": "ScopesController_list",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "The index of the first element to return (integer from 0 to 2147483647, default 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of elements to return (integer from 1 to 100, default 10)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of scopes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopesListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Scopes"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      },
+      "post": {
+        "description": "Use this API action to create a scope",
+        "operationId": "ScopesController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Scope created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopesCreateResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Scopes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScopesCreateParamsDto"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/scopes/{id}": {
+      "patch": {
+        "description": "Use this API action to rename a scope. The code cannot be changed",
+        "operationId": "ScopesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scope renamed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScopesUpdateResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Scopes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScopesUpdateParamsDto"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/server/health-check": {
+      "get": {
+        "description": "Health check",
+        "operationId": "ServerController_healthCheck",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "All services are healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheckResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "One or more services are unhealthy"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Server"
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "description": "Use this API action to list users (administrators only)",
+        "operationId": "UsersController_list",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "The index of the first element to return (integer from 0 to 2147483647, default 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of elements to return (integer from 1 to 100, default 10)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of users with their groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsersListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      },
+      "post": {
+        "description": "Use this API action to create a new user, optionally in some groups",
+        "operationId": "UsersController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsersCreateResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsersCreateParamsDto"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "description": "Use this API action to get a single user. An ordinary user can only read their own account",
+        "operationId": "UsersController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User with their groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserGetResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      },
+      "patch": {
+        "description": "Use this API action to change the role and/or the groups of a user",
+        "operationId": "UsersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsersUpdateResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsersUpdateParamsDto"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/users/imports/{importId}/confirm": {
+      "post": {
+        "description": "Use this API action to create the accounts of the valid rows of a preview (administrators only, once per file)",
+        "operationId": "UsersImportController_confirm",
+        "parameters": [
+          {
+            "name": "importId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Counts of the confirmation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportConfirmResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/users/imports/{importId}/errors": {
+      "get": {
+        "description": "Use this API action to list, page by page, the faults found in the preview of an accounts file",
+        "operationId": "UsersImportController_errors",
+        "parameters": [
+          {
+            "name": "importId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Index of the first entry to return (default 0)",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "Number of entries to return (default 10)",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of (row, column, reason) entries and their total",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportErrorsListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/users/imports/preview": {
+      "post": {
+        "description": "Use this API action to analyse an accounts file (.xlsx or .csv) without creating anything",
+        "operationId": "UsersImportController_preview",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Counts of the analysis and identifier of the preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportPreviewDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/users/imports/specification": {
+      "get": {
+        "description": "Use this API action to get the columns, formats and limits of the accounts import (administrators only)",
+        "operationId": "UsersImportController_specification",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Columns expected in the file and limits of the import",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportSpecificationDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "monappli API",
+    "description": "",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      },
+      "cookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "monappli-jwt-<host>"
+      }
+    },
+    "schemas": {
+      "AuditLogsListResponseDto": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditEntryDto"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Number of entries matching the filters",
+            "example": 42
+          }
+        },
+        "required": [
+          "entries",
+          "total"
+        ]
+      },
+      "AuditEntryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Entry ID"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time of the action (ISO 8601, UTC, millisecond precision)",
+            "example": "2026-01-31T10:15:30.123Z"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/AuditActorDto"
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Action code `<feature>:<verb>`",
+            "example": "groups:update"
+          },
+          "objectType": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "French label of the kind of object",
+            "example": "Groupe"
+          },
+          "objectId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Id of the object (not necessarily a uuid)"
+          },
+          "scope": {
+            "nullable": true,
+            "description": "Code of the scope the action targets, null if none",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "description": "Readable French text, never a secret"
+          }
+        },
+        "required": [
+          "id",
+          "occurredAt",
+          "actor",
+          "action",
+          "objectType",
+          "objectId",
+          "scope",
+          "summary"
+        ]
+      },
+      "AuditActorDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID of the author"
+          },
+          "email": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 254,
+            "description": "E-mail of the author at the time of the action",
+            "example": "admin@example.com"
+          }
+        },
+        "required": [
+          "id",
+          "email"
+        ]
+      },
+      "AuditLogFiltersDto": {
+        "type": "object",
+        "properties": {
+          "actors": {
+            "maxItems": 1000,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditActorDto"
+            },
+            "description": "Authors found in the journal, with the e-mail of their latest entry, sorted by e-mail"
+          },
+          "actions": {
+            "maxItems": 1000,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "description": "Distinct action codes, sorted"
+          },
+          "objectTypes": {
+            "maxItems": 1000,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "description": "Distinct object types, sorted"
+          },
+          "scopes": {
+            "maxItems": 1000,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50
+            },
+            "description": "Distinct scope codes, sorted"
+          }
+        },
+        "required": [
+          "actors",
+          "actions",
+          "objectTypes",
+          "scopes"
+        ]
+      },
+      "CurrentUserResponseDTO": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "description": "User information",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuthUserDto"
+              }
+            ]
+          }
+        }
+      },
+      "AuthUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "User ID",
+            "example": "123"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email of the user",
+            "example": "john.doe@example.com"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "user"
+            ],
+            "description": "Role name the user has"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "role"
+        ]
+      },
+      "LoginWithPasswordParamsDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email of the user",
+            "example": "john.doe@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password of the user",
+            "example": "securePassword123"
+          },
+          "returnToken": {
+            "description": "Whether to return the token in the response. An error will be thrown if no origin header is provided and returnToken is false",
+            "example": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "LoginWithPasswordResponseDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "description": "JWT token for authentication. Only returned if returnToken is true",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "type": "string"
+          }
+        }
+      },
+      "GroupsListResponseDto": {
+        "type": "object",
+        "properties": {
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Total number of groups",
+            "example": 3
+          }
+        },
+        "required": [
+          "groups",
+          "total"
+        ]
+      },
+      "GroupDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Group ID"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Name of the group, unique ignoring case",
+            "example": "Équipe Nord"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupMemberDto"
+            },
+            "description": "Members, sorted by e-mail"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScopeDto"
+            },
+            "description": "Scopes the group gives access to, sorted by code"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "members",
+          "scopes"
+        ]
+      },
+      "GroupMemberDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User ID"
+          },
+          "email": {
+            "type": "string",
+            "description": "E-mail of the member",
+            "example": "john.doe@example.com"
+          }
+        },
+        "required": [
+          "id",
+          "email"
+        ]
+      },
+      "ScopeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Scope ID"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,49}$",
+            "description": "Unique, immutable code business tables refer to",
+            "example": "creche-1"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Display name",
+            "example": "Crèche du Parc"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name"
+        ]
+      },
+      "GroupsCreateParamsDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Name of the group, trimmed, not empty, unique ignoring case",
+            "example": "Équipe Nord",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "userIds": {
+            "description": "Members of the group (rule-foundation-group-members-optional): distinct ids of existing users, none by default",
+            "uniqueItems": true,
+            "maxItems": 1000,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "scopeIds": {
+            "minItems": 1,
+            "maxItems": 200,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Scopes of the group (rule-foundation-group-needs-scope): 1 or more distinct ids of existing scopes",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "name",
+          "scopeIds"
+        ]
+      },
+      "GroupsCreateResponseDto": {
+        "type": "object",
+        "properties": {
+          "group": {
+            "$ref": "#/components/schemas/GroupDto"
+          }
+        },
+        "required": [
+          "group"
+        ]
+      },
+      "GroupsUpdateParamsDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "New name of the group, trimmed, not empty",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "userIds": {
+            "description": "New set of members (replaces the current one, [] removes all)",
+            "uniqueItems": true,
+            "maxItems": 1000,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "scopeIds": {
+            "description": "New set of scopes (replaces the current one), at least 1",
+            "uniqueItems": true,
+            "minItems": 1,
+            "maxItems": 200,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "GroupsUpdateResponseDto": {
+        "type": "object",
+        "properties": {
+          "group": {
+            "$ref": "#/components/schemas/GroupDto"
+          }
+        },
+        "required": [
+          "group"
+        ]
+      },
+      "ScopesListResponseDto": {
+        "type": "object",
+        "properties": {
+          "scopes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScopeDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Total number of scopes",
+            "example": 3
+          }
+        },
+        "required": [
+          "scopes",
+          "total"
+        ]
+      },
+      "ScopesCreateParamsDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,49}$",
+            "description": "Code of the scope (rule-foundation-scope-code-format): lowercase letters, digits, \"_\" and \"-\", not starting with a separator",
+            "example": "creche-1"
+          },
+          "name": {
+            "description": "Display name, trimmed, not empty",
+            "example": "Crèche du Parc",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "code",
+          "name"
+        ]
+      },
+      "ScopesCreateResponseDto": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/ScopeDto"
+          }
+        },
+        "required": [
+          "scope"
+        ]
+      },
+      "ScopesUpdateParamsDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "New display name, trimmed, not empty",
+            "example": "Crèche du Parc",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "ScopesUpdateResponseDto": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/ScopeDto"
+          }
+        },
+        "required": [
+          "scope"
+        ]
+      },
+      "HealthCheckResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "healthy",
+              "unhealthy"
+            ],
+            "description": "The overall status of the system"
+          },
+          "services": {
+            "type": "object",
+            "properties": {
+              "postgres": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "healthy",
+                      "unhealthy"
+                    ],
+                    "description": "Status of the service"
+                  },
+                  "latency": {
+                    "description": "Round-trip time of the probe, in milliseconds",
+                    "type": "number",
+                    "minimum": 0
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            },
+            "required": [
+              "postgres"
+            ],
+            "description": "Status of individual services"
+          }
+        },
+        "required": [
+          "status",
+          "services"
+        ]
+      },
+      "UsersListResponseDto": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Total number of users matching the criteria",
+            "example": 100
+          }
+        },
+        "required": [
+          "users",
+          "total"
+        ]
+      },
+      "UserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "User ID",
+            "example": "123"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email of the user",
+            "example": "john.doe@example.com"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "user"
+            ],
+            "description": "Role name the user has"
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupRefDto"
+            },
+            "description": "Groups the user belongs to (rule-foundation-user-groups-membership), sorted by name"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "role",
+          "groups"
+        ]
+      },
+      "GroupRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Group ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the group",
+            "example": "Équipe Nord"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "UsersCreateParamsDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "description": "Email of the user (at most 254 characters)",
+            "example": "john.doe@example.com"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 72,
+            "description": "Password of the user (8 to 72 characters)",
+            "example": "securePassword123"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "admin"
+            ],
+            "description": "Role of the user",
+            "example": "user"
+          },
+          "groupIds": {
+            "description": "Groups of the user (rule-foundation-user-groups-membership): distinct ids of existing groups, none by default",
+            "uniqueItems": true,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "role"
+        ]
+      },
+      "UsersCreateResponseDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/UserDto"
+          }
+        },
+        "required": [
+          "user"
+        ]
+      },
+      "UserGetResponseDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/UserDto"
+          }
+        },
+        "required": [
+          "user"
+        ]
+      },
+      "UsersUpdateParamsDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "description": "New role of the user",
+            "type": "string",
+            "enum": [
+              "user",
+              "admin"
+            ]
+          },
+          "groupIds": {
+            "description": "New groups of the user (replaces the current ones, [] removes all)",
+            "uniqueItems": true,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "UsersUpdateResponseDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/UserDto"
+          }
+        },
+        "required": [
+          "user"
+        ]
+      },
+      "ImportConfirmResponseDto": {
+        "type": "object",
+        "properties": {
+          "importId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifier of the confirmed preview"
+          },
+          "createdCount": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Rows written"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Valid rows not written because the state changed since the preview"
+          },
+          "fileName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Name of the imported file"
+          }
+        },
+        "required": [
+          "importId",
+          "createdCount",
+          "skippedCount",
+          "fileName"
+        ]
+      },
+      "ImportErrorsListResponseDto": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportRowErrorDto"
+            },
+            "description": "One page of entries, by row then by column"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of entries of the whole list (not of the rows)"
+          }
+        },
+        "required": [
+          "errors",
+          "total"
+        ]
+      },
+      "ImportRowErrorDto": {
+        "type": "object",
+        "properties": {
+          "row": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 2147483647,
+            "description": "Spreadsheet row number (the header is row 1)"
+          },
+          "column": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Name of the faulty column"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "description": "What is wrong, in French"
+          }
+        },
+        "required": [
+          "row",
+          "column",
+          "reason"
+        ]
+      },
+      "ImportPreviewDto": {
+        "type": "object",
+        "properties": {
+          "importId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifier of the preview, to list its errors or confirm it"
+          },
+          "fileName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Name of the file as kept (directory part removed)"
+          },
+          "totalRows": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Non-blank data rows (validRows + errorRows)"
+          },
+          "validRows": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Rows that will be imported"
+          },
+          "errorRows": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Rows in error (a row counts once, whatever its number of faults)"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End of the preview: after it, the file must be sent again"
+          }
+        },
+        "required": [
+          "importId",
+          "fileName",
+          "totalRows",
+          "validRows",
+          "errorRows",
+          "expiresAt"
+        ]
+      },
+      "ImportSpecificationDto": {
+        "type": "object",
+        "properties": {
+          "columns": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportColumnDto"
+            },
+            "description": "Columns the file may hold, in the order of the screen"
+          },
+          "maxFileSizeBytes": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Largest file accepted, in bytes"
+          },
+          "maxRows": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Largest number of data rows accepted"
+          },
+          "acceptedExtensions": {
+            "minItems": 1,
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "File extensions accepted, with their dot"
+          }
+        },
+        "required": [
+          "columns",
+          "maxFileSizeBytes",
+          "maxRows",
+          "acceptedExtensions"
+        ]
+      },
+      "ImportColumnDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Name of the column in the header of the file"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Is the column mandatory?"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "description": "What the column holds and the rule applied to it (French)"
+          }
+        },
+        "required": [
+          "name",
+          "required",
+          "description"
+        ]
+      }
+    }
+  }
+}

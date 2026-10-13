@@ -1,0 +1,49 @@
+# Variantes de l'API de test : acceptance/variants.yaml (propriété de la QA, scellé avec la recette ; lu par la cuisine).
+#
+# Pourquoi : l'API de test est un processus distinct des tests, son environnement est fixé à son démarrage. Une version
+# qui doit prouver un comportement sous un autre environnement (pilote réel contre des serveurs factices, configuration
+# absente, autre fournisseur) le déclare ici ; la cuisine démarre l'API dans chaque variante et y joue ses fichiers.
+#
+# Règles :
+# - `default` désigne la variante de tous les fichiers qu'aucun motif `files` ne désigne (socle, versions précédentes).
+#   La cuisine écrit son environnement dans api/.env.test : `start.sh` seul donne cette variante.
+# - `env` : variables ajoutées à la variante par défaut, qui priment. Une valeur vide retire la variable (l'API traite
+#   une variable vide comme absente). Interdites : DATABASE_URL, JWT_SECRET, COOKIE_SECRET, PORT, NODE_ENV.
+# - `files` : motifs des fichiers de recette (chemin relatif à acceptance/) ; obligatoire hors défaut ; un fichier ne
+#   relève que d'une variante.
+# - `generate` : valeur de test créée sur la machine, jamais versionnée. Générateur connu : rsa-private-key-pem
+#   (clé RSA PEM, retours à la ligne écrits \n).
+# - `jest_env` : variables passées aux tests seulement (par exemple pour sauter les fichiers d'une autre variante).
+# - Les tests lisent l'environnement de l'API sous test dans le fichier désigné par ACCEPTANCE_ENV_FILE (api/.env.test
+#   pour la variante par défaut). Ports des serveurs factices : fixes, locaux (127.0.0.1), propres à chaque variante.
+# - Valeurs factices uniquement : ce fichier est versionné.
+#
+# Exemple :
+default: fake
+
+variants:
+  fake:
+    description: pilote factice des sources ; suites du socle et des versions précédentes
+    env:
+      EXEMPLE_DRIVER: fake
+
+  real:
+    description: lecteurs réels pointés vers les serveurs factices démarrés par les tests de la version
+    files:
+      - acceptance-v2-*.test.ts
+    env:
+      EXEMPLE_DRIVER: real
+      EXEMPLE_BASE_URL: http://127.0.0.1:4302/exemple
+      EXEMPLE_API_KEY: cle-de-test-factice-0001
+    generate:
+      EXEMPLE_PRIVATE_KEY: rsa-private-key-pem
+
+  unconfigured:
+    description: lecteurs réels sans configuration (indisponibilité attendue, aucun repli)
+    files:
+      - acceptance-v2-unconfigured.test.ts
+    env:
+      EXEMPLE_DRIVER: real
+      EXEMPLE_SECRET: ''
+    jest_env:
+      ACCEPTANCE_VARIANT: unconfigured

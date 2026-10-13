@@ -1,0 +1,341 @@
+name: cuisine-sauvage-salle-blanche
+# Reconstruction du socle en salle blanche, un lot à la fois (cuisine rebuild <lot>).
+# L'entrée {{input}} est la fiche du lot, produite par `cuisine rebuild` depuis .cuisine/rebuild/lots.yaml.
+# La recette HTTP existe déjà (scellée) ; l'agent QA n'écrit que les tests de navigateur, à l'aveugle.
+entry: e2e-author
+
+defaults:
+  agent: claude
+  max_visits: 16
+
+hooks:
+  - type: console
+    events: [run_start, node_start, node_end, run_end]
+
+agents:
+  claude:
+    bin: claude
+    new_session_args: ["-p", "{{prompt}}", "--permission-mode", "acceptEdits", "--allowedTools", "Read,Edit,Write,Glob,Grep,TodoWrite,WebFetch,WebSearch,Bash(pnpm:*),Bash(npx:*),Bash(node:*),Bash(bash:*),Bash(cd:*),Bash(curl -s http://localhost:*),Bash(curl -sS http://localhost:*),Bash(curl -i http://localhost:*),Bash(curl http://localhost:*),Bash(psql:*),Bash(ls:*),Bash(cat:*),Bash(head:*),Bash(tail:*),Bash(mkdir:*),Bash(sleep:*),Bash(git status:*),Bash(git diff:*),Bash(NODE_ENV=*),Bash(DATABASE_URL=*),Bash(.cuisine/bin/cuisine envs)", "--disallowedTools", "Read(//home/claude/cuisine-sauvage/**),Glob(//home/claude/cuisine-sauvage/**),Grep(//home/claude/cuisine-sauvage/**),Read(//home/claude/archives/**),Read(//tmp/**),Glob(//tmp/**),Grep(//tmp/**),Read(//root/**),Glob(//root/**),Grep(//root/**),Bash(git log:*),Bash(git show:*),Bash(git checkout:*),Bash(git fetch:*),Bash(git clone:*),Bash(gh:*)"]
+    resume_session_args: ["-p", "{{prompt}}", "--permission-mode", "acceptEdits", "--allowedTools", "Read,Edit,Write,Glob,Grep,TodoWrite,WebFetch,WebSearch,Bash(pnpm:*),Bash(npx:*),Bash(node:*),Bash(bash:*),Bash(cd:*),Bash(curl -s http://localhost:*),Bash(curl -sS http://localhost:*),Bash(curl -i http://localhost:*),Bash(curl http://localhost:*),Bash(psql:*),Bash(ls:*),Bash(cat:*),Bash(head:*),Bash(tail:*),Bash(mkdir:*),Bash(sleep:*),Bash(git status:*),Bash(git diff:*),Bash(NODE_ENV=*),Bash(DATABASE_URL=*),Bash(.cuisine/bin/cuisine envs)", "--disallowedTools", "Read(//home/claude/cuisine-sauvage/**),Glob(//home/claude/cuisine-sauvage/**),Grep(//home/claude/cuisine-sauvage/**),Read(//home/claude/archives/**),Read(//tmp/**),Glob(//tmp/**),Grep(//tmp/**),Read(//root/**),Glob(//root/**),Grep(//root/**),Bash(git log:*),Bash(git show:*),Bash(git checkout:*),Bash(git fetch:*),Bash(git clone:*),Bash(gh:*)"]
+    session_id_regex: '"session_id":"([a-f0-9-]+)"'
+    rate_limit:
+      patterns:
+        - name: claude_usage_limit
+          regex: "usage limit reached.*reset at (\\d{1,2}):(\\d{2})"
+          reset_format: clock_hhmm
+          reset_groups: [1, 2]
+        - name: claude_429
+          regex: "429 Too Many Requests"
+        - name: anthropic_overloaded
+          regex: "overloaded_error|503 Service Unavailable"
+      default_wait_minutes: 15
+      max_consecutive_retries: 4
+
+  claude-qa:
+    bin: claude
+    new_session_args: ["-p", "{{prompt}}", "--permission-mode", "acceptEdits", "--disallowedTools", "Bash", "--allowedTools", "Read(specifications/**),Read(acceptance/**),Read(CLAUDE.md),Read(.cuisine/rebuild/**),Write(acceptance/e2e/**),Edit(acceptance/**),Write(acceptance/COVERAGE-*.md),Edit(specifications/**/DISPUTES.md),Write(specifications/socle/DISPUTES.md),Edit(specifications/permissions.yaml),Edit(specifications/contract-changes.yaml),Glob(specifications/**),Glob(acceptance/**),Grep(specifications/**),Grep(acceptance/**),TodoWrite"]
+    resume_session_args: ["-p", "{{prompt}}", "--permission-mode", "acceptEdits", "--disallowedTools", "Bash", "--allowedTools", "Read(specifications/**),Read(acceptance/**),Read(CLAUDE.md),Read(.cuisine/rebuild/**),Write(acceptance/e2e/**),Edit(acceptance/**),Write(acceptance/COVERAGE-*.md),Edit(specifications/**/DISPUTES.md),Write(specifications/socle/DISPUTES.md),Edit(specifications/permissions.yaml),Edit(specifications/contract-changes.yaml),Glob(specifications/**),Glob(acceptance/**),Grep(specifications/**),Grep(acceptance/**),TodoWrite"]
+    session_id_regex: '"session_id":"([a-f0-9-]+)"'
+
+sessions:
+  front:
+  back:
+  reviewer:
+  fixer:
+  qa:
+
+nodes:
+  e2e-author:
+    type: prompt
+    agent: claude-qa
+    session: qa
+    new_session: true
+    prompt: |
+      You are the ACCEPTANCE (QA) agent of a software factory that is rebuilding the foundation of this application from its specification, lot by lot. You are independent from the developers and cannot see the application code.
+      Lot sheet:
+      ---
+      {{input}}
+      ---
+      Read CLAUDE.md, the specification chapters listed in the lot sheet (`specifications/socle/`, including `98-arbitrages.md`, which overrides the default positions of the other chapters), the existing browser tests in `acceptance/e2e/` (`fixtures.ts`: `account(role)` creates an account and returns its email and password, data is reset before each test) and `acceptance/e2e/playwright.config.ts`.
+      BEFORE any screen exists, write the browser tests of this lot in `acceptance/e2e/<lot id>.spec.ts` (the lot id is given in the lot sheet), derived only from the specification of the screens listed in the lot sheet. Select elements by role and accessible name with the exact French labels of the specification (`getByRole`, `getByLabel`), never by CSS class or test id. Each test title starts with the rule id(s) it verifies, e.g. `test('[rule-foundation-login-page] ...')`. Cover the user journeys of the lot end to end through the browser: nominal path, visible error messages, empty states, redirections and what a user of each role sees or does not see. Keep each test independent and under 30 seconds. Never modify a test of a previous lot or a file outside `acceptance/e2e/`.
+      End with the list of tests written.
+    next: seal
+
+  seal:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; rm -f "$W/front-started"; git add acceptance specifications && git -c user.name=qa -c user.email=qa@local commit -qm "qa : tests de navigateur du lot scellés" ; git rev-parse HEAD > $W/acceptance.seal && echo SEALED'
+    on:
+      exit_0: code-back
+      exit_non_zero: code-back
+
+  code-back:
+    type: prompt
+    session: back
+    prompt: |
+      You are the BACKEND agent of a software factory that is rebuilding the foundation of this application in a clean room, lot by lot.
+      CLEAN ROOM RULES: your only sources are this repository (`CLAUDE.md`, `specifications/`, `acceptance/` read-only, the code already built by previous lots, `docs/socle.md`) and the public documentation of the libraries you use. No earlier implementation of this application exists for you: do not look for one outside this repository, do not read outside it, and write every file yourself.
+      Lot sheet:
+      ---
+      {{input}}
+      ---
+      Read CLAUDE.md, `docs/socle.md` if it exists, and every chapter of the lot sheet (`98-arbitrages.md` overrides the default positions of the other chapters; `data-contract.md` fixes the database schema exactly). Then implement the API part of this lot, following CLAUDE.md strictly: tooling contract, feature folders, explicit access declaration on every route, Zod schemas for every input and response, Drizzle tables matching the data contract and a generated migration applied to both databases (`pnpm --dir api migrate:all`), stable error codes, unit or integration tests per route under `api/src/features/<feature>/tests/`. Cite rule ids in comments and tests.
+      The black-box acceptance suite in `acceptance/` is the specification of record and is sealed: never modify it. Run the lot's part with `bash .cuisine/scripts/acceptance.sh` once the server runs (`cd api && NODE_ENV=test bash scripts/server/start.sh`; run `.cuisine/bin/cuisine envs` first if `api/.env.test` is missing) and make it pass. The OpenAPI document you generate must reproduce, for the contract paths of the lot, `specifications/openapi.json` without breaking change (same paths, methods, parameters, bounds, response codes and schemas; checked by oasdiff). If you are convinced an acceptance test or the contract contradicts the specification, do not touch them: append `OPEN: <test title or operation>: <reason>` to `specifications/socle/DISPUTES.md` and continue.
+      Finish with `pnpm --dir api type:check` and `pnpm --dir api test` green, then write or update `docs/socle.md` (what exists, how a business feature plugs into it).
+    next: check-back
+
+  check-back:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; ( .cuisine/bin/cuisine envs >/dev/null && cd api && pnpm -s type:check && NODE_ENV=test bash scripts/server/start.sh >/dev/null 2>&1 && { timeout -k 10 ${CUISINE_TEST_TIMEOUT:-900} pnpm -s test > $W/test.log 2>&1; r=$?; [ $r -eq 124 ] && { echo "BLOQUÉ : tests de l API arrêtés après ${CUISINE_TEST_TIMEOUT:-900} s sans réponse (attente sans fin : verrou, pool de connexions épuisé, promesse jamais résolue), ce n est pas un échec d assertion" >> $W/test.log; touch $W/blocked; }; tail -60 $W/test.log; exit $r; } ) > "$W/last-gate.txt" 2>&1; r=$?; [ -f "$W/blocked" ] && { rm -f "$W/blocked"; r=124; }; echo "[check-back]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: seal-check
+      exit_non_zero: back-dispute
+
+  # Un échec des tests de l'API avec des contestations ouvertes passe d'abord par l'arbitrage de la QA :
+  # sans cela, le développeur tourne en boucle sur un test qu'il conteste sans pouvoir le modifier.
+  back-dispute:
+    type: command
+    cmd: 'if grep -rqs "^OPEN" specifications --include=DISPUTES.md; then echo "Backend gate red and disputes are open: arbitration first."; grep -rh "^OPEN" specifications --include=DISPUTES.md; exit 1; else echo "NO OPEN DISPUTE"; fi'
+    on:
+      exit_0: fix-back
+      exit_non_zero: qa-arbitrate
+
+  seal-check:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; P="acceptance specifications/permissions.yaml specifications/openapi.json specifications/contract-changes.yaml specifications/socle/data-contract.md .cuisine CLAUDE.md"; sealed=$(cat $W/acceptance.seal) && git diff --quiet "$sealed" -- $P && [ -z "$(git status --porcelain -- $P)" ] && ! grep -rqE "\.(skip|only)\(|(^|[^a-z])x(it|describe)\(" acceptance --include=*.ts --exclude-dir=node_modules && echo "SEAL INTACT"'
+    on:
+      exit_0: acceptance-run
+      exit_non_zero: seal-broken
+
+  seal-broken:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; P="acceptance specifications/permissions.yaml specifications/openapi.json specifications/contract-changes.yaml specifications/socle/data-contract.md .cuisine CLAUDE.md"; ( sealed=$(cat $W/acceptance.seal); echo "SEAL BROKEN: sealed files were modified; they have been restored."; git diff --stat "$sealed" -- $P; git checkout "$sealed" -- $P; git clean -fdq -e node_modules -- acceptance .cuisine; exit 1 ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[seal-broken]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: acceptance-run
+      exit_non_zero: fix-back
+
+  acceptance-run:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; ( cd api && NODE_ENV=test bash scripts/server/start.sh >/dev/null 2>&1 && cd .. && { bash .cuisine/scripts/acceptance.sh > $W/acc.log 2>&1; r=$?; grep -E "✕|Tests:" $W/acc.log | head -40; exit $r; } ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[acceptance-run]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: dispute-check
+      exit_non_zero: dispute-gate
+
+  dispute-gate:
+    type: command
+    cmd: 'if grep -rqs "^OPEN" specifications --include=DISPUTES.md; then echo "A gate is red and disputes are open: arbitration first."; grep -rh "^OPEN" specifications --include=DISPUTES.md; exit 1; else echo "NO OPEN DISPUTE"; fi'
+    on:
+      exit_0: fix-back
+      exit_non_zero: qa-arbitrate
+
+  dispute-check:
+    type: command
+    cmd: 'if grep -rqs "^OPEN" specifications --include=DISPUTES.md; then grep -rh "^OPEN" specifications --include=DISPUTES.md; exit 1; else echo "NO OPEN DISPUTE"; fi'
+    on:
+      exit_0: permissions-check
+      exit_non_zero: qa-arbitrate
+
+  qa-arbitrate:
+    type: prompt
+    agent: claude-qa
+    session: qa
+    prompt: |
+      The developers opened disputes (entries starting with OPEN in `specifications/**/DISPUTES.md`) against the acceptance suite, the browser tests, `specifications/permissions.yaml` or the contract of record. For each one, re-read the specification (`specifications/socle/`, with `98-arbitrages.md` overriding the other chapters). If the test or the expected entry is wrong, fix it and rewrite the entry as `ACCEPTED: <what you changed>`; otherwise rewrite it as `REJECTED: <why it stands>`. Accept a breaking change of the contract of record only if the specification requires it, by adding `{ id: <oasdiff id>, path: <path>, reason: <why> }` under `allowed:` in `specifications/contract-changes.yaml`. Never weaken a test to match the code without a specification reason. The acceptance suite was written for the previous implementation: a test that depends on an implementation detail the specification does not fix is a valid reason to accept.
+    next: reseal
+
+  reseal:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; python3 .cuisine/scripts/cliquet.py "$(cat $W/acceptance.seal)" > "$W/last-gate.txt" 2>&1 || { echo "[cliquet]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit 1; }; git add acceptance specifications && git -c user.name=qa -c user.email=qa@local commit -qm "qa : contestations arbitrées, recette rescellée"; git rev-parse HEAD > $W/acceptance.seal && echo RESEALED'
+    on:
+      exit_0: check-back
+      exit_non_zero: cliquet-fix
+
+  cliquet-fix:
+    type: prompt
+    agent: claude-qa
+    session: qa
+    prompt: |
+      The ratchet on the acceptance suite refused your changes: a test was deleted, a rule lost tests or assertions, or an expectation was relaxed (strict equality turned into inclusion, a precise error code or HTTP status replaced by a vaguer check). A sealed suite never moves backwards without a written reason. Either restore the stricter test, or, if the specification or an owner's decision requires the change, cite it: the decision id `D-xxxx` in the test title, or an `ACCEPTED:` entry in a `DISPUTES.md` that quotes the test title. Read `.cuisine-run/last-gate.txt`.
+    next: reseal
+
+  fix-back:
+    type: prompt
+    session: back
+    prompt: |
+      A backend gate failed: environment, type check, unit tests, seal integrity or the sealed acceptance suite. Fix the application code. Never modify `acceptance/`, `.cuisine/`, `CLAUDE.md` or the contract files (they are sealed and restored automatically if touched). If you are convinced a test contradicts the specification, open a dispute (`OPEN: ...` line in `specifications/socle/DISPUTES.md`) instead. Clean room rules still apply: no source outside this repository except public library documentation.
+
+      Read `.cuisine-run/last-gate.txt`: it holds the output of the gate that failed, and its name on the last line. The full acceptance output is in `.cuisine-run/acc.log`.
+    next: check-back
+
+  permissions-check:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; ( cd api && NODE_ENV=test bash scripts/server/start.sh >/dev/null 2>&1; cd .. && rm -rf $W/gates/perm && { python3 .cuisine/scripts/permissions-check.py $W/gates/perm --report $W/gates/perm/report.md > $W/gates/perm.log 2>&1; r=$?; tail -30 $W/gates/perm.log; exit $r; } ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[permissions-check]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: contract-check
+      exit_non_zero: gate-dispute
+
+  contract-check:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; ( rm -rf $W/gates/contract && bash .cuisine/scripts/contract-check.sh $W/gates/contract ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[contract-check]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: gen-client
+      exit_non_zero: gate-dispute
+
+  gate-dispute:
+    type: command
+    cmd: 'if grep -rqs "^OPEN" specifications --include=DISPUTES.md; then echo "A gate failed and disputes are open: arbitration first."; grep -rh "^OPEN" specifications --include=DISPUTES.md; exit 1; else echo "NO OPEN DISPUTE"; fi'
+    on:
+      exit_0: fix-gates
+      exit_non_zero: qa-arbitrate
+
+  fix-gates:
+    type: prompt
+    session: back
+    prompt: |
+      A mechanical gate failed: the three-source permission check (expected matrix `specifications/permissions.yaml` and `.cuisine/permissions-foundation.yaml`, the routes declared by `pnpm --dir api cuisine:routes`, the running API probed per role) or the contract check (oasdiff against `specifications/openapi.json` restricted to the paths of the lots built so far, Schemathesis against the running API). Fix the application code: access declarations, Zod schemas (bounds, enums, response shapes), response codes. Details: `.cuisine-run/gates/perm/report.md`, `.cuisine-run/gates/contract/` (oasdiff output, `schemathesis.txt` with curl reproductions). Never modify the contract files, `acceptance/` or `.cuisine/`; if the expected matrix or the contract of record is wrong, append `OPEN: <permissions|contract> <operation>: <reason>` to `specifications/socle/DISPUTES.md`. Restart the server and re-run the unit and acceptance tests before finishing.
+
+      Read `.cuisine-run/last-gate.txt`: it holds the output of the gate that failed, and its name on the last line.
+    next: check-back
+
+  gen-client:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; ( cd api && NODE_ENV=test bash scripts/server/start.sh >/dev/null 2>&1 && cd .. && pnpm -s api-client:generate ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[gen-client]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: front-route
+      exit_non_zero: fix-back
+
+  # Après un arbitrage de la QA, les portes du back sont rejouées ; le front déjà commencé n'est pas refait,
+  # on revient directement à ses portes (l'agent front ne reprend la main que si elles échouent).
+  front-route:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; if [ -f "$W/front-started" ]; then echo "front already built: straight to its gates"; exit 1; else touch "$W/front-started"; echo "first front pass"; fi'
+    on:
+      exit_0: code-front
+      exit_non_zero: check-front
+
+  code-front:
+    type: prompt
+    session: front
+    prompt: |
+      You are the FRONTEND agent of a software factory that is rebuilding the foundation of this application in a clean room, lot by lot.
+      CLEAN ROOM RULES: your only sources are this repository (`CLAUDE.md`, `specifications/`, `acceptance/` read-only, the code already built, `docs/socle.md`) and the public documentation of the libraries you use. Do not read outside this repository; write every file yourself.
+      Lot sheet:
+      ---
+      {{input}}
+      ---
+      The API of this lot is implemented and the typed client `packages/api-client` is regenerated. Implement the screens of this lot in `studio/` following CLAUDE.md and `specifications/socle/70-ecrans.md` (exact French labels and accessible names, states, messages; `98-arbitrages.md` overrides the other chapters). If `studio/` does not exist yet, create it (React 18, MUI 6, Vite, React Router; `type:check`, `build`, `dev` scripts; `VITE_API_URL`). The browser tests of this lot in `acceptance/e2e/` are sealed: read them, do not modify them. Then run `pnpm --dir studio type:check && pnpm --dir studio build` and `bash .cuisine/scripts/e2e.sh` (with the test API running) and fix until green. If you are convinced a browser test contradicts the specification, append `OPEN: <test title>: <reason>` to `specifications/socle/DISPUTES.md` instead of changing it.
+    next: check-front
+
+  check-front:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; ( cd studio && pnpm -s type:check && pnpm -s build > $W/build.log 2>&1; r=$?; tail -20 $W/build.log; exit $r ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[check-front]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: e2e-run
+      exit_non_zero: fix-front
+
+  e2e-run:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; ( cd api && NODE_ENV=test bash scripts/server/start.sh >/dev/null 2>&1 && cd .. && bash .cuisine/scripts/e2e.sh > $W/e2e.log 2>&1; r=$?; grep -E "✘|passed|failed|flaky|Error:" $W/e2e.log | head -40; exit $r ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[e2e-run]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: review-sim
+      exit_non_zero: e2e-dispute
+
+  e2e-dispute:
+    type: command
+    cmd: 'if grep -rqs "^OPEN" specifications --include=DISPUTES.md; then echo "Browser tests are red and disputes are open: arbitration first."; grep -rh "^OPEN" specifications --include=DISPUTES.md; exit 1; else echo "NO OPEN DISPUTE"; fi'
+    on:
+      exit_0: fix-front
+      exit_non_zero: qa-arbitrate
+
+  fix-front:
+    type: prompt
+    session: front
+    prompt: |
+      A frontend gate failed (type check, build, or the sealed browser tests). Fix the studio code; never modify `acceptance/`. For browser failures, `.cuisine-run/e2e.log` has the full output and `.cuisine-run/e2e-results/` the traces and screenshots of failed tests. If you are convinced a browser test contradicts the specification, open a dispute in `specifications/socle/DISPUTES.md` instead.
+
+      Read `.cuisine-run/last-gate.txt`: it holds the output of the gate that failed, and its name on the last line.
+    next: check-front
+
+  review-sim:
+    type: prompt
+    session: reviewer
+    new_session: true
+    prompt: |
+      You are the EXECUTION-SIMULATION REVIEWER of a software factory that is rebuilding the foundation in a clean room. Read CLAUDE.md, the chapters of the lot sheet below and the code of the repository (`git status`, `git diff` since the seal commit).
+      ---
+      {{input}}
+      ---
+      Simulate mentally, step by step, the journeys of this lot through the screens, the API calls, the services and the database: authentication states, empty states, pagination, concurrent actions, error codes, transactions, ordering, security (no stack trace or SQL in responses, bounds on every input, access declared on every route). Build a completeness matrix: for every rule id of the lot, where it is implemented and which test covers it. Fix every defect you find directly in the code (never in `acceptance/`, `.cuisine/` or the contract files). Keep `docs/socle.md` accurate. End with the matrix and the list of fixes.
+    next: check-final
+
+  check-final:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; ( cd api && pnpm -s type:check && NODE_ENV=test bash scripts/server/start.sh >/dev/null 2>&1 && { timeout -k 10 ${CUISINE_TEST_TIMEOUT:-900} pnpm -s test > $W/test.log 2>&1; r=$?; [ $r -eq 124 ] && { echo "BLOQUÉ : tests de l API arrêtés après ${CUISINE_TEST_TIMEOUT:-900} s sans réponse (attente sans fin : verrou, pool de connexions épuisé, promesse jamais résolue), ce n est pas un échec d assertion" >> $W/test.log; touch $W/blocked; }; tail -40 $W/test.log; [ $r -eq 0 ]; } && cd ../studio && pnpm -s type:check && pnpm -s build > $W/build.log 2>&1 ) > "$W/last-gate.txt" 2>&1; r=$?; [ -f "$W/blocked" ] && { rm -f "$W/blocked"; r=124; }; echo "[check-final]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: final-gates
+      exit_non_zero: fix-final
+
+  final-gates:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; P="acceptance specifications/permissions.yaml specifications/openapi.json specifications/contract-changes.yaml specifications/socle/data-contract.md .cuisine CLAUDE.md"; ( sealed=$(cat $W/acceptance.seal); git diff --quiet "$sealed" -- $P && [ -z "$(git status --porcelain -- $P)" ] || { echo "SEAL BROKEN"; git checkout "$sealed" -- $P; exit 1; }; cd api && NODE_ENV=test bash scripts/server/start.sh >/dev/null 2>&1; cd .. && rm -rf $W/gates/perm-final $W/gates/contract-final && { python3 .cuisine/scripts/permissions-check.py $W/gates/perm-final > $W/gates/perm-final.log 2>&1; p=$?; tail -8 $W/gates/perm-final.log; bash .cuisine/scripts/contract-check.sh $W/gates/contract-final; c=$?; bash .cuisine/scripts/acceptance.sh > $W/acc.log 2>&1; a=$?; grep -E "✕|Tests:" $W/acc.log | head -30; bash .cuisine/scripts/e2e.sh > $W/e2e.log 2>&1; e=$?; grep -E "✘|passed|failed" $W/e2e.log | head -20; [ $p -eq 0 ] && [ $c -eq 0 ] && [ $a -eq 0 ] && [ $e -eq 0 ]; } ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[final-gates]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: matrix-check
+      exit_non_zero: final-dispute
+
+  final-dispute:
+    type: command
+    cmd: 'if grep -rqs "^OPEN" specifications --include=DISPUTES.md; then grep -rh "^OPEN" specifications --include=DISPUTES.md; exit 1; else echo "NO OPEN DISPUTE"; fi'
+    on:
+      exit_0: fix-final
+      exit_non_zero: qa-arbitrate
+
+  matrix-check:
+    type: command
+    cmd: 'bash .cuisine/scripts/matrix-check.sh'
+    on:
+      exit_0: docs
+      exit_non_zero: matrix-fix
+
+  matrix-fix:
+    type: prompt
+    agent: claude-qa
+    session: qa
+    prompt: |
+      The completeness matrix check failed: some rule ids of the specification are neither cited between brackets by an acceptance or browser test title nor justified as "not observable" in an `acceptance/COVERAGE-*.md` file. Add browser tests in `acceptance/e2e/` or justifications in `acceptance/COVERAGE-salle-blanche.md` (new content only; never weaken existing tests).
+      {{nodes.matrix-check.stdout}}
+    next: reseal-final
+
+  reseal-final:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; python3 .cuisine/scripts/cliquet.py "$(cat $W/acceptance.seal)" > "$W/last-gate.txt" 2>&1 || { echo "[cliquet]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit 1; }; git add acceptance && git -c user.name=qa -c user.email=qa@local commit -qm "qa : matrice complétée"; git rev-parse HEAD > $W/acceptance.seal; echo RESEALED'
+    on:
+      exit_0: check-final
+      exit_non_zero: cliquet-fix-final
+
+  cliquet-fix-final:
+    type: prompt
+    agent: claude-qa
+    session: qa
+    prompt: |
+      The ratchet on the acceptance suite refused your changes: a test was deleted, a rule lost tests or assertions, or an expectation was relaxed (strict equality turned into inclusion, a precise error code or HTTP status replaced by a vaguer check). A sealed suite never moves backwards without a written reason. Either restore the stricter test, or, if the specification or an owner's decision requires the change, cite it: the decision id `D-xxxx` in the test title, or an `ACCEPTED:` entry in a `DISPUTES.md` that quotes the test title. Read `.cuisine-run/last-gate.txt`.
+    next: reseal-final
+
+  fix-final:
+    type: prompt
+    session: fixer
+    prompt: |
+      Read CLAUDE.md. The final checks of this lot of the clean-room rebuild failed. Fix the code (never weaken tests, never modify `acceptance/`, `.cuisine/` or the contract files; clean room rules: no source outside this repository except public library documentation). If you are convinced a test or the contract contradicts the specification, open a dispute in `specifications/socle/DISPUTES.md`.
+
+      Read `.cuisine-run/last-gate.txt`: it holds the output of the gate that failed, and its name on the last line. Details are under `.cuisine-run/gates/`, `.cuisine-run/acc.log` and `.cuisine-run/e2e.log`.
+    next: check-final
+
+  docs:
+    type: prompt
+    session: back
+    prompt: |
+      The lot is green. Make sure `docs/socle.md` describes accurately what the foundation now provides and how a business feature plugs into it (access declaration, Zod schemas and contract, errors, audit, row-level scopes, imports, screens and navigation, tests), and that `README.md` explains how to run the application. Do not change code.
+    next: commit
+
+  commit:
+    type: command
+    cmd: 'git add -A && git -c user.name=cuisine -c user.email=cuisine@local commit -qm "salle blanche : lot reconstruit" || true; git log -1 --format="%h %s"'
+    terminal: true

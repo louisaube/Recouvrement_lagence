@@ -1,0 +1,57 @@
+# Tests de recette vus rouges avant le code qui les satisfait. Écrit par .cuisine/scripts/rouge.py, jamais à la main.
+- fichier: acceptance-garde-metier-declarations.test.ts
+  titre: '[rule-foundation-access-guard-only-route] a route declared roles: [] with a business guard raises no access problem and is reported with allow: []'
+  vu_rouge: '2026-10-11'
+  sur: 3746bc6
+- fichier: acceptance-garde-metier-declarations.test.ts
+  titre: '[rule-foundation-access-no-role-without-guard-refused] roles: [] without any business guard is a problem that names the route'
+  vu_rouge: '2026-10-11'
+  sur: 3746bc6
+- fichier: acceptance-garde-metier-declarations.test.ts
+  titre: '[rule-foundation-access-owner-only-needs-role] ownerOnly with roles: [] is refused even with a business guard'
+  vu_rouge: '2026-10-11'
+  sur: 3746bc6
+- fichier: acceptance-garde-metier-declarations.test.ts
+  titre: '[rule-foundation-access-undeclared-refused] a route without declaration is still refused, a guard-only route next to it is not'
+  vu_rouge: '2026-10-11'
+  sur: 3746bc6
+- fichier: acceptance-garde-metier-declarations.test.ts
+  titre: '[rule-foundation-access-no-role-without-guard-refused] the server start-up check refuses roles: [] without guard and names the route'
+  vu_rouge: '2026-10-11'
+  sur: 3746bc6
+- fichier: acceptance-garde-metier-declarations.test.ts
+  titre: '[rule-foundation-access-guard-only-route] the start-up check accepts roles: [] with a business guard'
+  vu_rouge: '2026-10-11'
+  sur: 3746bc6
+- fichier: acceptance-garde-metier-declarations.test.ts
+  titre: '[rule-foundation-access-guard-only-regime] a roles: [] route answers 401 security.missing_token without a valid token, yet admits an ordinary user with one'
+  vu_rouge: '2026-10-11'
+  sur: 3746bc6
+- fichier: acceptance-garde-metier-declarations.test.ts
+  titre: '[rule-foundation-access-guard-only-route] roles: [] never refuses by role, whereas roles: [admin] still refuses an ordinary user with security.access_denied'
+  vu_rouge: '2026-10-11'
+  sur: 3746bc6
+- fichier: acceptance-garde-metier-declarations.test.ts
+  titre: '[rule-foundation-response-content-type] text/csv replaces application/json under the declared response'
+  vu_rouge: '2026-10-11'
+  sur: 3746bc6
+- fichier: acceptance-garde-metier-declarations.test.ts
+  titre: '[rule-foundation-response-content-type] text/csv; charset=utf-8 is admitted and published as is'
+  vu_rouge: '2026-10-11'
+  sur: 3746bc6
+- fichier: acceptance-garde-metier-declarations.test.ts
+  titre: '[rule-foundation-response-content-type] only the declared response changes: the others stay application/json, and the operation keeps its bearer and cookie security'
+  vu_rouge: '2026-10-11'
+  sur: 3746bc6
+- fichier: acceptance-garde-metier-declarations.test.ts
+  titre: '[rule-foundation-response-content-type-default] the content type is the only difference: explicit application/json equals no declaration, and text/csv differs by that key alone'
+  vu_rouge: '2026-10-11'
+  sur: 3746bc6
+- fichier: acceptance-garde-metier-declarations.test.ts
+  titre: '[rule-foundation-response-content-type-closed-list] a content type outside the closed list stops the start-up and names the route'
+  vu_rouge: '2026-10-11'
+  sur: 3746bc6
+- fichier: acceptance-garde-metier-reponses-non-json.test.ts
+  titre: is replaced by acceptance-garde-metier-declarations.test.ts
+  vu_rouge: '2026-10-11'
+  sur: 3746bc6

@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "moduleResolution": "node",
+    "declaration": false,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "skipLibCheck": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node", "jest"]
+  },
+  "include": ["src/**/*.ts"]
+}

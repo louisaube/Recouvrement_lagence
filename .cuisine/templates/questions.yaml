@@ -1,0 +1,26 @@
+# Questions pour le propriétaire : specifications/<module>/implementation-plans/<version>/questions.yaml
+# Une question ne vaut que si sa réponse change ce qui est construit, donc la recette.
+# Vérifié par `arbitrage.py check` ; filtré par `arbitrage.py filter` (cinq groupes au plus, le défaut s'applique aux autres).
+# `effet_recette` et `decideur` sont relus par le script : une question observable dont les options n'attendent pas
+# la même chose change la recette ; une question qui touche la sécurité ou les données personnelles revient au propriétaire.
+- id: Q-IMPORT-01                 # Q-<MODULE>-<n>, unique dans tout le dépôt : suite de la numérotation du module, toutes versions confondues (questions.yaml des autres versions et registre arbitrages.yaml)
+  titre: Comptes importés sans possibilité de connexion
+  regles: [rule-foundation-import-users-no-password]   # règles qui dépendent de cette question et d'elle seule
+  effet_recette: oui              # oui | non
+  decideur: proprietaire          # proprietaire | defaut
+  observable: oui                 # oui : chaque option porte un cas testable par l'API | non : délai, charge, configuration
+  situation: "Un salarié importé ouvre l'application et tente de se connecter."   # même situation pour toutes les options
+  options:
+    - code: A
+      libelle: Laisser ainsi jusqu'à une future fonction d'invitation
+      cout: leger                 # leger | lourd
+      ouvre: []                   # questions nouvelles que l'option ouvre
+      resultat: "Connexion refusée ; il attend une future fonction d'invitation."
+      test: { route: "POST /auth/login", entree: "compte importé, mot de passe quelconque", attendu: "401 security.invalid_credentials" }
+    - code: B
+      libelle: Invitation par e-mail avec lien de définition du mot de passe
+      cout: lourd
+      ouvre: [durée du lien, déclencheur de l'invitation, renvoi, sous-traitant d'envoi]
+      resultat: "Il a reçu un lien valable 72 h, choisit son mot de passe et se connecte."
+      test: { route: "POST /auth/invitations/accept", entree: "jeton d'invitation valide, mot de passe conforme", attendu: "200, puis connexion acceptée" }
+  defaut: A                       # option recommandée, appliquée si la question n'est pas retenue

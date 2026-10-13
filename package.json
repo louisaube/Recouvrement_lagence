@@ -1,0 +1,9 @@
+{
+  "name": "monappli",
+  "private": true,
+  "description": "Application fabriquée par Cuisine sauvage",
+  "scripts": {
+    "acceptance": "bash .cuisine/scripts/acceptance.sh",
+    "api-client:generate": "pnpm --dir packages/api-client generate"
+  }
+}

@@ -1,0 +1,41 @@
+---
+name: cuisine
+description: Opérer Cuisine sauvage dans ce dépôt (préparer la machine, baptiser l'application, fabriquer une version depuis prompts/, reprendre, vérifier, recetter par captures). À utiliser dès que l'utilisateur demande de fabriquer, lancer ou recetter une version, ou de préparer l'application.
+---
+
+# Opérer Cuisine sauvage
+
+Vous êtes l'opérateur, pas un agent de fabrication : vous lancez la chaîne, vous la surveillez, vous rendez compte. Vous ne modifiez jamais le code métier, les tests de recette, `specifications/permissions.yaml`, `specifications/openapi.json` ni `specifications/contract-changes.yaml`.
+
+## Commandes (depuis la racine du dépôt)
+
+`.cuisine/bin/cuisine <commande>` : `setup`, `doctor`, `up`, `init <slug>`, `run <version>`, `resume <version>`, `veille [--relance]`, `rebuild [--resume] <lot>`, `envs`, `questions`, `arbitre`, `revise`, `accorde`, `reprendre`, `check`, `shots [--as user|admin] /chemin ...`.
+
+## Déroulé
+
+1. **Machine** : `cuisine doctor`. Si un élément manque : `cuisine setup`. Puis `cuisine up` (machine neuve à chaque session : PostgreSQL, base, dépendances, migrations).
+2. **Baptême** (une seule fois, si `package.json` porte encore le nom `monappli`) : demander le nom court à l'utilisateur, puis `cuisine init <slug>`.
+3. **Demande de version** : l'utilisateur la donne en langage courant. L'écrire telle quelle dans `prompts/v<N>-<sujet>.md` (N = numéro suivant), sans l'enrichir ; si les droits ne sont pas dits (qui peut faire quoi, qui ne doit rien voir), poser la question avant. Committer ce fichier seul.
+4. **Fabrication** : la commande dure 25 à 60 minutes, plus que le délai d'un appel. La lancer en arrière-plan : `nohup .cuisine/bin/cuisine run <version> > .cuisine-run/<version>.out 2>&1 &`. Ne pas relancer tant que le processus tourne.
+   - **Surveillance pendant le tour** : `cuisine veille` toutes les 8 à 10 minutes (une attente dans l'appel), plus `grep -E "node_end|run_end" .cuisine-run/<version>.log | tail -5` pour le parcours.
+   - **Avant de rendre la main** : la session peut être recyclée pendant l'attente (PostgreSQL arrêté, chaîne tuée sans fin écrite). Programmer un point de contrôle qui la réveille dans 20 minutes avec l'outil de rappel différé de la session (`send_later`), message « Point de contrôle de la fabrication <version> : cuisine veille ». Au réveil, le crochet de session (`.claude/hooks/session-start.sh`) remet la machine en route et reprend une fabrication interrompue (au plus 5 fois).
+   - **À chaque point de contrôle** : `cuisine veille`. État `en-cours` ou reprise faite : reprogrammer le point suivant. État `terminee`, `attente-arbitrage`, `arretee` ou `reprises-epuisees` : prévenir l'utilisateur par notification (outil `PushNotification` s'il est disponible, sinon message), avec l'état et l'étape, et ne plus reprogrammer.
+5. **Arbitrage** : si la fabrication s'arrête « EN ATTENTE », présenter à l'utilisateur les questions de `cuisine questions` telles quelles (situation, options, coût, défaut), sans les trancher à sa place ; inscrire ses réponses par `cuisine arbitre "A/B/..."` (ou `cuisine arbitre defaut` s'il s'en remet aux défauts), qui lance la suite en arrière-plan comme une fabrication. Pour revenir sur une décision : `cuisine revise <Q-ID> <choix> "motif"` (version de correction limitée au périmètre de la question).
+5 bis. **Cliquet bloqué par la demande elle-même** (la chaîne s'arrête sur `reseal`, nombre maximal de visites, avec des « test supprimé sans décision » ou des relâchements « une décision D-xxxx est exigée ») : la demande de la version change un comportement antérieur et aucune décision ne couvre le recul. `cuisine accorde` liste les reculs refusés ; les présenter au propriétaire, groupés par cause et rapportés à la section de la demande qui les rend nécessaires, sans les trancher. Sur son accord explicite seulement : `cuisine accorde --enregistrer "motif"` (commit « proprietaire » du seul fichier des accords), puis `nohup .cuisine/bin/cuisine reprendre <version> reseal > .cuisine-run/<version>.reprise.out 2>&1 &`. Un recul que le propriétaire refuse reste à la QA.
+5 ter. **Identifiant de question repris d'une autre version** (la chaîne s'arrête sur `arbitrage-apply`, nombre maximal de visites, avec « identifiant déjà tranché pour la version … » ou une règle sommée de porter la décision d'une autre version ; ou `filter` répond `COLLISION`) : la question de la version n'a jamais eu de décision. Pour une chaîne lancée avant le contrôle des identifiants : `python3 .cuisine/scripts/arbitrage.py renumber <version> <ancien> <libre>` (identifiant libre donné par le message), `python3 .cuisine/scripts/arbitrage.py check <version>`, puis `python3 .cuisine/scripts/arbitrage.py filter <version>` (inscrit son défaut ; si la question revient au propriétaire, la lui présenter et `cuisine arbitre`) ; commit, puis `nohup .cuisine/bin/cuisine reprendre <version> arbitrage-apply > .cuisine-run/<version>.reprise.out 2>&1 &`.
+6. **Interruption** (machine recyclée) : le crochet de session l'a normalement traitée ; sa sortie (« Veille de la cuisine ») figure au début de la session. Sinon, à la main : `cuisine veille --relance`. Arrêt par la chaîne elle-même (`arretee`, par exemple nombre maximal de visites atteint) ou cinq reprises épuisées : ne pas relancer, présenter l'étape et le journal à l'utilisateur.
+7. **Compte rendu** : lire `.cuisine-run/<version>.out` (parcours, boucles de réparation, contestations), puis `cuisine check`. Signaler toute alerte « à arbitrer » et toute règle `(inferred)` nouvelle de `specifications/`.
+8. **Recette** : `cuisine shots --as user /` et `cuisine shots --as admin /` (plus les pages concernées), puis envoyer les captures de `.cuisine-run/shots/` à l'utilisateur. La décision de livrer est la sienne.
+9. **La Passe** (tableau de bord) : `cuisine check`, puis `cuisine passe`, puis publier `.cuisine-run/la-passe.html` avec l'outil Artifact en passant `url` = contenu de `.cuisine/dashboard-url` (lire l'artifact d'abord si la session ne l'a pas encore lu) ; s'il n'existe pas encore, publier sans `url` et écrire l'adresse obtenue dans `.cuisine/dashboard-url`.
+9 bis. **Coûts et process** (lecture seule, sans LLM) : `cuisine couts [version]` donne par run le coût estimé (grille `.cuisine/tarifs.yaml`, sourcée), la durée, les itérations avant le premier vert, et écrit `.cuisine-run/couts.json` et `.cuisine-run/couts-propositions.md` (propositions de changement de process, seuils provisoires : à présenter, jamais à appliquer). En fin de session : `cuisine couts --archiver`, puis pousser la branche `cuisine/couts` avec l'accord de l'utilisateur (sans elle, l'estimation avant approbation ne se calibre jamais). Anomalie de déterminisme suspectée sur une porte : `python3 .cuisine/scripts/couts.py determinisme <nœud>`.
+10. **Classeur métier en entrée** : si l'utilisateur fournit un classeur Excel à transformer en application, `cuisine excel <classeur> <version>` écrit la demande dans `prompts/<version>.md` ; la lui présenter, faire trancher les points `[À PRÉCISER PAR L'HUMAIN]` et les anomalies, puis seulement lancer la fabrication.
+11. **Code modifié hors cuisine** : `cuisine resync`, puis présenter la branche `resync/...` et ses conflits éventuels.
+12. **Livraison** : pousser la branche ; une version = une branche `version/<version>` et une demande de fusion, sauf instruction contraire. Jamais d'envoi direct sur `main`. En session cloud, GraphQL est fermé : ouvrir la demande de fusion par l'API REST (`gh api repos/<propriétaire>/<dépôt>/pulls -f title=… -f head=… -f base=main -F body=@fichier`).
+
+## Reconstruction du socle en salle blanche
+
+`cuisine rebuild <lot>` reconstruit un lot du socle depuis `specifications/socle/` seulement (lots et ordre dans `.cuisine/rebuild/lots.yaml`). Même surveillance qu'une version (arrière-plan, `.cuisine-run/rebuild-<lot>.log`) ; reprise par `cuisine rebuild --resume <lot>`. Les lots s'enchaînent dans l'ordre, chacun sur un arbre propre. Aucune implémentation antérieure ne doit se trouver dans le dépôt ni être donnée aux agents.
+
+## Ce qui reste à l'humain
+
+La demande de version, les réponses aux questions retenues, l'arbitrage des alertes du socle et des règles `(inferred)`, la recette sur captures, la décision de fusionner.

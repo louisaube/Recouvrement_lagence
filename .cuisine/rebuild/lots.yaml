@@ -1,0 +1,30 @@
+# Reconstruction du socle en salle blanche, par lots cumulatifs.
+# Pour chaque lot : chapitres de la spécification, fichiers de recette (spécification de référence, scellée),
+# chemins du contrat d'API à reproduire à l'identique, écrans à couvrir par les tests de navigateur.
+lots:
+  r0-fondations:
+    titre: "Plateforme, authentification, session, écrans de connexion et d'accueil"
+    chapitres: [00-vue-ensemble.md, 10-plateforme.md, 20-authentification-session.md, "70-ecrans.md (connexion, mise en page, accueil)", "90-capacites-pour-le-metier.md (régime d'accès)"]
+    recette: [acceptance-session.test.ts]
+    # POST /users dès r0 : la recette de session vérifie qu'un visiteur ou un utilisateur ne peut pas créer de compte
+    contrat: [/server/health-check, /auth/login, /auth/current-user, /auth/logout, "POST:/users"]
+    ecrans: [connexion, mise en page protégée, accueil]
+  r1-comptes-groupes-perimetres:
+    titre: "Comptes, groupes, périmètres, règle par ligne, écrans d'administration"
+    chapitres: [30-comptes.md, 40-groupes-perimetres.md, "70-ecrans.md (utilisateurs, groupes, périmètres)", "90-capacites-pour-le-metier.md (périmètres)"]
+    recette: [acceptance-auth.test.ts, acceptance-users-admin.test.ts, acceptance-groups.test.ts, acceptance-scopes.test.ts]
+    contrat: [/users, "/users/{id}", /scopes, "/scopes/{id}", /groups, "/groups/{id}"]
+    ecrans: [utilisateurs, groupes, périmètres]
+  r2-journal-audit:
+    titre: "Journal d'audit et traçabilité déclarative"
+    chapitres: [50-journal-audit.md, "70-ecrans.md (journal)", "90-capacites-pour-le-metier.md (traçabilité)"]
+    recette: [acceptance-audit-journal.test.ts, acceptance-audit-trace.test.ts]
+    contrat: [/audit-logs, /audit-logs/filters]
+    ecrans: [journal d'audit]
+  r3-import:
+    titre: "Import Excel et CSV en flux, mécanisme réutilisable, import de comptes"
+    chapitres: [60-import.md, "70-ecrans.md (import des utilisateurs)", "90-capacites-pour-le-metier.md (import)"]
+    recette: [acceptance-import-specification.test.ts, acceptance-import-preview.test.ts, acceptance-import-errors.test.ts, acceptance-import-confirm.test.ts, acceptance-import-large.test.ts]
+    contrat: [/users/imports/specification, /users/imports/preview, "/users/imports/{importId}/errors", "/users/imports/{importId}/confirm"]
+    ecrans: [import des utilisateurs]
+ordre: [r0-fondations, r1-comptes-groupes-perimetres, r2-journal-audit, r3-import]

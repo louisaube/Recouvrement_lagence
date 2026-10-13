@@ -1,0 +1,41 @@
+# Grille tarifaire de la cuisine (F2), USD par million de tokens. Versionnée : une ligne par modèle et par date d'effet ;
+# la ligne retenue pour une visite est la plus récente dont l'effet précède la visite. Un modèle absent donne
+# « coût inconnu », jamais zéro. Toute ligne cite sa source et la date du relevé.
+# effet: inconnue  = date d'entrée en vigueur non publiée sur la page relevée ; la ligne vaut pour toute date
+#                    antérieure à une ligne datée du même modèle.
+- modele: claude-sonnet-5-5
+  effet: inconnue
+  entree: 2
+  ecriture_cache_5m: 2.5
+  ecriture_cache_1h: 4
+  lecture_cache: 0.1
+  sortie: 10
+  releve: 2026-10-09
+  source: https://platform.claude.com/docs/en/about-claude/pricing
+- modele: claude-opus-5-5
+  effet: inconnue
+  entree: 4
+  ecriture_cache_5m: 5
+  ecriture_cache_1h: 8
+  lecture_cache: 0.2
+  sortie: 20
+  releve: 2026-10-09
+  source: https://platform.claude.com/docs/en/about-claude/pricing
+- modele: claude-fable-5-1
+  effet: inconnue
+  entree: 10
+  ecriture_cache_5m: 12.5
+  ecriture_cache_1h: 20
+  lecture_cache: 0.25
+  sortie: 50
+  releve: 2026-10-09
+  source: https://platform.claude.com/docs/en/about-claude/pricing
+- modele: claude-haiku-4-5-20251001
+  effet: inconnue
+  entree: 1
+  ecriture_cache_5m: 1.25
+  ecriture_cache_1h: 2
+  lecture_cache: 0.1
+  sortie: 5
+  releve: 2026-10-09
+  source: https://platform.claude.com/docs/en/about-claude/pricing

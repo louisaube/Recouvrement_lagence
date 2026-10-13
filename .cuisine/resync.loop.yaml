@@ -1,0 +1,118 @@
+name: cuisine-sauvage-resync
+entry: detect
+defaults:
+  agent: claude
+  max_visits: 4
+hooks:
+- type: console
+  events:
+  - run_start
+  - node_start
+  - node_end
+  - run_end
+agents:
+  claude:
+    bin: claude
+    new_session_args:
+    - -p
+    - '{{prompt}}'
+    - --output-format
+    - json
+    - --permission-mode
+    - acceptEdits
+    - --allowedTools
+    - Read,Edit,Write,Glob,Grep,TodoWrite,Bash(pnpm:*),Bash(npx:*),Bash(bash:*),Bash(cd:*),Bash(curl:*),Bash(ls:*),Bash(cat:*),Bash(mkdir:*),Bash(sleep:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(DATABASE_URL=*),Bash(NODE_ENV=*)
+    resume_session_args:
+    - --resume
+    - '{{session_id}}'
+    - -p
+    - '{{prompt}}'
+    - --output-format
+    - json
+    - --permission-mode
+    - acceptEdits
+    - --allowedTools
+    - Read,Edit,Write,Glob,Grep,TodoWrite,Bash(pnpm:*),Bash(npx:*),Bash(bash:*),Bash(cd:*),Bash(curl:*),Bash(ls:*),Bash(cat:*),Bash(mkdir:*),Bash(sleep:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(DATABASE_URL=*),Bash(NODE_ENV=*)
+    session_id_regex: '"session_id":"([a-f0-9-]+)"'
+    rate_limit:
+      patterns:
+      - name: claude_usage_limit
+        regex: usage limit reached.*reset at (\d{1,2}):(\d{2})
+        reset_format: clock_hhmm
+        reset_groups:
+        - 1
+        - 2
+      - name: claude_429
+        regex: 429 Too Many Requests
+      - name: anthropic_overloaded
+        regex: overloaded_error|503 Service Unavailable
+      default_wait_minutes: 15
+      max_consecutive_retries: 4
+  claude-qa:
+    bin: claude
+    new_session_args:
+    - -p
+    - '{{prompt}}'
+    - --output-format
+    - json
+    - --permission-mode
+    - acceptEdits
+    - --disallowedTools
+    - Bash
+    - --allowedTools
+    - Read(specifications/**),Read(prompts/**),Read(api/acceptance/**),Read(CLAUDE.md),Read(.cuisine/**),Write(api/acceptance/**),Edit(api/acceptance/**),Edit(specifications/**/DISPUTES.md),Write(specifications/permissions.yaml),Edit(specifications/permissions.yaml),Edit(specifications/contract-changes.yaml),Glob(specifications/**),Glob(api/acceptance/**),Grep(specifications/**),Grep(api/acceptance/**),TodoWrite
+    resume_session_args:
+    - -p
+    - '{{prompt}}'
+    - --output-format
+    - json
+    - --permission-mode
+    - acceptEdits
+    - --disallowedTools
+    - Bash
+    - --allowedTools
+    - Read(specifications/**),Read(prompts/**),Read(api/acceptance/**),Read(CLAUDE.md),Read(.cuisine/**),Write(api/acceptance/**),Edit(api/acceptance/**),Edit(specifications/**/DISPUTES.md),Write(specifications/permissions.yaml),Edit(specifications/permissions.yaml),Edit(specifications/contract-changes.yaml),Glob(specifications/**),Glob(api/acceptance/**),Grep(specifications/**),Grep(api/acceptance/**),TodoWrite
+    session_id_regex: '"session_id":"([a-f0-9-]+)"'
+sessions:
+  spec: null
+  qa: null
+nodes:
+  detect:
+    type: command
+    cmd: W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; base=$(git log --format=%H -1 --author="^cuisine" --author="^factory" --grep="version fabriquée\|factory version\|application .* baptisée" ); [ -n "$base" ] || base=$(git rev-list --max-parents=0 HEAD); echo "$base" > "$W/resync.base"; git log --format="%h %an %s" "$base"..HEAD -- api/src studio/src > "$W/resync.commits"; if [ ! -s "$W/resync.commits" ]; then echo "NOTHING TO RESYNC since $base"; exit 3; fi; echo "Code changed outside the kitchen since $base:"; cat "$W/resync.commits"; git diff --stat "$base"..HEAD -- api/src studio/src | tail -25
+    'on':
+      exit_0: resync-spec
+      exit_non_zero: done
+  resync-spec:
+    type: prompt
+    session: spec
+    new_session: true
+    prompt: |-
+      You are the SPECIFICATION RESYNC agent of the kitchen. Code was changed OUTSIDE the factory (by a person or another tool). The base commit is in `.cuisine-run/resync.base` and the commits in `.cuisine-run/resync.commits`; read the full diff with `git diff $(cat .cuisine-run/resync.base)..HEAD -- api/src studio/src`.
+      Update `specifications/` so that it describes the behaviour of the code as it is now: module and page summaries (following `.cuisine/templates/summary.md`) and, where a plan is affected, a short addendum. Every rule added, changed or removed by the outside change keeps a stable id `rule-<module>-<slug>` and gets the provenance tag `(code)`.
+      If the outside change contradicts a rule tagged `(user)`, do NOT rewrite that rule: record it as `CONFLICT: <rule id>: <what the code now does> (commit <hash>)` for the human.
+      Write `specifications/RESYNC-<YYYY-MM-DD>.md` listing: commits examined, rules added/changed/removed with ids, conflicts. Never modify code, `api/acceptance/**`, `specifications/permissions.yaml`, `specifications/openapi.json`, `specifications/contract-changes.yaml`. End with the list of files written.
+    next: qa-cover
+  qa-cover:
+    type: prompt
+    agent: claude-qa
+    session: qa
+    new_session: true
+    prompt: 'You are the ACCEPTANCE (QA) agent; you cannot see the application code. The specifications were just resynchronised from code changed outside the factory: read the newest `specifications/RESYNC-*.md` and the summaries it points to. For every rule tagged `(code)` that is observable through the API, add black-box acceptance tests in a new file `api/acceptance/acceptance-resync-<YYYY-MM-DD>.test.ts` (test names start with the rule ids), and update `specifications/permissions.yaml` for any operation added or changed. Justify non observable rules in `api/acceptance/COVERAGE-resync-<YYYY-MM-DD>.md`. Never modify existing tests. Rules marked CONFLICT are left to the human: do not test them.'
+    next: acceptance-run
+  acceptance-run:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; ( cd api && NODE_ENV=test bash scripts/server/start.sh >/dev/null 2>&1 && sleep 8 && { pnpm -s test:acceptance > $W/acc.log 2>&1; r=$?; grep -E "✕|Tests:" $W/acc.log | head -40; exit $r; } ) ; r=$?; [ $r -eq 0 ] || echo "RED: the code changed outside the kitchen breaks the sealed acceptance suite; these failures are conflicts for the human."; exit 0'
+    next: gates
+  gates:
+    type: command
+    cmd: W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; bash .cuisine/scripts/matrix-check.sh | tail -5; python3 .cuisine/scripts/permissions-check.py "$W/gates/perm-resync" --report "$W/gates/perm-resync.md" > "$W/perm-resync.log" 2>&1; tail -1 "$W/perm-resync.log"; grep BLOQUANT "$W/gates/perm-resync.md" | cut -c1-200; cd api && NODE_ENV=test node -r tsconfig-paths/register -r ts-node/register/transpile-only scripts/cuisine/openapi-snapshot.ts "$W/openapi-now.json" >/dev/null && cd .. && oasdiff breaking specifications/openapi.json "$W/openapi-now.json" --format text | head -30; exit 0
+    next: commit
+  commit:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; b="resync/$(date +%Y-%m-%d-%H%M)"; git checkout -q -b "$b" && { printf "\n## Gates after resync\n\n\`\`\`\n%s\n\`\`\`\n" "$(cat $W/acc.log 2>/dev/null | grep -E "Tests:|✕" | head -20; tail -1 $W/perm-resync.log 2>/dev/null)" >> "$(ls -t specifications/RESYNC-*.md | head -1)"; git add specifications api/acceptance && git -c user.name=cuisine -c user.email=cuisine@local commit -qm "cuisine : spécifications resynchronisées depuis le code" && echo "branch $b ready for review"; }'
+    terminal: true
+  done:
+    type: command
+    cmd: echo "Nothing to resync."
+    terminal: true

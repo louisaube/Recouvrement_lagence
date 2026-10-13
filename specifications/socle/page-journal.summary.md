@@ -1,0 +1,17 @@
+# Journal d'audit (`/journal`) : état réalisé
+
+Écran en lecture seule réservé aux administrateurs. Code : `features/audit/pages/JournalPage.tsx`, `hooks/useAuditData.ts`, `hooks/auditFilters.ts`. Règles API : `50-journal-audit.md`. Écran : `70-ecrans.md` §10.
+
+## Ce qui existe
+- Titre « Journal d'audit » et bouton « Copier le lien » (notification « Lien copié. », ou « Copie impossible. Copiez l'adresse depuis la barre du navigateur. »). Onglet et écran réservés aux administrateurs, « Accès refusé » sinon, sans appel au journal (`rule-foundation-audit-admin-only`, user ; `rule-foundation-audit-french-screen`, user).
+- **Filtres** : « Auteur » (choix avec saisie sur l'e-mail), « Action » (« Toutes », puis verbe français et code, par exemple « Modification — groups:update »), « Type d'objet », « Périmètre », « Du », « Au », « Réinitialiser les filtres » (désactivé sans filtre). Valeurs lues une fois par `GET /audit-logs/filters`, calculées sur le seul journal (`rule-foundation-audit-filter-options-from-journal`, inferred) ; échec : « Impossible de charger les valeurs des filtres. » avec « Réessayer », la liste reste lisible. Les filtres se combinent par ET (`rule-foundation-audit-filters` user, `rule-foundation-audit-filters-combine` inferred).
+- **Tableau** (`GET /audit-logs`, seuls les filtres non vides sont envoyés) : « Date » (`JJ/MM/AAAA HH:mm:ss`, fuseau du navigateur), « Auteur » (e-mail enregistré dans l'entrée, `rule-foundation-audit-survives-author-deletion` user), « Action » (pastille « Création » / « Modification » / « Suppression » et code), « Objet » (type, identifiant en police à chasse fixe), « Périmètre » (code ou « — »), « Résumé » en texte brut, jamais interprété comme du HTML (`rule-foundation-audit-summary-no-secret`, inferred). Plus récent d'abord, ordre non modifiable (`rule-foundation-audit-newest-first`, inferred), pagination serveur 10 / 25 / 50. Aucune commande de modification, de suppression ni d'export (`rule-foundation-audit-immutable`, user).
+- Vide : « Aucune action n'a encore été tracée. » sans filtre ; « Aucune entrée ne correspond à ces filtres. » avec filtres. Erreurs : 401 fin de session, 403 « Action non autorisée. », autre « Une erreur est survenue. Veuillez réessayer. » avec « Réessayer ».
+- **Filtre partageable par lien** (`rule-foundation-audit-shareable-filter`, user) : paramètres d'adresse `auteur`, `action`, `type`, `perimetre`, `du`, `au` ; vides omis, autres paramètres conservés, page et taille non portées ; un lien filtré survit à la connexion via `?redirection=`.
+- **Période en jours entiers** (`rule-foundation-audit-period-inclusive-days`, inferred) : « Du » 00:00:00.000 et « Au » 23:59:59.999 dans le fuseau du navigateur, envoyés en ISO UTC ; « Du » postérieur à « Au » : « La date de début doit précéder la date de fin. », aucun appel.
+- **Adresse assainie** (`rule-foundation-audit-url-sanitized`, inferred) : date invalide, auteur non uuid, texte trop long ou contenant un caractère nul sont ignorés et retirés de l'adresse ; une valeur valide mais inconnue des listes reste appliquée.
+- Une nouvelle route tracée apparaît dans l'écran et ses filtres sans modification (`rule-foundation-audit-declarative-route`, user).
+
+## Limites connues
+- Pas de filtre « sans périmètre », de recherche plein texte, d'export ni de page de détail ; les actions sur comptes et groupes ne sont pas filtrables par périmètre.
+- Un import n'apparaît que par une entrée (`users:import-confirm`, affichée « Import »), pas une par compte créé.

@@ -1,0 +1,5 @@
+# Aucune question : la demande ne laisse aucun choix ouvert qui change ce qui est construit ni la recette.
+# Les points de détail (forme de la déclaration `roles: []`, liste des types de contenu admis, en-tête posé par la route
+# elle-même) sont tranchés dans la demande à l'API et listés en hypothèses ; aucun n'est observable par la suite de
+# recette (cuisine:routes, matrice observée, démarrage du serveur, document OpenAPI des routes existantes).
+[]

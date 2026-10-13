@@ -1,0 +1,495 @@
+name: cuisine-sauvage-socle
+entry: spec-front
+
+defaults:
+  agent: claude
+  max_visits: 8
+
+hooks:
+  - type: console
+    events: [run_start, node_start, node_end, run_end]
+
+agents:
+  claude:
+    bin: claude
+    new_session_args: ["-p", "{{prompt}}", "--permission-mode", "acceptEdits", "--allowedTools", "Read,Edit,Write,Glob,Grep,TodoWrite,Bash(pnpm:*),Bash(npx:*),Bash(bash:*),Bash(cd:*),Bash(curl -s http://localhost:*),Bash(curl -sS http://localhost:*),Bash(curl -i http://localhost:*),Bash(curl http://localhost:*),Bash(ls:*),Bash(cat:*),Bash(mkdir:*),Bash(sleep:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(DATABASE_URL=*),Bash(NODE_ENV=*)"]
+    resume_session_args: ["-p", "{{prompt}}", "--permission-mode", "acceptEdits", "--allowedTools", "Read,Edit,Write,Glob,Grep,TodoWrite,Bash(pnpm:*),Bash(npx:*),Bash(bash:*),Bash(cd:*),Bash(curl -s http://localhost:*),Bash(curl -sS http://localhost:*),Bash(curl -i http://localhost:*),Bash(curl http://localhost:*),Bash(ls:*),Bash(cat:*),Bash(mkdir:*),Bash(sleep:*),Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(DATABASE_URL=*),Bash(NODE_ENV=*)"]
+    session_id_regex: '"session_id":"([a-f0-9-]+)"'
+    rate_limit:
+      patterns:
+        - name: claude_usage_limit
+          regex: "usage limit reached.*reset at (\\d{1,2}):(\\d{2})"
+          reset_format: clock_hhmm
+          reset_groups: [1, 2]
+        - name: claude_429
+          regex: "429 Too Many Requests"
+        - name: anthropic_overloaded
+          regex: "overloaded_error|503 Service Unavailable"
+      default_wait_minutes: 15
+      max_consecutive_retries: 4
+
+  claude-qa:
+    bin: claude
+    new_session_args: ["-p", "{{prompt}}", "--permission-mode", "acceptEdits", "--disallowedTools", "Bash", "--allowedTools", "Read(specifications/**),Read(prompts/**),Read(acceptance/**),Read(CLAUDE.md),Read(.cuisine/templates/**),Write(acceptance/**),Edit(acceptance/**),Edit(specifications/**/DISPUTES.md),Write(specifications/permissions.yaml),Edit(specifications/permissions.yaml),Edit(specifications/contract-changes.yaml),Glob(specifications/**),Glob(acceptance/**),Grep(specifications/**),Grep(acceptance/**),TodoWrite"]
+    resume_session_args: ["-p", "{{prompt}}", "--permission-mode", "acceptEdits", "--disallowedTools", "Bash", "--allowedTools", "Read(specifications/**),Read(prompts/**),Read(acceptance/**),Read(CLAUDE.md),Read(.cuisine/templates/**),Write(acceptance/**),Edit(acceptance/**),Edit(specifications/**/DISPUTES.md),Write(specifications/permissions.yaml),Edit(specifications/permissions.yaml),Edit(specifications/contract-changes.yaml),Glob(specifications/**),Glob(acceptance/**),Grep(specifications/**),Grep(acceptance/**),TodoWrite"]
+    session_id_regex: '"session_id":"([a-f0-9-]+)"'
+
+sessions:
+  front:
+  back:
+  reviewer:
+  fixer:
+  qa:
+
+nodes:
+  spec-front:
+    type: prompt
+    session: front
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      You are the FRONTEND agent of a software factory. Read CLAUDE.md, the existing `specifications/` folder (if any) and the current studio and api code first.
+      The user asks for a new version of the application:
+
+      ---
+      {{input}}
+      ---
+
+      Write the specifications for this version, WITHOUT writing any code:
+      1. One page implementation plan per page created or updated, at `specifications/<module>/implementation-plans/<version-slug>/<page>-page-implementation-plan.md`, following `.cuisine/templates/page-implementation-plan.md`.
+      2. If the view needs API routes that do not exist yet or must change, write `specifications/<module>/implementation-plans/<version-slug>/<name>-api-modification-request.md` following `.cuisine/templates/api-modification-request.md`.
+      3. Questions for the owner: wherever the request leaves a choice open that changes what is built (a behaviour, a rule, a screen), do not decide silently. Write it in `specifications/<module>/implementation-plans/<version-slug>/questions.yaml` following the format of `.cuisine/templates/questions.yaml` (closed options, the cost of each, the same `situation` for every option and one `resultat` per option, a concrete `test` per option when the behaviour is observable through the API, the default you recommend). Question ids continue the module's numbering across all versions: never reuse an id already present in another version's `questions.yaml` or in `specifications/<module>/arbitrages.yaml`. One rule depends only on the options of one question. Ask nothing whose answer would not change the acceptance tests. Write the rule for the default option in the plans, tagged as usual.
+      The version slug is the content of `.cuisine-run/version`.
+      Tag every business rule `(user)` only if it is stated in the request above, otherwise `(inferred)`. List your assumptions. Do not invent features that were explicitly excluded.
+      End with the list of files you wrote.
+    next: spec-back
+
+  spec-back:
+    type: prompt
+    session: back
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      You are the BACKEND agent of a software factory. Read CLAUDE.md and the existing api code first.
+      The frontend agent just wrote API modification requests (see `git status` for new files under `specifications/`). Original user request, for reference:
+
+      ---
+      {{input}}
+      ---
+
+      Write the backend module implementation plan at `specifications/<module>/implementation-plans/<version-slug>/<module>-module-implementation-plan.md` following `.cuisine/templates/module-implementation-plan.md`. Keep the provenance of each rule as written upstream: a rule tagged `(inferred)` by the frontend agent stays `(inferred)`. Do not write code. If no API change is needed, write nothing and say so. The version slug is the content of `.cuisine-run/version`. Add to `questions.yaml` (same folder, format `.cuisine/templates/questions.yaml`) the backend choices left open by the request that would change the acceptance tests; never decide them silently.
+    next: questions-check
+
+  questions-check:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; ( python3 .cuisine/scripts/arbitrage.py check ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[questions-check]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: questions-filter
+      exit_non_zero: questions-fix
+
+  questions-fix:
+    type: prompt
+    session: back
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      The questions you wrote for the owner (`questions.yaml` of this version) are rejected by the format check. Fix them: every field of `.cuisine/templates/questions.yaml`, rule ids that exist in the specifications, options whose `resultat` and `test.attendu` all differ (two options the acceptance tests cannot tell apart are one option), a question id taken by another version replaced in every file of this version by the free id the check names (it prints the `arbitrage.py renumber` command that does it). Read `.cuisine-run/last-gate.txt`.
+    next: questions-check
+
+  questions-filter:
+    type: command
+    cmd: 'python3 .cuisine/scripts/arbitrage.py filter'
+    on:
+      exit_0: arbitrage-wait
+      exit_non_zero: arbitrage-wait
+
+  arbitrage-wait:
+    type: command
+    cmd: 'python3 .cuisine/scripts/arbitrage.py wait'
+    on:
+      exit_0: arbitrage-apply
+      exit_non_zero: en-attente
+
+  # La fabrication s'arrête ici tant que le propriétaire n'a pas répondu ; `cuisine arbitre` lance la suite
+  # (graphe *.suite.loop.yaml, qui commence à arbitrage-apply).
+  en-attente:
+    type: command
+    cmd: 'python3 .cuisine/scripts/arbitrage.py show; git add -A && git -c user.name=cuisine -c user.email=cuisine@local commit -qm "cuisine : spécification et questions en attente d arbitrage" || true; echo "EN ATTENTE : cuisine questions, puis cuisine arbitre"'
+    terminal: true
+
+  arbitrage-apply:
+    type: prompt
+    session: back
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      The owner's decisions for this version are in the registry `specifications/<module>/arbitrages.yaml` (entries whose `version` is the content of `.cuisine-run/version` and whose `statut` is `active`; `choix_par` says whether the owner or the default decided). For each active decision of this version: make the specification follow the chosen option (rules, plans, page and API requests), and add ` decision D-xxxx` inside the provenance tag of every rule the question lists, for example `(user, decision D-0012)` or `(inferred, decision D-0012)`, on the rule's heading line. A rule fixed by a decision the owner took gains nothing from your interpretation: follow the option's `resultat` and `test` literally. Never edit `arbitrages.yaml` or `questions.yaml`. If no decision concerns this version, change nothing and say so.
+    next: arbitrage-check-spec
+
+  arbitrage-check-spec:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; ( python3 .cuisine/scripts/arbitrage.py check-spec ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[arbitrage-check-spec]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: review-plan
+      exit_non_zero: arbitrage-apply
+
+  review-plan:
+    type: prompt
+    session: reviewer
+    new_session: true
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      You are the PLAN REVIEWER of a software factory. Read CLAUDE.md, then every specification file added or changed in this version (`git status`, `git diff`).
+      User request:
+      ---
+      {{input}}
+      ---
+      Check: (a) every point of the request is covered; (b) nothing explicitly excluded is planned; (c) the plans reuse existing code instead of duplicating it (read the code); (d) frontend needs and backend plan are consistent (routes, DTOs, auth); (e) rule provenance is correct; (f) the test plan covers every rule.
+      Fix the plan files directly. End with a short list of the changes you made.
+    next: acceptance-author
+
+  acceptance-author:
+    type: prompt
+    agent: claude-qa
+    session: qa
+    new_session: true
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      You are the ACCEPTANCE (QA) agent of a software factory. You are independent from the developers and you cannot see the application code.
+      User request for this new version:
+      ---
+      {{input}}
+      ---
+      Read CLAUDE.md, the specifications of this version (newest folder under `specifications/*/implementation-plans/`), the module summaries, and the existing acceptance suite in `acceptance/` (`harness.ts` helpers and the style of existing tests).
+      BEFORE any code exists, write the black-box acceptance tests of this version in new files `acceptance/acceptance-<topic>.test.ts`, derived only from the user request and the specifications (routes, parameters and DTOs as specified in the API modification request and module plan). Each test name starts with the rule id(s) it verifies, e.g. `it('[rule-events-admin-create] ...')`. Cover nominal, error (400, 404) and permission cases (401 without token, 403 with the wrong role, admin versus user). Seed data with `sql(...)`, users with `createUser`, tokens with `login`; `resetData()` in `beforeEach`, `closePool()` in `afterAll`. The test API is a separate process whose environment is fixed at start-up: if tests of this version need it started with an environment other than the existing ones (another driver, test doubles at fixed local addresses, a configuration left out), declare a variant in `acceptance/variants.yaml` (format and rules: `.cuisine/templates/variants.yaml`; files of earlier versions keep the default variant); the kitchen starts the API in each variant and runs its files there; tests read the environment of the API under test from the file named by `ACCEPTANCE_ENV_FILE` and never require a value that developers would have to write in `api/.env.test`. Write `acceptance/COVERAGE-<version-slug>.md` listing every rule id of this version: covered by which test, or "not observable through the API" with a reason. Never modify the tests of previous versions. Also update `specifications/permissions.yaml` (the EXPECTED permission matrix, compared mechanically with the code's decorators and with the running API): add or change one entry per operation of this version (method, Express-style path, action, allow among anonymous/user/admin, ownership none|own, rules, provenance, cross_owner_tests = exact titles of acceptance tests proving another user's resource cannot be read or changed). Keep existing entries unless this version changes them. For every active decision of this version in `specifications/<module>/arbitrages.yaml` whose question is observable (`questions.yaml` of this version), write one test from the `test` of the chosen option, titled `[rule-…][D-xxxx] …`, calling exactly that route and asserting exactly that expected result: the owner validated this case, do not reinterpret it. If the request is a revision (`prompts/revision-*.md`), you may rewrite only the tests listed in the impact file it names. End with the list of files written.
+    next: arbitrage-check-tests
+
+  arbitrage-check-tests:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; ( python3 .cuisine/scripts/arbitrage.py check-tests ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[arbitrage-check-tests]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: red-check
+      exit_non_zero: arbitrage-tests-fix
+
+  arbitrage-tests-fix:
+    type: prompt
+    agent: claude-qa
+    session: qa
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      The decision check failed: an observable decision of the owner has no acceptance test titled with its id `[D-xxxx]` that calls the chosen option's route and asserts its expected result, or (revision) a test outside the impact list was changed. Fix the acceptance tests accordingly. Output of the check:
+      {{nodes.arbitrage-check-tests.stdout}}
+    next: arbitrage-check-tests
+
+  red-check:
+    type: command
+    # Le rouge se constate test par test : seuls les tests absents du registre specifications/recette-rouge.yaml
+    # doivent échouer avant le code ; ceux qui y figurent l'ont déjà prouvé (reprise après arbitrage, relance).
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; files=$( { git ls-files --others --exclude-standard -- acceptance; git diff --name-only --diff-filter=A "$(cat $W/base 2>/dev/null || echo HEAD)" HEAD -- acceptance; } | grep "\.test\.ts$" | sort -u | sed "s#^acceptance/##"); [ -n "$files" ] || { echo "NO NEW ACCEPTANCE TEST"; exit 2; }; (cd api && NODE_ENV=test bash scripts/server/start.sh >/dev/null 2>&1); python3 .cuisine/scripts/rouge.py check $files > $W/red.log 2>&1; r=$?; tail -30 $W/red.log; exit $r'
+    on:
+      exit_0: seal
+      exit_non_zero: acceptance-fix
+
+  acceptance-fix:
+    type: prompt
+    agent: claude-qa
+    session: qa
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      The red check on your new acceptance tests is not satisfied: either no new test file exists, or the new tests already pass before any code is written, so they verify nothing new. Rewrite them so that they verify the new behaviour of this version. Output of the check:
+      {{nodes.red-check.stdout}}
+    next: red-check
+
+  seal:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; git add acceptance specifications; git -c user.name=qa -c user.email=qa@local commit -qm "qa: acceptance suite sealed" || echo "nothing new to seal"; git rev-parse HEAD > $W/acceptance.seal && echo SEALED'
+    on:
+      exit_0: code-back
+      exit_non_zero: code-back
+
+  code-back:
+    type: prompt
+    session: back
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      Implement the backend plan of this version (reviewed version in `specifications/`), following CLAUDE.md strictly: feature folder, explicit access declaration on every route, Zod schemas for every input and response (they generate the contract), Drizzle tables and a generated migration (`pnpm --dir api migrate:all`), tests per route. Cite rule ids in comments and tests. The sealed acceptance suite in `acceptance/` is the specification of record: never modify, delete or skip anything there; run it with `bash .cuisine/scripts/acceptance.sh` and make it pass (the script starts the test API in each variant of `acceptance/variants.yaml` itself; `bash .cuisine/scripts/api-variante.sh <variant>` starts one variant to debug a file; never write test values into `api/.env.*`, which the kitchen rewrites). If you are convinced an acceptance test contradicts the specification, do not touch it: append a line `OPEN: <test name>: <reason>` to `DISPUTES.md` in the implementation-plans folder of this version and continue. Then restart the server with `cd api && NODE_ENV=test bash scripts/server/start.sh`, run `pnpm type:check` and `pnpm test` in `api/`, and fix until green. Do not modify the read-only files of CLAUDE.md.
+    next: check-back
+
+  check-back:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; touch "$W/$(cat $W/version 2>/dev/null || echo version).code"; ( cd api && pnpm -s type:check && NODE_ENV=test bash scripts/server/start.sh >/dev/null 2>&1 && sleep 6 && { timeout -k 10 ${CUISINE_TEST_TIMEOUT:-900} pnpm -s test > $W/test.log 2>&1; r=$?; [ $r -eq 124 ] && { echo "BLOQUÉ : tests de l API arrêtés après ${CUISINE_TEST_TIMEOUT:-900} s sans réponse (attente sans fin : verrou, pool de connexions épuisé, promesse jamais résolue), ce n est pas un échec d assertion" >> $W/test.log; touch $W/blocked; }; tail -60 $W/test.log; exit $r; } ) > "$W/last-gate.txt" 2>&1; r=$?; [ -f "$W/blocked" ] && { rm -f "$W/blocked"; r=124; }; echo "[check-back]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: seal-check
+      exit_non_zero: back-dispute
+
+  # Un échec des tests de l'API avec des contestations ouvertes passe d'abord par l'arbitrage de la QA :
+  # sans cela, le développeur tourne en boucle sur un test qu'il conteste sans pouvoir le modifier.
+  back-dispute:
+    type: command
+    cmd: 'if grep -rqs "^OPEN" specifications --include=DISPUTES.md; then echo "Backend gate red and disputes are open: arbitration first."; grep -rh "^OPEN" specifications --include=DISPUTES.md; exit 1; else echo "NO OPEN DISPUTE"; fi'
+    on:
+      exit_0: fix-back
+      exit_non_zero: qa-arbitrate
+
+  seal-check:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; sealed=$(cat $W/acceptance.seal) && git diff --quiet "$sealed" -- acceptance specifications/permissions.yaml specifications/openapi.json specifications/contract-changes.yaml specifications/recette-rouge.yaml && [ -z "$(git status --porcelain -- acceptance specifications/permissions.yaml specifications/openapi.json specifications/contract-changes.yaml specifications/recette-rouge.yaml)" ] && ! grep -rqE "\.(skip|only)\(|(^|[^a-z])x(it|describe)\(" acceptance && echo "SEAL INTACT"'
+    on:
+      exit_0: acceptance-run
+      exit_non_zero: seal-broken
+
+  seal-broken:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; ( sealed=$(cat $W/acceptance.seal); echo "SEAL BROKEN: the sealed acceptance suite was modified; it has been restored."; git diff --stat "$sealed" -- acceptance; git checkout "$sealed" -- acceptance specifications/permissions.yaml specifications/openapi.json specifications/contract-changes.yaml specifications/recette-rouge.yaml; git clean -fdq -- acceptance; exit 1 ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[seal-broken]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: acceptance-run
+      exit_non_zero: fix-back
+
+  acceptance-run:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; ( cd api && NODE_ENV=test bash scripts/server/start.sh >/dev/null 2>&1 && cd .. && { bash .cuisine/scripts/acceptance.sh > $W/acc.log 2>&1; r=$?; grep -E "✕|Tests:" $W/acc.log | head -40; exit $r; } ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[acceptance-run]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: dispute-check
+      exit_non_zero: dispute-gate
+
+  dispute-gate:
+    type: command
+    cmd: 'if grep -rqs "^OPEN" specifications --include=DISPUTES.md; then echo "Acceptance is red and disputes are open: arbitration first."; grep -rh "^OPEN" specifications --include=DISPUTES.md; exit 1; else echo "NO OPEN DISPUTE"; fi'
+    on:
+      exit_0: fix-back
+      exit_non_zero: qa-arbitrate
+
+  dispute-check:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; if grep -rqs "^OPEN" specifications --include=DISPUTES.md; then grep -rh "^OPEN" specifications --include=DISPUTES.md; exit 1; else echo "NO OPEN DISPUTE"; fi'
+    on:
+      exit_0: permissions-check
+      exit_non_zero: qa-arbitrate
+
+  qa-arbitrate:
+    type: prompt
+    agent: claude-qa
+    session: qa
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      The developers opened disputes against your acceptance tests (files `specifications/**/DISPUTES.md`, entries starting with OPEN). For each one, re-read the user request and the specification. If the test is wrong, fix the test and rewrite the entry as `ACCEPTED: <what you changed>`; otherwise rewrite it as `REJECTED: <why the test stands>`. Disputes may also concern `specifications/permissions.yaml` (fix the entry if the specification supports the developers) or the contract of record (accept a breaking change only if the previous contract was wrong or the specification requires it, by adding `{ id: <oasdiff id>, path: <path>, reason: <why> }` under `allowed:` in `specifications/contract-changes.yaml`). A dispute about the environment a test runs against (driver, test doubles, a configuration left out) is settled in `acceptance/variants.yaml`, never in `api/.env.test`. Never weaken a test to match the code without a specification reason.
+    next: reseal
+
+  reseal:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; python3 .cuisine/scripts/cliquet.py "$(cat $W/acceptance.seal)" > "$W/last-gate.txt" 2>&1 || { echo "[cliquet]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit 1; }; mkdir -p "$W/gates"; git add acceptance specifications && git -c user.name=qa -c user.email=qa@local commit -qm "qa: disputes arbitrated, suite resealed"; git rev-parse HEAD > $W/acceptance.seal && echo RESEALED'
+    on:
+      exit_0: acceptance-run
+      exit_non_zero: cliquet-fix
+
+  cliquet-fix:
+    type: prompt
+    agent: claude-qa
+    session: qa
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      The ratchet on the acceptance suite refused your changes: a test was deleted, a rule lost tests or assertions, or an expectation was relaxed (strict equality turned into inclusion, a precise error code or HTTP status replaced by a vaguer check). A sealed suite never moves backwards without a written reason. Either restore the stricter test, or, if the specification or an owner's decision requires the change, cite it: the decision id `D-xxxx` in the test title, or an `ACCEPTED:` entry in a `DISPUTES.md` that quotes the test title. Read `.cuisine-run/last-gate.txt`.
+    next: reseal
+
+  fix-back:
+    type: prompt
+    session: back
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      A backend gate failed: type check, unit tests, seal integrity or the sealed acceptance suite. Fix the application code. Never modify anything in `acceptance/` (it is sealed and restored automatically if touched) and never touch the frozen foundation. If you are convinced an acceptance test contradicts the specification, open a dispute (`OPEN: ...` line in this version's DISPUTES.md) instead. A test that needs the test API started with an environment no variant of `acceptance/variants.yaml` provides is also a dispute: never write test values into `api/.env.*`.
+
+      Read `.cuisine-run/last-gate.txt`: it holds the output of the gate that failed, and its name on the last line.
+    next: check-back
+
+  permissions-check:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; ( cd api && NODE_ENV=test bash scripts/server/start.sh >/dev/null 2>&1; sleep 8; cd .. && rm -rf $W/gates/perm && { python3 .cuisine/scripts/permissions-check.py $W/gates/perm --report $W/gates/perm/report.md > $W/gates/perm.log 2>&1; r=$?; tail -30 $W/gates/perm.log; exit $r; } ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[permissions-check]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: contract-check
+      exit_non_zero: gate-dispute
+
+  contract-check:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; ( rm -rf $W/gates/contract && bash .cuisine/scripts/contract-check.sh $W/gates/contract ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[contract-check]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: gen-client
+      exit_non_zero: gate-dispute
+
+
+  gate-dispute:
+    type: command
+    cmd: 'if grep -rqs "^OPEN" specifications --include=DISPUTES.md; then echo "A gate failed and disputes are open: arbitration first."; grep -rh "^OPEN" specifications --include=DISPUTES.md; exit 1; else echo "NO OPEN DISPUTE"; fi'
+    on:
+      exit_0: fix-gates
+      exit_non_zero: qa-arbitrate
+  fix-gates:
+    type: prompt
+    session: back
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      A mechanical gate failed after the backend work: the three-source permission check (expected matrix `specifications/permissions.yaml`, the routes declared by `pnpm --dir api cuisine:routes`, running API) or the API contract check (oasdiff against `specifications/openapi.json`, Schemathesis against the running API). Fix the application code so that the gate passes: correct the access declarations, add missing bounds to the Zod schemas, make response schemas describe exactly what is returned. Details: `.cuisine-run/gates/perm/report.md`, `.cuisine-run/gates/contract/schemathesis.txt` (with curl reproductions). Never modify `acceptance/`, `specifications/permissions.yaml`, `specifications/openapi.json`, `specifications/contract-changes.yaml` or the frozen foundation. If the expected matrix is wrong, or if a fix necessarily breaks the contract of record (for instance a response type that was documented wrongly), do not touch those files: append `OPEN: <permissions|contract> <operation>: <reason>` to this version's DISPUTES.md. Restart the server and re-run the unit and acceptance tests before finishing.
+
+      Read `.cuisine-run/last-gate.txt`: it holds the output of the gate that failed, and its name on the last line.
+    next: check-back
+
+  gen-client:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; pnpm -s api-client:generate'
+    on:
+      exit_0: code-front
+      exit_non_zero: fix-back
+
+  code-front:
+    type: prompt
+    session: front
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      The backend for this version is implemented and the typed client in `packages/api-client` has been regenerated. Implement the frontend plan(s) of this version in `studio/src/app/` following CLAUDE.md (wire routes in `studio/src/App.tsx`). Use the generated types of `@monappli/api-client`. Cite rule ids in comments. Then run `cd studio && pnpm type:check && pnpm build` and fix until green.
+    next: check-front
+
+  check-front:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; cd studio && pnpm -s type:check && pnpm -s build > $W/build.log 2>&1; r=$?; tail -20 $W/build.log; exit $r'
+    on:
+      exit_0: review-sim
+      exit_non_zero: fix-front
+
+  fix-front:
+    type: prompt
+    session: front
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      The frontend checks failed. Fix the code.
+
+      stdout:
+      {{nodes.check-front.stdout}}
+
+      stderr:
+      {{nodes.check-front.stderr}}
+    next: check-front
+
+  review-sim:
+    type: prompt
+    session: reviewer
+    new_session: true
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      You are the EXECUTION-SIMULATION REVIEWER of a software factory. Read CLAUDE.md, the specifications of this version and the code diff (`git diff`, `git status`).
+      Simulate mentally, step by step, the user journeys of this version through the frontend, the API calls, the services and the database: authentication states, empty states, pagination, concurrent actions, error codes, transactions and ordering. Build a completeness matrix: for every rule id, where it is implemented and which test covers it.
+      Fix every defect you find directly in the code or tests (not in the frozen foundation). End with the matrix and the list of fixes.
+    next: check-final
+
+  check-final:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; ( cd api && pnpm -s type:check && NODE_ENV=test bash scripts/server/start.sh >/dev/null 2>&1 && sleep 6 && { timeout -k 10 ${CUISINE_TEST_TIMEOUT:-900} pnpm -s test > $W/test.log 2>&1; r=$?; [ $r -eq 124 ] && { echo "BLOQUÉ : tests de l API arrêtés après ${CUISINE_TEST_TIMEOUT:-900} s sans réponse (attente sans fin : verrou, pool de connexions épuisé, promesse jamais résolue), ce n est pas un échec d assertion" >> $W/test.log; touch $W/blocked; }; tail -40 $W/test.log; [ $r -eq 0 ]; } && cd ../studio && pnpm -s type:check && pnpm -s build > $W/build.log 2>&1 ) > "$W/last-gate.txt" 2>&1; r=$?; [ -f "$W/blocked" ] && { rm -f "$W/blocked"; r=124; }; echo "[check-final]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: final-gates
+      exit_non_zero: fix-final
+
+  final-gates:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; ( python3 .cuisine/scripts/echantillon_b.py "$(cat $W/base 2>/dev/null || echo HEAD)" >/dev/null 2>&1; cd api && NODE_ENV=test bash scripts/server/start.sh >/dev/null 2>&1; sleep 8; cd .. && rm -rf $W/gates/perm-final $W/gates/contract-final && { python3 .cuisine/scripts/permissions-check.py $W/gates/perm-final > $W/gates/perm-final.log 2>&1; p=$?; tail -12 $W/gates/perm-final.log; bash .cuisine/scripts/contract-check.sh $W/gates/contract-final; c=$?; [ $p -eq 0 ] && [ $c -eq 0 ]; } ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[final-gates]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: arbitrage-final
+      exit_non_zero: fix-final
+
+  arbitrage-final:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; ( python3 .cuisine/scripts/arbitrage.py check-spec && python3 .cuisine/scripts/arbitrage.py check-tests && python3 .cuisine/scripts/arbitrage.py append-only "$(cat $W/base 2>/dev/null || echo HEAD)" && python3 .cuisine/scripts/cliquet.py "$(cat $W/base 2>/dev/null || echo HEAD)" ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[arbitrage-final]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: matrix-check
+      exit_non_zero: final-dispute
+
+  # Un recul de la recette ou des tests de l'API ne se répare pas en silence : contestation ouverte, la QA arbitre.
+  final-dispute:
+    type: command
+    cmd: 'if grep -rqs "^OPEN" specifications --include=DISPUTES.md; then grep -rh "^OPEN" specifications --include=DISPUTES.md; exit 1; else echo "NO OPEN DISPUTE"; fi'
+    on:
+      exit_0: fix-final
+      exit_non_zero: qa-arbitrate
+
+  matrix-check:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; bash .cuisine/scripts/matrix-check.sh && sealed=$(cat $W/acceptance.seal) && git diff --quiet "$sealed" -- acceptance && { bash .cuisine/scripts/acceptance.sh > $W/acc.log 2>&1; r=$?; grep -E "Tests:" $W/acc.log; exit $r; }'
+    on:
+      exit_0: summarize
+      exit_non_zero: matrix-fix
+
+  matrix-fix:
+    type: prompt
+    agent: claude-qa
+    session: qa
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      The completeness matrix check failed: some rule ids declared in the specifications are neither cited by an acceptance test name nor justified as "not observable" in a COVERAGE file, or the final acceptance run failed. Add the missing acceptance tests or justifications (new tests only; never weaken existing ones).
+      {{nodes.matrix-check.stdout}}
+    next: reseal-final
+
+  reseal-final:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; python3 .cuisine/scripts/cliquet.py "$(cat $W/acceptance.seal)" > "$W/last-gate.txt" 2>&1 || { echo "[cliquet]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit 1; }; mkdir -p "$W/gates"; git add acceptance && git -c user.name=qa -c user.email=qa@local commit -qm "qa: matrix completion"; git rev-parse HEAD > $W/acceptance.seal; echo RESEALED'
+    on:
+      exit_0: acceptance-final
+      exit_non_zero: cliquet-fix-final
+
+  cliquet-fix-final:
+    type: prompt
+    agent: claude-qa
+    session: qa
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      The ratchet on the acceptance suite refused your changes: a test was deleted, a rule lost tests or assertions, or an expectation was relaxed (strict equality turned into inclusion, a precise error code or HTTP status replaced by a vaguer check). A sealed suite never moves backwards without a written reason. Either restore the stricter test, or, if the specification or an owner's decision requires the change, cite it: the decision id `D-xxxx` in the test title, or an `ACCEPTED:` entry in a `DISPUTES.md` that quotes the test title. Read `.cuisine-run/last-gate.txt`.
+    next: reseal-final
+
+  acceptance-final:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; ( cd api && NODE_ENV=test bash scripts/server/start.sh >/dev/null 2>&1 && cd .. && { bash .cuisine/scripts/acceptance.sh > $W/acc.log 2>&1; r=$?; grep -E "✕|Tests:" $W/acc.log | head -40; exit $r; } ) > "$W/last-gate.txt" 2>&1; r=$?; echo "[acceptance-final]" >> "$W/last-gate.txt"; cat "$W/last-gate.txt"; exit $r'
+    on:
+      exit_0: matrix-check
+      exit_non_zero: fix-final
+
+  fix-final:
+    type: prompt
+    session: fixer
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      Read CLAUDE.md. The final checks of this version failed. Fix the code (never weaken tests, never touch the frozen foundation).
+
+      Read `.cuisine-run/last-gate.txt`: it holds the output of the gate that failed, and its name on the last line. Details of the permission and contract gates are under `.cuisine-run/gates/`.
+    next: check-final
+
+  summarize:
+    type: prompt
+    session: front
+    prompt: |
+      FOUNDATION VERSION (Cuisine sauvage applied to itself). For this version only, the foundation part of the rule "Read-only for coding agents" of CLAUDE.md is lifted for the foundation folders (`api/src/platform/**`, the foundation features, `api/src/main.ts`, `api/scripts/**`, `studio/src/**`, `packages/api-client/scripts/**`): the foundation itself is the product of this version, and every application created from this repository will inherit it. It still applies to `.cuisine/**`, `CLAUDE.md`, the tooling contract of CLAUDE.md, `specifications/socle/data-contract.md` and `acceptance/**`. Keep the foundation generic: no business domain, French user interface texts, existing foundation tests must keep passing unless the specification of this version changes them. Foundation operations go into `specifications/permissions.yaml` like business ones.
+      
+      Update the living summaries following `.cuisine/templates/summary.md`: `specifications/<module>/module-<module>.summary.md` and one `specifications/<module>/page-<page>.summary.md` per page touched, reflecting what is now implemented, with rule ids and provenance tags. Do not change code.
+    next: mesures
+
+  mesures:
+    type: command
+    cmd: 'v=$(cat .cuisine-run/version); for d in specifications/*/implementation-plans/$v; do [ -d "$d" ] && { python3 .cuisine/scripts/arbitrage.py metrics; [ -f .cuisine-run/$v.echantillon-b.md ] && { echo; cat .cuisine-run/$v.echantillon-b.md; }; } > "$d/mesures.md"; done; python3 .cuisine/scripts/arbitrage.py metrics'
+    on:
+      exit_0: commit
+      exit_non_zero: commit
+
+  commit:
+    type: command
+    cmd: 'W="$PWD/.cuisine-run"; mkdir -p "$W/gates"; git add -A && git -c user.name=cuisine -c user.email=cuisine@local commit -qm "cuisine : version fabriquée" || true; pnpm -s --dir api cuisine:openapi "$PWD/specifications/openapi.json" >/dev/null && printf "allowed: []\n" > specifications/contract-changes.yaml && git add specifications/openapi.json specifications/contract-changes.yaml && git -c user.name=cuisine -c user.email=cuisine@local commit -qm "cuisine : contrat de référence mis à jour" || true'
+    terminal: true

@@ -1,0 +1,364 @@
+# Les 33 questions ouvertes de la salle blanche (specifications/socle/99-questions-ouvertes.md), converties au format 3.1.
+# Classement d'origine (tri manuel du 8 octobre) : 12 sans effet sur la recette, 15 où le défaut suffit, le reste au propriétaire.
+# Sert au critère d'acceptation 1 de l'étape d'arbitrage (.cuisine/tests/arbitrage/run.sh).
+
+# ── Plateforme ──
+- id: Q-PLAT-01
+  titre: Forme complète du corps d'erreur
+  regles: [rule-foundation-api-failure-handling]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un client envoie un corps invalide à une route quelconque."
+  options:
+    - {code: A, libelle: "status, code, message (et details en validation)", cout: leger, resultat: "Le corps ne contient que status, code, message, details.", test: {route: "POST /users", entree: "corps invalide", attendu: "400 api.validation.incoming_failed avec details"}}
+    - {code: B, libelle: "Ajouter horodatage et chemin", cout: leger, resultat: "Le corps contient aussi timestamp et path.", test: {route: "POST /users", entree: "corps invalide", attendu: "400 avec timestamp et path"}}
+  defaut: A
+- id: Q-PLAT-02
+  titre: Identifiant de corrélation
+  regles: [rule-foundation-api-failure-handling]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un client appelle GET /server/health-check."
+  options:
+    - {code: A, libelle: "En-tête X-Request-Id généré par le serveur", cout: leger, resultat: "La réponse porte X-Request-Id, un UUID.", test: {route: "GET /server/health-check", entree: "aucune", attendu: "200 avec en-tête X-Request-Id"}}
+    - {code: B, libelle: "Pas d'identifiant", cout: leger, resultat: "Aucun en-tête de corrélation.", test: {route: "GET /server/health-check", entree: "aucune", attendu: "200 sans en-tête X-Request-Id"}}
+  defaut: A
+- id: Q-PLAT-03
+  titre: Chemin du document OpenAPI servi
+  regles: [rule-foundation-home-replaceable]
+  effet_recette: non
+  decideur: defaut
+  observable: non
+  options:
+    - {code: A, libelle: "/api-json hors production", cout: leger, resultat: "Document servi en développement et en recette seulement."}
+    - {code: B, libelle: "/api-json partout", cout: leger, resultat: "Document servi aussi en production."}
+  defaut: A
+- id: Q-PLAT-04
+  titre: Taille maximale d'un corps JSON
+  regles: [rule-foundation-api-failure-handling]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un client envoie un corps JSON de 2 Mio."
+  options:
+    - {code: A, libelle: "1 Mio, 413", cout: leger, resultat: "Refus 413 api.payload_too_large.", test: {route: "POST /users", entree: "corps de 2 Mio", attendu: "413 api.payload_too_large"}}
+    - {code: B, libelle: "10 Mio", cout: leger, resultat: "Corps accepté puis validé.", test: {route: "POST /users", entree: "corps de 2 Mio", attendu: "400 api.validation.incoming_failed"}}
+  defaut: A
+- id: Q-PLAT-05
+  titre: Refus d'une route non déclarée
+  regles: [rule-foundation-api-failure-handling]
+  effet_recette: oui
+  decideur: defaut
+  observable: non
+  options:
+    - {code: A, libelle: "Le serveur refuse de démarrer", cout: leger, resultat: "Une route sans déclaration empêche le démarrage."}
+    - {code: B, libelle: "403 à l'exécution", cout: leger, resultat: "La route répond 403 security.access_denied."}
+  defaut: A
+- id: Q-PLAT-06
+  titre: Corps d'une réponse 404 de route inexistante
+  regles: [rule-foundation-api-failure-handling]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un visiteur appelle GET /inexistant."
+  options:
+    - {code: A, libelle: "404 api.route_not_found pour tous", cout: leger, resultat: "Le visiteur reçoit 404.", test: {route: "GET /inexistant", entree: "sans jeton", attendu: "404 api.route_not_found"}}
+    - {code: B, libelle: "401 pour un visiteur", cout: leger, resultat: "Le visiteur reçoit 401.", test: {route: "GET /inexistant", entree: "sans jeton", attendu: "401 security.unauthenticated"}}
+  defaut: A
+- id: Q-PLAT-07
+  titre: Clés inconnues hors routes PATCH
+  regles: [rule-foundation-scope-definition]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un administrateur crée un périmètre avec une clé en trop."
+  options:
+    - {code: A, libelle: "Ignorées", cout: leger, resultat: "Périmètre créé, clé ignorée.", test: {route: "POST /scopes", entree: "corps valide + clé foo", attendu: "201"}}
+    - {code: B, libelle: "Refusées partout", cout: leger, resultat: "Création refusée.", test: {route: "POST /scopes", entree: "corps valide + clé foo", attendu: "400 api.validation.incoming_failed"}}
+  defaut: A
+- id: Q-PLAT-08
+  titre: Contenu de services dans le point de santé
+  regles: [rule-foundation-api-unreachable]
+  effet_recette: non
+  decideur: defaut
+  observable: non
+  options:
+    - {code: A, libelle: "Base de données seule", cout: leger, resultat: "services.postgres seulement."}
+    - {code: B, libelle: "Tous les services", cout: leger, resultat: "Un état par dépendance."}
+  defaut: A
+- id: Q-PLAT-09
+  titre: Provenance divergente de trois règles
+  regles: [rule-foundation-list-pagination, rule-foundation-admin-nav, rule-foundation-admin-screens-guard]
+  effet_recette: non
+  decideur: defaut
+  observable: non
+  options:
+    - {code: A, libelle: "(inferred)", cout: leger, resultat: "Provenance déduite."}
+    - {code: B, libelle: "(user)", cout: leger, resultat: "Provenance demandée."}
+  defaut: A
+
+# ── Authentification ──
+- id: Q-AUTH-01
+  titre: Connexion sans Origin et sans jeton demandé
+  regles: [rule-foundation-session-persists]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un client sans en-tête Origin se connecte sans demander de jeton."
+  options:
+    - {code: A, libelle: "400 security.invalid_origin", cout: leger, resultat: "Refus explicite.", test: {route: "POST /auth/login", entree: "sans Origin, returnToken absent", attendu: "400 security.invalid_origin"}}
+    - {code: B, libelle: "Jeton renvoyé", cout: leger, resultat: "Le serveur renvoie un jeton.", test: {route: "POST /auth/login", entree: "sans Origin, returnToken absent", attendu: "201 avec token"}}
+  defaut: A
+- id: Q-AUTH-02
+  titre: Provenance des règles de la recette d'origine
+  regles: [rule-foundation-login-single-error]
+  effet_recette: non
+  decideur: defaut
+  observable: non
+  options:
+    - {code: A, libelle: "(user)", cout: leger, resultat: "Règles demandées."}
+    - {code: B, libelle: "(inferred)", cout: leger, resultat: "Règles déduites."}
+  defaut: A
+- id: Q-AUTH-03
+  titre: Révocation du jeton à la déconnexion
+  regles: [rule-foundation-logout, rule-foundation-session-expired]
+  effet_recette: oui
+  decideur: proprietaire
+  observable: oui
+  situation: "Un utilisateur se déconnecte, puis son ancien jeton est réutilisé."
+  options:
+    - {code: A, libelle: "Jeton sans état, pas de révocation", cout: leger, resultat: "L'ancien jeton reste valable jusqu'à son expiration.", test: {route: "GET /auth/current-user", entree: "jeton émis avant la déconnexion", attendu: "200 avec user"}}
+    - {code: B, libelle: "Révocation côté serveur", cout: lourd, ouvre: [stockage des révocations, purge], resultat: "L'ancien jeton est refusé.", test: {route: "GET /auth/current-user", entree: "jeton émis avant la déconnexion", attendu: "401 security.invalid_token"}}
+  defaut: A
+- id: Q-AUTH-04
+  titre: Rôle figé dans le jeton
+  regles: [rule-foundation-session-expired, rule-foundation-user-edit-scope]
+  effet_recette: oui
+  decideur: proprietaire
+  observable: oui
+  situation: "Un administrateur est rétrogradé en utilisateur, puis réutilise son jeton."
+  options:
+    - {code: A, libelle: "Rôle lu dans le jeton", cout: leger, resultat: "Il garde ses droits jusqu'à la reconnexion.", test: {route: "GET /users", entree: "jeton émis avant la rétrogradation", attendu: "200"}}
+    - {code: B, libelle: "Rôle relu en base", cout: leger, resultat: "Il perd ses droits immédiatement.", test: {route: "GET /users", entree: "jeton émis avant la rétrogradation", attendu: "403 security.access_denied"}}
+  defaut: A
+- id: Q-AUTH-05
+  titre: Studio et API sur des origines distinctes
+  regles: [rule-foundation-protected-redirect]
+  effet_recette: non
+  decideur: defaut
+  observable: non
+  options:
+    - {code: A, libelle: "Même site seulement", cout: leger, resultat: "Cookie SameSite=Strict."}
+    - {code: B, libelle: "Origines distinctes", cout: lourd, resultat: "Cookie SameSite=None et CORS élargi."}
+  defaut: A
+
+# ── Comptes ──
+- id: Q-COMPTES-01
+  titre: Mot de passe borné en caractères ou en octets
+  regles: [rule-foundation-user-create-fields]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un administrateur crée un compte avec un mot de passe de 72 caractères accentués."
+  options:
+    - {code: A, libelle: "Borne en caractères", cout: leger, resultat: "Compte créé ; bcrypt tronque au-delà de 72 octets.", test: {route: "POST /users", entree: "mot de passe de 72 caractères accentués", attendu: "201"}}
+    - {code: B, libelle: "Borne en octets", cout: leger, resultat: "Création refusée.", test: {route: "POST /users", entree: "mot de passe de 72 caractères accentués", attendu: "400 api.validation.incoming_failed"}}
+  defaut: A
+- id: Q-COMPTES-02
+  titre: Critère de validité d'une adresse e-mail
+  regles: [rule-foundation-user-create-fields, rule-foundation-import-users-email]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un administrateur crée un compte avec l'adresse a@b."
+  options:
+    - {code: A, libelle: "Domaine avec un point", cout: leger, resultat: "Adresse refusée.", test: {route: "POST /users", entree: "email a@b", attendu: "400 api.validation.incoming_failed"}}
+    - {code: B, libelle: "Une arobase suffit", cout: leger, resultat: "Compte créé.", test: {route: "POST /users", entree: "email a@b", attendu: "201"}}
+  defaut: A
+- id: Q-COMPTES-03
+  titre: Écran pour les utilisateurs ordinaires
+  regles: [rule-foundation-home-welcome]
+  effet_recette: non
+  decideur: defaut
+  observable: non
+  options:
+    - {code: A, libelle: "Aucun dans cette version", cout: leger, resultat: "Accueil seulement."}
+    - {code: B, libelle: "Écran « Mon compte »", cout: lourd, resultat: "Un écran de plus."}
+  defaut: A
+
+# ── Groupes et périmètres ──
+- id: Q-PERIM-01
+  titre: Une ligne rattachée à plusieurs périmètres
+  regles: [rule-foundation-scope-row-filter]
+  effet_recette: non
+  decideur: defaut
+  observable: non
+  options:
+    - {code: A, libelle: "Un seul périmètre par ligne", cout: leger, resultat: "Modèle simple."}
+    - {code: B, libelle: "Plusieurs périmètres", cout: lourd, resultat: "Table de liaison."}
+  defaut: A
+- id: Q-PERIM-02
+  titre: Preuve de la règle par ligne
+  regles: [rule-foundation-scope-fail-closed]
+  effet_recette: non
+  decideur: defaut
+  observable: non
+  options:
+    - {code: A, libelle: "Tests du socle sur une table d'essai", cout: leger, resultat: "Preuve par les tests de l'API."}
+    - {code: B, libelle: "Route d'essai exposée", cout: leger, resultat: "Preuve par la recette."}
+  defaut: A
+
+# ── Journal d'audit ──
+- id: Q-AUDIT-01
+  titre: Accord de « 0 » dans les résumés
+  regles: [rule-foundation-audit-french-screen]
+  effet_recette: oui
+  decideur: defaut
+  observable: non
+  options:
+    - {code: A, libelle: "Singulier pour 0 et 1", cout: leger, resultat: "« 0 compte »."}
+    - {code: B, libelle: "Pluriel pour 0", cout: leger, resultat: "« 0 comptes »."}
+  defaut: A
+- id: Q-AUDIT-02
+  titre: Verbe affiché pour l'import
+  regles: [rule-foundation-audit-french-screen]
+  effet_recette: oui
+  decideur: defaut
+  observable: non
+  options:
+    - {code: A, libelle: "« Import »", cout: leger, resultat: "Libellé français."}
+    - {code: B, libelle: "Suffixe brut", cout: leger, resultat: "« import-confirm »."}
+  defaut: A
+- id: Q-AUDIT-03
+  titre: Nom de la base de recette
+  regles: [rule-foundation-audit-db-append-only]
+  effet_recette: non
+  decideur: defaut
+  observable: non
+  options:
+    - {code: A, libelle: "Suffixe _test", cout: leger, resultat: "Reconnaissance par le nom."}
+    - {code: B, libelle: "Variable d'environnement", cout: leger, resultat: "Reconnaissance par configuration."}
+  defaut: A
+
+# ── Import ──
+- id: Q-IMPORT-01
+  titre: Comptes importés sans possibilité de connexion
+  regles: [rule-foundation-import-users-no-password]
+  effet_recette: oui
+  decideur: proprietaire
+  observable: oui
+  situation: "Un salarié importé ouvre l'application et tente de se connecter."
+  options:
+    - {code: A, libelle: "Laisser ainsi jusqu'à une future fonction d'invitation", cout: leger, resultat: "Connexion refusée ; il attend une future fonction d'invitation.", test: {route: "POST /auth/login", entree: "compte importé, mot de passe quelconque", attendu: "401 security.invalid_credentials"}}
+    - {code: B, libelle: "Invitation par e-mail avec lien de définition du mot de passe", cout: lourd, ouvre: [durée du lien, déclencheur de l'invitation, renvoi, sous-traitant d'envoi], resultat: "Il a reçu un lien valable 72 h, choisit son mot de passe et se connecte.", test: {route: "POST /auth/invitations/accept", entree: "jeton d'invitation valide, mot de passe conforme", attendu: "200, puis connexion acceptée"}}
+  defaut: A
+- id: Q-IMPORT-02
+  titre: Une entrée de journal par import ou par compte
+  regles: [rule-foundation-import-audited]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un administrateur confirme l'import de 3 comptes."
+  options:
+    - {code: A, libelle: "Une entrée par import", cout: leger, resultat: "Une ligne « Import de comptes ».", test: {route: "GET /audit-logs", entree: "après confirmation", attendu: "200 avec 1 entrée users:import-confirm"}}
+    - {code: B, libelle: "Une entrée par compte", cout: leger, resultat: "Trois lignes users:create.", test: {route: "GET /audit-logs", entree: "après confirmation", attendu: "200 avec 3 entrées users:create"}}
+  defaut: A
+- id: Q-IMPORT-03
+  titre: Entrée chiffrée dans un xlsx
+  regles: [rule-foundation-import-trapped-files-refused]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un administrateur envoie un classeur protégé par mot de passe."
+  options:
+    - {code: A, libelle: "import.unsafe_archive", cout: leger, resultat: "Refus pour archive dangereuse.", test: {route: "POST /users/imports/preview", entree: "classeur chiffré", attendu: "400 import.unsafe_archive"}}
+    - {code: B, libelle: "import.invalid_file_type", cout: leger, resultat: "Refus pour type invalide.", test: {route: "POST /users/imports/preview", entree: "classeur chiffré", attendu: "400 import.invalid_file_type"}}
+  defaut: A
+- id: Q-IMPORT-04
+  titre: CSV sans ligne d'en-tête
+  regles: [rule-foundation-import-header-matching]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un administrateur envoie un CSV de données sans en-tête."
+  options:
+    - {code: A, libelle: "import.missing_columns", cout: leger, resultat: "Refus, colonnes manquantes nommées.", test: {route: "POST /users/imports/preview", entree: "CSV sans en-tête", attendu: "400 import.missing_columns"}}
+    - {code: B, libelle: "import.invalid_file_type", cout: leger, resultat: "Refus, type invalide.", test: {route: "POST /users/imports/preview", entree: "CSV sans en-tête", attendu: "400 import.invalid_file_type"}}
+  defaut: A
+- id: Q-IMPORT-05
+  titre: Confirmation d'un aperçu sans ligne valide
+  regles: [rule-foundation-import-confirm-needs-valid-rows]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un administrateur confirme un aperçu dont aucune ligne n'est valide."
+  options:
+    - {code: A, libelle: "Autorisée par l'API, bloquée par l'écran", cout: leger, resultat: "Confirmation acceptée, zéro compte créé.", test: {route: "POST /users/imports/{importId}/confirm", entree: "aperçu sans ligne valide", attendu: "200 avec created 0"}}
+    - {code: B, libelle: "Refusée par l'API", cout: leger, resultat: "Confirmation refusée.", test: {route: "POST /users/imports/{importId}/confirm", entree: "aperçu sans ligne valide", attendu: "400 import.nothing_to_import"}}
+  defaut: A
+- id: Q-IMPORT-06
+  titre: Analyses d'import simultanées
+  regles: [rule-foundation-import-large-files]
+  effet_recette: oui
+  decideur: proprietaire
+  observable: non
+  options:
+    - {code: A, libelle: "Pas de limite", cout: leger, resultat: "Chaque analyse prend jusqu'à 100 Mio de disque temporaire ; dix analyses simultanées en prennent un Gio."}
+    - {code: B, libelle: "Deux analyses par instance", cout: leger, ouvre: [code d'erreur de la troisième, durée d'attente], resultat: "La troisième analyse simultanée est refusée."}
+  defaut: A
+- id: Q-IMPORT-07
+  titre: 413 ou 400 pour un fichier trop gros
+  regles: [rule-foundation-import-limits]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un administrateur envoie un fichier de 101 Mio."
+  options:
+    - {code: A, libelle: "413", cout: leger, resultat: "Refus 413.", test: {route: "POST /users/imports/preview", entree: "fichier de 101 Mio", attendu: "413 import.file_too_large"}}
+    - {code: B, libelle: "400", cout: leger, resultat: "Refus 400.", test: {route: "POST /users/imports/preview", entree: "fichier de 101 Mio", attendu: "400 import.file_too_large"}}
+  defaut: A
+- id: Q-IMPORT-08
+  titre: Constantes de limites
+  regles: [rule-foundation-import-archive-limits]
+  effet_recette: non
+  decideur: defaut
+  observable: non
+  options:
+    - {code: A, libelle: "Conservées", cout: leger, resultat: "100 Mio, 1 000 000 lignes, 2 h."}
+    - {code: B, libelle: "Réduites", cout: leger, resultat: "Limites plus basses."}
+  defaut: A
+
+# ── Écrans ──
+- id: Q-ECRANS-01
+  titre: Captures incohérentes avec les spécifications de pages
+  regles: [rule-foundation-groups-admin-screen]
+  effet_recette: non
+  decideur: defaut
+  observable: non
+  options:
+    - {code: A, libelle: "Les spécifications font foi", cout: leger, resultat: "Onglet Journal et colonne Actions présents."}
+    - {code: B, libelle: "Les captures font foi", cout: leger, resultat: "Onglet et colonne retirés."}
+  defaut: A
+- id: Q-ECRANS-02
+  titre: Format des champs date
+  regles: [rule-foundation-audit-period-inclusive-days]
+  effet_recette: non
+  decideur: defaut
+  observable: non
+  options:
+    - {code: A, libelle: "Sélecteur natif, langue du navigateur", cout: leger, resultat: "jj/mm/aaaa en français."}
+    - {code: B, libelle: "Format forcé", cout: leger, resultat: "jj/mm/aaaa partout."}
+  defaut: A
+- id: Q-ECRANS-03
+  titre: Caractères de contrôle dans les noms
+  regles: [rule-foundation-scope-code-format]
+  effet_recette: oui
+  decideur: defaut
+  observable: oui
+  situation: "Un administrateur nomme un périmètre avec un caractère de tabulation."
+  options:
+    - {code: A, libelle: "Acceptés, affichés échappés", cout: leger, resultat: "Périmètre créé.", test: {route: "POST /scopes", entree: "nom contenant une tabulation", attendu: "201"}}
+    - {code: B, libelle: "Refusés", cout: leger, resultat: "Création refusée.", test: {route: "POST /scopes", entree: "nom contenant une tabulation", attendu: "400 api.validation.incoming_failed"}}
+  defaut: A

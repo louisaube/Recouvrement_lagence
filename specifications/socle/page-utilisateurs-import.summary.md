@@ -1,0 +1,17 @@
+# Importer des utilisateurs (`/utilisateurs/import`) : état réalisé
+
+Écran réservé aux administrateurs, bâti sur un parcours d'import générique réutilisable. Code : `features/users/pages/UsersImportPage.tsx`, `features/users/hooks/useUsersImportApi.ts`, `shared/import/{ImportFlow,ImportDropZone,ImportSpecPanel,ImportPreview,ImportConfirmDialog,importMessages,importTypes}`. Règles API : `60-import.md`. Écran : `70-ecrans.md` §7.
+
+## Ce qui existe
+- Structure : bouton retour « Utilisateurs », titre « Importer des utilisateurs », indicateur en trois étapes « Dépôt du fichier », « Aperçu », « Confirmation ». Point d'entrée uniquement depuis l'écran Utilisateurs (`rule-foundation-import-users-admin-only`, user). Aucun paramètre d'adresse ; quitter la page abandonne l'aperçu.
+- **Dépôt** : zone « Glissez un fichier .xlsx ou .csv ici », bouton « Choisir un fichier » (champ limité à `.xlsx,.csv`, nom accessible « Fichier à importer »), un seul fichier retenu (message « Un seul fichier à la fois : seul « <nom> » a été retenu. »). Panneau « Colonnes attendues » alimenté par `GET /users/imports/specification` (colonnes `email`, `role`, `groupes`, 100 Mo, 1 000 000 lignes ; `rule-foundation-import-users-columns` user), avec « Réessayer » en cas d'échec.
+- **Contrôles locaux** avant envoi, sans lire le fichier : format, 0 octet, taille (`rule-foundation-import-client-precheck`, inferred). Le fichier part tel quel en `multipart/form-data` (`rule-foundation-import-no-client-parsing`, inferred) et l'analyse démarre aussitôt.
+- **Analyse** : barre indéterminée, avertissement de durée, bouton « Annuler » qui interrompt la requête sans message d'erreur ; une réponse tardive est ignorée (`rule-foundation-import-cancel-analysis`, inferred).
+- **Refus** : un message français par code (`import.invalid_file_type`, `unsafe_archive`, `external_links`, `file_too_large`, `too_many_rows`, `empty_file`, `missing_columns`, `already_imported`), retour au dépôt (`rule-foundation-import-trapped-files-refused` user, `rule-foundation-import-no-double` user, `rule-foundation-import-formats` user).
+- **Aperçu** (`rule-foundation-import-two-steps` user, `rule-foundation-import-preview-content` user) : nom du fichier, « Lignes lues », « Lignes valides », « Lignes en erreur », « Rien n'a encore été enregistré. », alerte selon le cas ; tableau « Lignes en erreur » (Ligne, Colonne, Raison en français) paginé côté serveur (`rule-foundation-import-errors-paginated`, inferred). Aperçu expiré ou inconnu : « L'aperçu a expiré ou n'existe plus. Déposez à nouveau le fichier. » (`rule-foundation-import-preview-expires`, inferred).
+- **Confirmation** : « Importer N compte(s) », dialogue « Confirmer l'import » qui mentionne la trace d'audit (`rule-foundation-import-audited`, user), une seule requête malgré une série de clics, résultat « N compte(s) créé(s). », avertissement si des lignes ont été ignorées (`rule-foundation-import-confirm-valid-only` user). Sans ligne valide, le bouton est désactivé : « Aucune ligne valide : rien à importer. » (`rule-foundation-import-confirm-needs-valid-rows`, inferred).
+- Gros fichiers : l'analyse est une seule requête qui peut durer plusieurs minutes, annoncée à l'utilisateur (`rule-foundation-import-large-files`, user).
+
+## Limites connues
+- Pas d'export des erreurs, de modèle à télécharger, ni d'historique des imports.
+- Les comptes importés n'ont pas de mot de passe utilisable (Q-IMPORT-01, reporté).

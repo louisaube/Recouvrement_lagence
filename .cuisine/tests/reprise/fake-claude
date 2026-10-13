@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+"""Agent simulé du banc de reprise : remplace `claude` dans le PATH. Reconnaît le nœud à sa consigne et produit,
+sans modèle, l'effet minimal attendu sur une version factice d'une seule route (GET /banc/ping).
+Comportements pilotés par l'environnement :
+  BANC_DISPUTE=1   le développeur ouvre une contestation au lieu de faire passer un test qu'il conteste (cas 4)
+  BANC_AFFAIBLIR=1 en arbitrant, la QA relâche aussi le test de décision (toBe vers une comparaison) : le cliquet doit refuser (cas 8)
+Journal des nœuds joués : $BANC_JOURNAL (une ligne par appel)."""
+import glob, json, os, re, sys, uuid
+
+args = sys.argv[1:]
+prompt = args[args.index('-p') + 1] if '-p' in args else ''
+root = os.getcwd()
+version = open('.cuisine-run/version').read().strip() if os.path.exists('.cuisine-run/version') else 'banc'
+plans = f'specifications/banc/implementation-plans/{version}'
+RULE = 'rule-banc-ping-reponse'
+
+
+def write(path, text):
+    os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
+    open(path, 'w', encoding='utf-8').write(text)
+
+
+def journal(name):
+    if os.environ.get('BANC_JOURNAL'):
+        open(os.environ['BANC_JOURNAL'], 'a').write(name + '\n')
+
+
+def active_decision():
+    import yaml
+    for p in glob.glob('specifications/*/arbitrages.yaml'):
+        for d in yaml.safe_load(open(p)) or []:
+            if d.get('statut') == 'active' and d.get('question') == 'Q-BANC-01':
+                return d
+    return None
+
+
+if 'You are the FRONTEND agent' in prompt and 'Write the specifications' in prompt:
+    journal('spec-front')
+    write(f'{plans}/ping-page-implementation-plan.md',
+          f'# Écran ping\n\n## Règles\n- `{RULE}` (inferred) : la route répond selon la décision du propriétaire.\n')
+    write(f'{plans}/questions.yaml', """- id: Q-BANC-01
+  titre: Réponse de la route ping pour un visiteur
+  regles: [rule-banc-ping-reponse]
+  effet_recette: oui
+  decideur: proprietaire
+  observable: oui
+  situation: "Un visiteur appelle GET /banc/ping."
+  options:
+    - {code: A, libelle: "Ouverte", cout: leger, resultat: "Réponse 200.", test: {route: "GET /banc/ping", entree: "sans jeton", attendu: "200"}}
+    - {code: B, libelle: "Fermée", cout: leger, resultat: "Réponse 401.", test: {route: "GET /banc/ping", entree: "sans jeton", attendu: "401 security.unauthenticated"}}
+  defaut: A
+""")
+elif 'The owner\'s decisions for this version' in prompt:
+    journal('arbitrage-apply')
+    d = active_decision()
+    for f in glob.glob(f'{plans}/*.md'):
+        s = open(f).read()
+        s = re.sub(rf'`{RULE}` \((inferred)[^)]*\)', f'`{RULE}` (inferred, decision {d["decision"]})', s)
+        write(f, s)
+elif 'You are the ACCEPTANCE (QA) agent' in prompt:
+    journal('acceptance-author')
+    d = active_decision()
+    attendu = {'A': "expect(res.status).toBe(200)", 'B': "expect(res.status).toBe(401); expect(body.code).toBe('security.unauthenticated')"}[d['choix']]
+    write('acceptance/acceptance-banc.test.ts',
+          f"describe('banc', () => {{\n  it('[{RULE}][{d['decision']}] GET /banc/ping', async () => {{\n"
+          f"    const res = await fetch(API_URL + '/banc/ping'); const body = await res.json(); {attendu}\n  }})\n}})\n")
+elif prompt.lstrip().startswith('The developers opened disputes'):
+    journal('qa-arbitrate')
+    for f in glob.glob('specifications/**/DISPUTES.md', recursive=True):
+        write(f, re.sub(r'^OPEN: (.*)$', r'ACCEPTED: \1 (banc : test corrigé)', open(f).read(), flags=re.M))
+    if os.environ.get('BANC_AFFAIBLIR') == '1' and os.path.exists('acceptance/acceptance-banc.test.ts'):
+        t = open('acceptance/acceptance-banc.test.ts').read()
+        write('acceptance/acceptance-banc.test.ts', t.replace('expect(res.status).toBe(200)', 'expect(res.status).toBeGreaterThanOrEqual(200)'))
+    open('.cuisine-run/banc-arbitre', 'w').write('1')
+elif prompt.lstrip().startswith('The ratchet on the acceptance suite refused'):
+    journal('cliquet-fix')
+    t = open('acceptance/acceptance-banc.test.ts').read()
+    write('acceptance/acceptance-banc.test.ts', t.replace('toBeGreaterThanOrEqual(200)', 'toBe(200)'))
+elif prompt.lstrip().startswith('A backend gate failed'):
+    journal('fix-back')
+    if 'BLOQUÉ' in open('.cuisine-run/last-gate.txt', encoding='utf-8', errors='replace').read():
+        write('api/src/fixed', 'pool de connexions corrigé\n')
+elif 'Implement the backend plan' in prompt:
+    journal('code-back')
+    write('api/src/banc.ts', 'export const ping = () => ({ ok: true })\n')
+    d = active_decision()
+    write('api/src/banc-ping.status', '401' if d and d['choix'] == 'B' else '200')  # application simulée (fake-acceptance.py)
+    if os.environ.get('BANC_DISPUTE') == '1':
+        write(f'{plans}/DISPUTES.md', '# Contestations\n\nOPEN: test unitaire banc : contredit la spécification.\n')
+else:
+    m = re.search(r'You are the ([A-Z -]+?) (?:agent|of)', prompt)
+    journal('autre:' + (m.group(1).strip().lower() if m else prompt[:40].replace('\n', ' ')))
+
+# Sortie comme le vrai CLI : flux d'événements (stream-json), ou, avec --output-format json et --verbose, un tableau
+# JSON unique (forme que le parseur de yamloop ignore : ni usage ni session).
+sid = str(uuid.uuid4())
+result = {'type': 'result', 'subtype': 'success', 'session_id': sid, 'result': 'ok', 'num_turns': 3, 'total_cost_usd': 0.0123,
+          'usage': {'input_tokens': 100, 'cache_creation_input_tokens': 2000, 'cache_read_input_tokens': 8000, 'output_tokens': 300}}
+init = {'type': 'system', 'subtype': 'init', 'session_id': sid, 'model': 'claude-banc-1'}
+fmt = args[args.index('--output-format') + 1] if '--output-format' in args else 'text'
+if fmt == 'json' and '--verbose' in args:
+    print(json.dumps([init, result]))
+elif fmt == 'json':
+    print(json.dumps(result))
+else:
+    print(json.dumps(init)); print(json.dumps(result))

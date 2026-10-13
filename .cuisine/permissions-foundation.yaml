@@ -1,0 +1,25 @@
+# Foundation permission matrix (frozen, owned by the foundation, not by the agents).
+# Routes of the foundation that business specifications do not describe.
+roles: [anonymous, user, admin]
+operations:
+  - { method: POST, path: /auth/login,          action: null,          allow: [anonymous, user, admin], ownership: none }
+  - { method: GET,  path: /auth/current-user,   action: null,          allow: [anonymous, user, admin], ownership: none }
+  - { method: GET,  path: /server/health-check, action: null,          allow: [anonymous, user, admin], ownership: none }
+  - { method: POST, path: /auth/logout,         action: null,          allow: [anonymous, user, admin], ownership: none }
+  - { method: POST, path: /users,               action: users:create,  allow: [admin],                  ownership: none }
+  - method: GET
+    path: /users
+    action: users:list
+    allow: [admin, user]
+    ownership: none
+    status: to-arbitrate
+    note: "Un utilisateur ordinaire peut lister tous les comptes, e-mails compris. A trancher par le proprietaire du socle."
+  - method: GET
+    path: /users/:id
+    action: users:get
+    allow: [admin, user]
+    ownership: none
+    status: to-arbitrate
+    note: "Un utilisateur ordinaire peut lire n'importe quel compte par identifiant. A trancher par le proprietaire du socle."
+# Routes that only exist when NODE_ENV=test (auth test helpers); ignored by the check.
+test_only_prefixes: [/test/]

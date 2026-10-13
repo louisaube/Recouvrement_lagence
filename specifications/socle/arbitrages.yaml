@@ -1,0 +1,13 @@
+- decision: D-0001
+  question: cliquet [Q-PLAT-03] schémas de sécurité
+  choix: version ouverte
+  date: '2026-10-11'
+  statut: active
+  choix_par: proprietaire
+  version: socle-garde-metier-et-reponses-non-json
+  motif: >-
+    Le test développeur [Q-PLAT-03] (api/src/features/auth/tests/auth.test.ts) exige que les schémas de sécurité bearer
+    et cookie soient présents et admet qu'un module métier en déclare d'autres, comme l'exige la recette
+    acceptance-tests-ouverts-au-metier.test.ts. La paire exacte avait été rétablie par erreur lors de la résolution
+    du conflit de fusion de cuisine/arbitrage (demande de fusion n° 2) ; la chaîne oscillait entre la recette et le
+    cliquet.
