@@ -120,6 +120,23 @@ export interface paths {
         patch: operations["GroupsController_update"];
         trace?: never;
     };
+    "/profiles/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to read the recovery profile and the channel of the connected account */
+        get: operations["ProfilesController_me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/scopes": {
         parameters: {
             query?: never;
@@ -165,6 +182,40 @@ export interface paths {
         /** @description Health check */
         get: operations["ServerController_healthCheck"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user-profiles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to list the accounts that have a recovery profile (administrators only) */
+        get: operations["ProfilesController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user-profiles/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description Use this API action to give, replace or remove the recovery profile of an account (administrators only) */
+        put: operations["ProfilesController_set"];
         post?: never;
         delete?: never;
         options?: never;
@@ -463,6 +514,20 @@ export interface components {
         GroupsUpdateResponseDto: {
             group: components["schemas"]["GroupDto"];
         };
+        ProfilesMeResponseDto: {
+            profile: components["schemas"]["ProfileDto"] | null;
+            channel: components["schemas"]["ChannelDto"] | null;
+        };
+        /**
+         * @description Recovery profile
+         * @enum {string}
+         */
+        ProfileDto: "supervisor" | "agent" | "litigation" | "indicators";
+        /**
+         * @description Channel of an agent account
+         * @enum {string}
+         */
+        ChannelDto: "voice" | "email_sms" | "mail";
         ScopesListResponseDto: {
             scopes: components["schemas"]["ScopeDto"][];
             /**
@@ -514,6 +579,31 @@ export interface components {
                     latency?: number;
                 };
             };
+        };
+        UserProfilesListResponseDto: {
+            items: components["schemas"]["UserProfileDto"][];
+            /** @description Number of accounts that have a profile */
+            total: number;
+        };
+        UserProfileDto: {
+            /**
+             * Format: uuid
+             * @description Account ID
+             */
+            userId: string;
+            /** @description E-mail of the account */
+            email: string;
+            profile: components["schemas"]["ProfileDto"] | null;
+            channel: components["schemas"]["ChannelDto"] | null;
+        };
+        SetUserProfileParamsDto: {
+            /** @description The profile, or null to remove it */
+            profile: components["schemas"]["ProfileDto"] | null;
+            /** @description Required for the agent profile, refused otherwise */
+            channel?: components["schemas"]["ChannelDto"] | null;
+        };
+        SetUserProfileResponseDto: {
+            userProfile: components["schemas"]["UserProfileDto"];
         };
         UsersListResponseDto: {
             users: components["schemas"]["UserDto"][];
@@ -929,6 +1019,33 @@ export interface operations {
             };
         };
     };
+    ProfilesController_me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Profile and channel (null without profile) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfilesMeResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ScopesController_list: {
         parameters: {
             query?: {
@@ -1066,6 +1183,92 @@ export interface operations {
             };
             /** @description One or more services are unhealthy */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProfilesController_list: {
+        parameters: {
+            query?: {
+                /** @description The index of the first element to return (integer from 0 to 2147483647, default 0) */
+                from?: number;
+                /** @description The number of elements to return (integer from 1 to 100, default 10) */
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accounts with a profile, by e-mail */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserProfilesListResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProfilesController_set: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetUserProfileParamsDto"];
+            };
+        };
+        responses: {
+            /** @description The profile of the account after the change */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetUserProfileResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Conflict - profiles.channel_required, channel_not_allowed, channel_taken, agent_requires_user_role, cannot_change_own_profile */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
