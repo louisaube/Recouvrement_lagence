@@ -16,6 +16,7 @@ Ce lot est une tranche de la version `v1-cerveau-recouvrement`. La demande compl
 - six imports du format pivot, aperçu, erreurs, rapport d'écarts, lettrage, gel des factures en litige
 - tables et lecture des dossiers, factures, interlocuteurs, états et journal des transitions
 - litiges : tables et lecture seule (la création et la clôture sont du lot suivant)
+- file de décisions, LECTURE SEULE : `GET /decision-queue/items` et `GET /decision-queue/counts` (les tests d'imports lisent les compteurs de la file ; `POST /decision-queue/items/:id/decision` reste du lot suivant)
 
 ## Porte de recette de ce lot (fichiers dans `acceptance/`)
 - acceptance-v1-politiques.test.ts
@@ -31,8 +32,9 @@ Ce lot est une tranche de la version `v1-cerveau-recouvrement`. La demande compl
 
 ## Hors de ce lot
 - lot du jour et décisions du cerveau (la négociation n'est pas encore là : les dossiers n'ont pas d'ordre du jour)
-- file de décisions, sorties comptables, relecture, indicateurs, outils des agents, MCP
+- sorties comptables, relecture, indicateurs, outils des agents, MCP
 - ouverture et clôture d'un litige
+- décision sur un élément de la file (`POST /decision-queue/items/:id/decision`)
 
 ## Règles de conduite
 - Aucune route provisoire qui répond 501 ou 404 de convenance : une route d'un lot suivant n'existe pas encore.

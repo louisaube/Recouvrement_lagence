@@ -4,7 +4,6 @@ import {
   World, get, post, expectRes, ok, UNKNOWN_UUID, runImport, strip, euros, daysFromToday, today, addDays, setupWorld, importReceivables,
   importPayments, importOk, receivablesFile, receivablesTotal, receivableRow, RECEIVABLES_HEADER, PAYMENTS_HEADER, CONTACTS_HEADER,
   contactsFile, defaultContact, DISPUTES_HEADER, DOCUMENTS_HEADER, errorEntries, paymentsFile, policyDoc, activatePolicy, SIREN_A, SIREN_B,
-  RestTools, openConversation, descendTo,
 } from './recouvrement-helpers'
 import type { Inv } from './recouvrement-helpers'
 
@@ -508,29 +507,7 @@ describe('Recouvrement - imports', () => {
   })
 
   describe('Créances : changement de segment (arbitrage)', () => {
-    it('[rule-recouvrement-debtor-attribute-change][D-0014] a following snapshot that changes the segment of a debtor is accepted: the case takes the new segment and its unlocked offers are revoked', async () => {
-      const world = await setupWorld({}, w)
-      const agentAcc = await world.acc('agent')
-      const tools = new RestTools(agentAcc.token, 'voice')
-      const caseId = await world.caseId('D1')
-      await openConversation(tools, 'c-q18', caseId, await world.contactId('D1'))
-      const offer = await descendTo(tools, 'c-q18', caseId, 2)
-      expect(offer.totalCents).toBe(90000)
-      const before = await world.caseDetail('D1')
-      expect(before.unlockedOffers.filter((o: any) => o.status === 'current').length).toBeGreaterThan(0)
-      const run = await runImport(sup, 'receivables', receivablesFile([{ numero: 'FA-001', debiteur: 'D1', montant: 100000, segment: 'premium' }], D(-2)), { controlTotal: '1000.00', confirm: false })
-      expectRes(run.pre, 200)
-      expect(run.pre.body.accepted).toBe(true)
-      expectRes(await post(`/recovery-imports/receivables/${run.pre.body.importId}/confirm`, sup), 200)
-      const after = await world.caseDetail('D1')
-      expect(after.segment).toBe('premium')
-      expect(after.unlockedOffers.length).toBeGreaterThan(0)
-      expect(after.unlockedOffers.every((o: any) => o.status === 'revoked')).toBe(true)
-      const anchor = await tools.nextOffer('c-q18', caseId, {})
-      expect(anchor.ok).toBe(true)
-      expect(anchor.body.offer.totalCents).toBe(95000)
-    })
-
+    // Le test « changement de segment » (offres débloquées révoquées) passe par les outils des agents : il est dans acceptance-v1-agents.test.ts (lot des outils des agents).
     it('[rule-recouvrement-debtor-attribute-change][D-0014] a following snapshot that changes the nature of a debtor is accepted as well', async () => {
       await setupWorld({ policy: false, statement: false, contacts: false }, w)
       const rows: Inv[] = [{ numero: 'FA-001', debiteur: 'D1', montant: 100000, nature: 'entreprise' }]

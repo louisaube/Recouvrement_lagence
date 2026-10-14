@@ -2,7 +2,7 @@ import { resetData, closePool, sql } from './harness'
 import {
   World, get, post, http, expectRes, ok, UNKNOWN_UUID, setupWorld, daysFromToday, policyDoc, ruleFor, standardLadder, importOk, strip,
   RestTools, openConversation, descendTo, commitmentFor, forbiddenKeysIn, freshKey, makeAccount, PASSWORD, contactsFile, defaultContact,
-  DISPUTES_HEADER, SIREN_A, euros,
+  DISPUTES_HEADER, SIREN_A, euros, runImport, receivablesFile,
 } from './recouvrement-helpers'
 import type { Inv, Outcome } from './recouvrement-helpers'
 
@@ -323,6 +323,31 @@ describe('Recouvrement - outils des agents (REST)', () => {
       expect(replay.body).toEqual(before.body)
       expect(replay.body.case.currentOffer).toBeNull()
       expect((await agent.read(CONV, caseId)).body.case.currentOffer).not.toBeNull()
+    })
+  })
+
+  // ------------------------------------------------------------------ changement de segment (arbitrage)
+
+  describe('changement de segment par un cliché de créances', () => {
+    it('[rule-recouvrement-debtor-attribute-change][D-0014] a following snapshot that changes the segment of a debtor is accepted: the case takes the new segment and its unlocked offers are revoked', async () => {
+      await world()
+      const caseId = await w.caseId('D1')
+      await openConversation(agent, 'c-q18', caseId, await w.contactId('D1'))
+      const offer = await descendTo(agent, 'c-q18', caseId, 2)
+      expect(offer.totalCents).toBe(90000)
+      const before = await w.caseDetail('D1')
+      expect(before.unlockedOffers.filter((o: any) => o.status === 'current').length).toBeGreaterThan(0)
+      const run = await runImport(sup, 'receivables', receivablesFile([{ numero: 'FA-001', debiteur: 'D1', montant: 100000, segment: 'premium' }], D(-2)), { controlTotal: '1000.00', confirm: false })
+      expectRes(run.pre, 200)
+      expect(run.pre.body.accepted).toBe(true)
+      expectRes(await post(`/recovery-imports/receivables/${run.pre.body.importId}/confirm`, sup), 200)
+      const after = await w.caseDetail('D1')
+      expect(after.segment).toBe('premium')
+      expect(after.unlockedOffers.length).toBeGreaterThan(0)
+      expect(after.unlockedOffers.every((o: any) => o.status === 'revoked')).toBe(true)
+      const anchor = await agent.nextOffer('c-q18', caseId, {})
+      expect(anchor.ok).toBe(true)
+      expect(anchor.body.offer.totalCents).toBe(95000)
     })
   })
 
