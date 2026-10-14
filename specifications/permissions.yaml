@@ -89,8 +89,8 @@ operations:
   - method: GET
     path: /audit-logs
     action: audit:list
-    # Version v1-cerveau-recouvrement: admin OR profile supervisor, through a custom guard (allow: [] observed).
-    allow: []
+    # Version v1-cerveau-recouvrement: admin OR profile supervisor, through a custom guard (admin declared by role, supervisor by guard).
+    allow: [admin]
     ownership: none
     rules: [rule-foundation-audit-admin-only, rule-foundation-audit-filters, rule-foundation-audit-trace-content, rule-recouvrement-journal-supervisor, rule-recouvrement-journal-others-refused, rule-recouvrement-journal-agent-never]
     provenance: user
@@ -98,7 +98,7 @@ operations:
   - method: GET
     path: /audit-logs/filters
     action: audit:filters
-    allow: []
+    allow: [admin]
     ownership: none
     rules: [rule-foundation-audit-admin-only, rule-foundation-audit-filter-options-from-journal, rule-recouvrement-journal-supervisor, rule-recouvrement-journal-others-refused, rule-recouvrement-journal-agent-never]
     provenance: user

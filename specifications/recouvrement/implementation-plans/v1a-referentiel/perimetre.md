@@ -16,6 +16,7 @@ Ce lot est une tranche de la version `v1-cerveau-recouvrement`. La demande compl
 - six imports du format pivot, aperçu, erreurs, rapport d'écarts, lettrage, gel des factures en litige
 - tables et lecture des dossiers, factures, interlocuteurs, états et journal des transitions
 - litiges : tables et lecture seule (la création et la clôture sont du lot suivant)
+- journal : `GET /audit-logs` et `GET /audit-logs/filters` admettent l'administrateur ou le superviseur (garde métier, `journal-api-modification-request.md`) ; la porte des permissions compare ces deux routes à `specifications/permissions.yaml` dans tous les lots
 - file de décisions, LECTURE SEULE : `GET /decision-queue/items` et `GET /decision-queue/counts` (les tests d'imports lisent les compteurs de la file ; `POST /decision-queue/items/:id/decision` reste du lot suivant)
 
 ## Porte de recette de ce lot (fichiers dans `acceptance/`)
