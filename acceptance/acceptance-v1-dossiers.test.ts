@@ -25,7 +25,7 @@ function transitionAllowed(from: string | null, to: string, cause: string): bool
   if (from === 'negotiating' && to === 'committed') return cause === 'commitment_registered'
   if (from === 'committed' && to === 'open') return cause === 'commitment_broken' || cause === 'commitment_held'
   if (from === 'committed' && to === 'settled') return cause === 'commitment_held'
-  if (['open', 'negotiating', 'committed'].includes(from) && to === 'frozen') return FROZEN_CAUSES.includes(cause)
+  if (['open', 'negotiating', 'committed', 'supervisor_queue'].includes(from) && to === 'frozen') return FROZEN_CAUSES.includes(cause)
   if (from === 'frozen' && ALL_STATES.includes(to)) return cause === 'freeze_released' || (to === 'settled' && cause === 'balance_cleared') || (to === 'transferred' && cause === 'transfer_approved')
   if (['open', 'negotiating', 'committed'].includes(from) && to === 'supervisor_queue') return cause === 'queue_item_opened'
   if (from === 'supervisor_queue' && ALL_STATES.includes(to)) return cause === 'queue_item_decided' || (to === 'transferred' && cause === 'transfer_approved') || (to === 'settled' && cause === 'balance_cleared')

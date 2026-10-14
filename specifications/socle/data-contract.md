@@ -13,6 +13,7 @@ Extrait mécaniquement du schéma PostgreSQL (schéma `base`) par introspection 
 - Horodatages : `timestamp with time zone`, valeur par défaut `now()`.
 - Mots de passe : une ligne de `credentials` par compte, `type = 'token'`, colonne `password` = empreinte bcrypt de coût 10 (préfixe `$2b$10$`). Les tests créent des comptes en écrivant ces deux tables.
 - Les tables de démonstration propres aux tests unitaires de l'import ne font pas partie du contrat.
+- Extension du module recouvrement (version `v1-cerveau-recouvrement`, ajout seul, aucune colonne contractée ci-dessous n'est modifiée) : les tables `user_profiles`, `cases`, `invoices`, `freezes`, `case_state_history`, `receivable_snapshots`, `recovery_import_details`, `recovery_import_report_items`, `recovery_import_report_notes`, `payments`, `statements`, `payment_allocations`, `contacts`, `invoice_documents`, `policy_versions`, `policy_previews`, `decisions`, `indicator_facts`, `unlocked_offers`, `commitments` (+ `_installments`, `_lines`), `agent_conversations`, `agent_calls`, `complaints`, `disputes`, `contestations`, `queue_items`, `ledger_outputs` (+ `_lines`), `daily_batches`, `send_orders`, `review_samples`, `review_items` sont lues et écrites par les tests de recette ; leurs colonnes, types et contraintes sont ceux de `specifications/recouvrement/implementation-plans/v1-cerveau-recouvrement/recouvrement-module-implementation-plan.md`. Le profil agent est tenu par des déclencheurs sur `base.users`.
 
 ## `base.audit_logs`
 

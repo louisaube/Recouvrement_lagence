@@ -34,7 +34,7 @@ Toute transition est journalisée (table d'historique du dossier : instant, éta
 | `committed` | `open` | `commitment_broken` | cerveau | Déchéance : versement manqué à sa date ; les concessions de l'engagement tombent |
 | `committed` | `open` | `commitment_held` | cerveau | Engagement tenu, il reste des factures ouvertes |
 | `committed` | `settled` | `commitment_held` | cerveau | Engagement tenu et plus aucune facture ouverte |
-| `open`, `negotiating`, `committed` | `frozen` | `contestation`, `dispute_opened`, `unassigned_payment`, `all_invoices_frozen` | agent, service litiges, import, cerveau | Gel actif (voir §3) |
+| `open`, `negotiating`, `committed`, `supervisor_queue` | `frozen` | `contestation`, `dispute_opened`, `unassigned_payment`, `all_invoices_frozen` | agent, service litiges, import, cerveau | Gel actif (voir §3) |
 | `frozen` | état de précédence | `freeze_released` | service litiges, superviseur, import | Dernier gel levé |
 | `open`, `negotiating`, `committed` | `supervisor_queue` | `queue_item_opened` | cerveau, agent | Élément de file ouvert sur le dossier (voir §4) |
 | `supervisor_queue` | état de précédence | `queue_item_decided` | superviseur | Dernier élément du dossier décidé, hors transfert |

@@ -463,8 +463,8 @@ export function policyDoc(o: PolicyOpts = {}): any {
     label: o.label ?? `Politique de recette ${policySeq}-${Math.random().toString(16).slice(2, 8)}`,
     versionDate: o.versionDate ?? '2026-10-01',
     decision: o.decision ?? jdm(o.decisionRows ?? DEFAULT_DECISION_ROWS),
-    parameters: { global: { ...DEFAULT_GLOBAL, ...(o.global ?? {}) }, rules },
-    witnesses: o.witnesses ?? DEFAULT_WITNESSES,
+    parameters: { global: structuredClone({ ...DEFAULT_GLOBAL, ...(o.global ?? {}) }), rules: structuredClone(rules) },
+    witnesses: structuredClone(o.witnesses ?? DEFAULT_WITNESSES),
     ...(o.rootExtra ?? {}),
   }
 }
