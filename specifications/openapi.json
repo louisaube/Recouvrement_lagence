@@ -247,6 +247,693 @@
         ]
       }
     },
+    "/cases": {
+      "get": {
+        "description": "Use this API action to list and filter the debtor cases, by negotiable amount then customer identifier (supervisor profile)",
+        "operationId": "CasesController_list",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "The index of the first element to return (integer from 0 to 2147483647, default 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of elements to return (integer from 1 to 100, default 10)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "state",
+            "required": false,
+            "in": "query",
+            "description": "State of the case",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/CaseStateDto"
+                }
+              ]
+            }
+          },
+          {
+            "name": "nature",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/DebtorNatureDto"
+                }
+              ]
+            }
+          },
+          {
+            "name": "segment",
+            "required": false,
+            "in": "query",
+            "description": "Segment of the debtor (1 to 50 characters)",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50
+            }
+          },
+          {
+            "name": "creditor",
+            "required": false,
+            "in": "query",
+            "description": "SIREN of a creditor entity (9 digits)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Part of the customer identifier, case-insensitive (1 to 50 characters)",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The cases of the page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CasesListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Cases"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/cases/{id}": {
+      "get": {
+        "description": "Use this API action to read the sheet of a case: invoices, freezes, offers, commitments, outputs (supervisor profile)",
+        "operationId": "CasesController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The case",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Cases"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/cases/{id}/decisions": {
+      "get": {
+        "description": "Use this API action to read the decisions of the brain about a case, most recent first (supervisor profile)",
+        "operationId": "CasesController_decisions",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "The index of the first element to return (integer from 0 to 2147483647, default 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of elements to return (integer from 1 to 100, default 10)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The decisions of the page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionsListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Cases"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/cases/{id}/state-history": {
+      "get": {
+        "description": "Use this API action to read the state transitions of a case, most recent first (supervisor profile)",
+        "operationId": "CasesController_stateHistory",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "The index of the first element to return (integer from 0 to 2147483647, default 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of elements to return (integer from 1 to 100, default 10)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The transitions of the page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StateHistoryResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Cases"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/cases/filters": {
+      "get": {
+        "description": "Use this API action to read the segments and creditor entities present in the cases (supervisor profile)",
+        "operationId": "CasesController_filters",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Sorted values",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CasesFiltersResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Cases"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/decision-queue/counts": {
+      "get": {
+        "description": "Use this API action to count the open items of the decision queue by type (supervisor profile)",
+        "operationId": "DecisionQueueController_counts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Open items by type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueCountsResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Decision queue"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/decision-queue/items": {
+      "get": {
+        "description": "Use this API action to list the items of the decision queue, open ones oldest first by default (supervisor profile)",
+        "operationId": "DecisionQueueController_list",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "The index of the first element to return (integer from 0 to 2147483647, default 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of elements to return (integer from 1 to 100, default 10)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Open items (default) or decided ones",
+            "schema": {
+              "default": "open",
+              "type": "string",
+              "enum": [
+                "open",
+                "decided"
+              ]
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "Only the items of this type",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/QueueTypeDto"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Items of the page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueItemsResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Decision queue"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/disputes": {
+      "get": {
+        "description": "Use this API action to list the disputes (open by default), with their invoice and the state of their case (litigation profile)",
+        "operationId": "DisputesController_list",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "The index of the first element to return (integer from 0 to 2147483647, default 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of elements to return (integer from 1 to 100, default 10)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Open disputes (default), closed ones or all",
+            "schema": {
+              "default": "open",
+              "type": "string",
+              "enum": [
+                "open",
+                "closed",
+                "all"
+              ]
+            }
+          },
+          {
+            "name": "origin",
+            "required": false,
+            "in": "query",
+            "description": "Only the disputes of this origin",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/DisputeOriginDto"
+                }
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Invoice number or customer identifier, case-insensitive substring (1 to 50 characters)",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Disputes of the page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisputesListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Disputes"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/disputes/{id}": {
+      "get": {
+        "description": "Use this API action to read a dispute with its invoice, the summary of its case and its contestation (litigation profile)",
+        "operationId": "DisputesController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The dispute",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisputeResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Disputes"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/disputes/invoices": {
+      "get": {
+        "description": "Use this API action to search the open invoices by the beginning of their number, to open a dispute (litigation profile)",
+        "operationId": "DisputesController_invoices",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "The index of the first element to return (integer from 0 to 2147483647, default 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of elements to return (integer from 1 to 100, default 10)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "number",
+            "required": true,
+            "in": "query",
+            "description": "Beginning of the invoice number, case-insensitive (1 to 50 characters)",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoices of the page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisputeInvoicesResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Disputes"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
     "/groups": {
       "get": {
         "description": "Use this API action to list the groups with their members and scopes",
@@ -394,6 +1081,948 @@
             }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/invoices": {
+      "get": {
+        "description": "Use this API action to search the open invoices by the beginning of their number (supervisor profile)",
+        "operationId": "CasesController_searchInvoices",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "The index of the first element to return (integer from 0 to 2147483647, default 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of elements to return (integer from 1 to 100, default 10)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "number",
+            "required": true,
+            "in": "query",
+            "description": "Beginning of the invoice number, case-insensitive (1 to 50 characters)",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Open invoices of the page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoicesSearchResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Cases"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/policy-versions": {
+      "get": {
+        "description": "Use this API action to list the versions of the recovery policy, newest first (supervisor profile)",
+        "operationId": "PoliciesController_list",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "The index of the first element to return (integer from 0 to 2147483647, default 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of elements to return (integer from 1 to 100, default 10)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Status of the versions",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PolicyStatusDto"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Versions of the page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyVersionsListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Policies"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/policy-versions/{id}": {
+      "get": {
+        "description": "Use this API action to read a policy version with its rules, its six checks and its witnesses (supervisor profile)",
+        "operationId": "PoliciesController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyVersionDetailResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Policies"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/policy-versions/{id}/activate": {
+      "post": {
+        "description": "Use this API action to activate a policy version once its six checks pass; the previous active version is superseded",
+        "operationId": "PoliciesController_activate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The version, active",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyVersionResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflict - policies.activation_blocked (details: one entry per failed check), policies.not_activatable"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Policies"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/policy-versions/previews": {
+      "post": {
+        "description": "Use this API action to analyse a policy file (JSON) with its six activation checks and witness cases, without creating a version",
+        "operationId": "PoliciesController_preview",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The analysis of the file and the identifier of the preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyPreviewDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - policies.invalid_file_type or the body is not a multipart upload"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "409": {
+            "description": "Conflict - policies.already_imported"
+          },
+          "413": {
+            "description": "Payload too large - policies.file_too_large"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Policies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/policy-versions/previews/{previewId}/confirm": {
+      "post": {
+        "description": "Use this API action to create the version of a policy preview (once per file)",
+        "operationId": "PoliciesController_confirm",
+        "parameters": [
+          {
+            "name": "previewId",
+            "required": true,
+            "in": "path",
+            "description": "Preview ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The version, imported",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyVersionResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "404": {
+            "description": "Not found - policies.preview_not_found"
+          },
+          "409": {
+            "description": "Conflict - policies.invalid_file, policies.already_imported"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Policies"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/profiles/me": {
+      "get": {
+        "description": "Use this API action to read the recovery profile and the channel of the connected account",
+        "operationId": "ProfilesController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Profile and channel (null without profile)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfilesMeResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Profiles"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/recovery-imports/{type}/{importId}/confirm": {
+      "post": {
+        "description": "Use this API action to give the green light to a preview: the file is applied (once per file)",
+        "operationId": "RecoveryImportsController_confirm",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/RecoveryImportTypeDto"
+            }
+          },
+          {
+            "name": "importId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "What the confirmation did",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoveryImportConfirmDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflict - imports.file_refused, imports.stale_extraction, imports.already_imported"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Recovery imports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/recovery-imports/{type}/{importId}/errors": {
+      "get": {
+        "description": "Use this API action to list the errors of a preview, by row",
+        "operationId": "RecoveryImportsController_errors",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/RecoveryImportTypeDto"
+            }
+          },
+          {
+            "name": "importId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Index of the first entry to return (default 0)",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "Number of entries to return (default 10)",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Errors of the page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportErrorsListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Recovery imports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/recovery-imports/{type}/{importId}/report": {
+      "get": {
+        "description": "Use this API action to read the differences of a preview (or of a confirmed import) with the previous import of the same type",
+        "operationId": "RecoveryImportsController_report",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/RecoveryImportTypeDto"
+            }
+          },
+          {
+            "name": "importId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The report",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportReportDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Recovery imports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/recovery-imports/{type}/{importId}/report/items": {
+      "get": {
+        "description": "Use this API action to list the lines of one category of the report",
+        "operationId": "RecoveryImportsController_reportItems",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/RecoveryImportTypeDto"
+            }
+          },
+          {
+            "name": "importId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "The index of the first element to return (integer from 0 to 2147483647, default 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of elements to return (integer from 1 to 100, default 10)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "category",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ImportReportCategoryDto"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lines of the page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportReportItemsResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Recovery imports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/recovery-imports/{type}/preview": {
+      "post": {
+        "description": "Use this API action to analyse a file of a type without writing anything but its temporary preview",
+        "operationId": "RecoveryImportsController_preview",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/RecoveryImportTypeDto"
+            }
+          },
+          {
+            "name": "controlTotal",
+            "required": false,
+            "in": "query",
+            "description": "Control total of the receivables file: balance of the customer account at the extraction date (required for receivables, refused for the other types)",
+            "schema": {
+              "pattern": "^-?[0-9 ]{1,15}([.,][0-9]{1,2})?$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The analysis of the file and the identifier of the preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoveryImportPreviewDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - imports.invalid_file_type, imports.control_total_required, imports.control_total_invalid or invalid input"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "409": {
+            "description": "Conflict - imports.already_imported"
+          },
+          "413": {
+            "description": "Payload too large - imports.file_too_large"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Recovery imports"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/recovery-imports/{type}/specification": {
+      "get": {
+        "description": "Use this API action to read the columns, the limits and the extra fields of a file type",
+        "operationId": "RecoveryImportsController_specification",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/RecoveryImportTypeDto"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Specification of the file",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoveryImportSpecificationDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Recovery imports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/recovery-imports/history": {
+      "get": {
+        "description": "Use this API action to list the confirmed imports of the module, newest first (supervisor profile)",
+        "operationId": "RecoveryImportsController_history",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "The index of the first element to return (integer from 0 to 2147483647, default 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of elements to return (integer from 1 to 100, default 10)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "Only the imports of this type",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/RecoveryImportTypeDto"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Imports of the page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoveryImportHistoryResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Recovery imports"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/recovery-imports/status": {
+      "get": {
+        "description": "Use this API action to know whether the bank statement is fresh, the date of the receivables extraction and the last import of each type",
+        "operationId": "RecoveryImportsController_status",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "State of the imports",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoveryImportStatusDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Recovery imports"
+        ],
         "security": [
           {
             "bearer": []
@@ -584,6 +2213,121 @@
         "summary": "",
         "tags": [
           "Server"
+        ]
+      }
+    },
+    "/user-profiles": {
+      "get": {
+        "description": "Use this API action to list the accounts that have a recovery profile (administrators only)",
+        "operationId": "ProfilesController_list",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "The index of the first element to return (integer from 0 to 2147483647, default 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of elements to return (integer from 1 to 100, default 10)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Accounts with a profile, by e-mail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfilesListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Profiles"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/user-profiles/{userId}": {
+      "put": {
+        "description": "Use this API action to give, replace or remove the recovery profile of an account (administrators only)",
+        "operationId": "ProfilesController_set",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The profile of the account after the change",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetUserProfileResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "409": {
+            "description": "Conflict - profiles.channel_required, channel_not_allowed, channel_taken, agent_requires_user_role, cannot_change_own_profile"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Profiles"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetUserProfileParamsDto"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
         ]
       }
     },
@@ -1248,6 +2992,1751 @@
           }
         }
       },
+      "CaseStateDto": {
+        "type": "string",
+        "enum": [
+          "open",
+          "negotiating",
+          "committed",
+          "frozen",
+          "supervisor_queue",
+          "transferred",
+          "settled"
+        ],
+        "description": "State of a case (referential of the states)"
+      },
+      "DebtorNatureDto": {
+        "type": "string",
+        "enum": [
+          "family",
+          "company"
+        ],
+        "description": "Nature of the debtor"
+      },
+      "CasesListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CaseSummaryDto"
+            },
+            "description": "Cases of the page"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of elements of the whole list"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
+      "CaseSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Case ID"
+          },
+          "debtorId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Customer identifier of the debtor"
+          },
+          "nature": {
+            "$ref": "#/components/schemas/DebtorNatureDto"
+          },
+          "segment": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Segment of the debtor"
+          },
+          "creditors": {
+            "maxItems": 1000,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "SIREN of a creditor entity"
+            },
+            "description": "Creditor entities of the case, sorted"
+          },
+          "state": {
+            "$ref": "#/components/schemas/CaseStateDto"
+          },
+          "negotiableCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Negotiable amount in cents (rule-recouvrement-negotiable-amount)"
+          },
+          "openBalanceCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Sum of the balances of the open invoices, in cents"
+          },
+          "openInvoices": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of open invoices"
+          },
+          "maxDaysLate": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Greatest number of days late of an open invoice"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last change of the case"
+          }
+        },
+        "required": [
+          "id",
+          "debtorId",
+          "nature",
+          "segment",
+          "creditors",
+          "state",
+          "negotiableCents",
+          "openBalanceCents",
+          "openInvoices",
+          "maxDaysLate",
+          "updatedAt"
+        ]
+      },
+      "CaseResponseDto": {
+        "type": "object",
+        "properties": {
+          "case": {
+            "$ref": "#/components/schemas/CaseDetailDto"
+          }
+        },
+        "required": [
+          "case"
+        ]
+      },
+      "CaseDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Case ID"
+          },
+          "debtorId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Customer identifier of the debtor"
+          },
+          "nature": {
+            "$ref": "#/components/schemas/DebtorNatureDto"
+          },
+          "segment": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Segment of the debtor"
+          },
+          "creditors": {
+            "maxItems": 1000,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "SIREN of a creditor entity"
+            },
+            "description": "Creditor entities of the case, sorted"
+          },
+          "state": {
+            "$ref": "#/components/schemas/CaseStateDto"
+          },
+          "negotiableCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Negotiable amount in cents (rule-recouvrement-negotiable-amount)"
+          },
+          "openBalanceCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Sum of the balances of the open invoices, in cents"
+          },
+          "openInvoices": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of open invoices"
+          },
+          "maxDaysLate": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Greatest number of days late of an open invoice"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last change of the case"
+          },
+          "debtorSiren": {
+            "nullable": true,
+            "description": "SIREN of the debtor (company only)",
+            "type": "string"
+          },
+          "invoices": {
+            "maxItems": 100000,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceDto"
+            },
+            "description": "Invoices and credit notes of the case"
+          },
+          "freezes": {
+            "maxItems": 100000,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FreezeDto"
+            },
+            "description": "Active freezes"
+          },
+          "unlockedOffers": {
+            "maxItems": 1000,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnlockedOfferDto"
+            },
+            "description": "Offers unlocked"
+          },
+          "commitments": {
+            "maxItems": 1000,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CommitmentDto"
+            },
+            "description": "Commitments"
+          },
+          "ledgerOutputs": {
+            "maxItems": 10000,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LedgerOutputDto"
+            },
+            "description": "Accounting outputs"
+          },
+          "openQueueItems": {
+            "maxItems": 1000,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "description": "Item ID"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Type of the item"
+                }
+              },
+              "required": [
+                "id",
+                "type"
+              ]
+            },
+            "description": "Open items of the queue about the case"
+          },
+          "activePolicy": {
+            "nullable": true,
+            "description": "Active policy version",
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Policy version ID"
+              },
+              "label": {
+                "type": "string",
+                "description": "Label"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "debtorId",
+          "nature",
+          "segment",
+          "creditors",
+          "state",
+          "negotiableCents",
+          "openBalanceCents",
+          "openInvoices",
+          "maxDaysLate",
+          "updatedAt",
+          "debtorSiren",
+          "invoices",
+          "freezes",
+          "unlockedOffers",
+          "commitments",
+          "ledgerOutputs",
+          "openQueueItems",
+          "activePolicy"
+        ]
+      },
+      "InvoiceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Invoice ID"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/InvoiceKindDto"
+          },
+          "number": {
+            "type": "string",
+            "description": "Invoice number"
+          },
+          "creditorSiren": {
+            "type": "string",
+            "description": "SIREN of the creditor entity"
+          },
+          "amountCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Amount in cents"
+          },
+          "balanceCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Current balance in cents (negative for a credit note)"
+          },
+          "invoiceDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Invoice date"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Due date"
+          },
+          "daysLate": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Days late (0 when not due or not open)"
+          },
+          "frozen": {
+            "type": "boolean",
+            "description": "The invoice carries an active freeze"
+          },
+          "freezeCodes": {
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FreezeCodeDto"
+            },
+            "description": "Codes of the active freezes that concern the invoice"
+          },
+          "prescription": {
+            "$ref": "#/components/schemas/PrescriptionDto"
+          },
+          "prescriptionDate": {
+            "nullable": true,
+            "type": "string",
+            "format": "date",
+            "description": "Prescription date"
+          },
+          "coveredByOutputsCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Part covered by accounting outputs not yet noted, in cents"
+          },
+          "negotiable": {
+            "type": "boolean",
+            "description": "The balance enters the negotiable amount"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "number",
+          "creditorSiren",
+          "amountCents",
+          "balanceCents",
+          "invoiceDate",
+          "dueDate",
+          "daysLate",
+          "frozen",
+          "freezeCodes",
+          "prescription",
+          "prescriptionDate",
+          "coveredByOutputsCents",
+          "negotiable"
+        ]
+      },
+      "InvoiceKindDto": {
+        "type": "string",
+        "enum": [
+          "invoice",
+          "credit_note"
+        ],
+        "description": "Invoice or credit note"
+      },
+      "FreezeCodeDto": {
+        "type": "string",
+        "enum": [
+          "dispute",
+          "contestation",
+          "unassigned_payment"
+        ],
+        "description": "Code of a freeze"
+      },
+      "PrescriptionDto": {
+        "type": "string",
+        "enum": [
+          "none",
+          "near",
+          "expired"
+        ],
+        "description": "Prescription status"
+      },
+      "FreezeDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/FreezeCodeDto"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/FreezeScopeDto"
+          },
+          "invoiceNumber": {
+            "nullable": true,
+            "description": "Number of the invoice (scope invoice)",
+            "type": "string"
+          },
+          "since": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Start of the freeze"
+          },
+          "reference": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Reason of the dispute, reference of the payment"
+          }
+        },
+        "required": [
+          "code",
+          "scope",
+          "invoiceNumber",
+          "since",
+          "reference"
+        ]
+      },
+      "FreezeScopeDto": {
+        "type": "string",
+        "enum": [
+          "invoice",
+          "case"
+        ],
+        "description": "Scope of the freeze"
+      },
+      "UnlockedOfferDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Offer ID"
+          },
+          "unlockedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Instant the offer was unlocked"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "current",
+              "superseded",
+              "accepted",
+              "revoked"
+            ],
+            "description": "Status of the offer"
+          },
+          "totalCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Total to pay, in cents"
+          },
+          "discountCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Discount granted, in cents"
+          },
+          "installments": {
+            "maxItems": 60,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dueDate": {
+                  "type": "string",
+                  "format": "date",
+                  "description": "Due date"
+                },
+                "amountCents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991,
+                  "description": "Amount in cents"
+                }
+              },
+              "required": [
+                "dueDate",
+                "amountCents"
+              ]
+            },
+            "description": "Installments"
+          },
+          "counterpart": {
+            "nullable": true,
+            "description": "Counterpart asked for the offer",
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Type of counterpart"
+              },
+              "deadlineDate": {
+                "nullable": true,
+                "type": "string",
+                "format": "date",
+                "description": "Deadline"
+              },
+              "firstPaymentCents": {
+                "nullable": true,
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "First payment in cents"
+              }
+            },
+            "required": [
+              "type",
+              "deadlineDate",
+              "firstPaymentCents"
+            ]
+          },
+          "conversationId": {
+            "nullable": true,
+            "description": "Conversation that unlocked the offer",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "unlockedAt",
+          "status",
+          "totalCents",
+          "discountCents",
+          "installments",
+          "counterpart",
+          "conversationId"
+        ]
+      },
+      "CommitmentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Commitment ID"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Registration instant"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "held",
+              "broken"
+            ],
+            "description": "Status of the commitment"
+          },
+          "offerId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Offer ID"
+          },
+          "totalCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Total, in cents"
+          },
+          "discountCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Discount, in cents"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "description": "Payment method"
+          },
+          "installments": {
+            "maxItems": 60,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dueDate": {
+                  "type": "string",
+                  "format": "date",
+                  "description": "Due date"
+                },
+                "amountCents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991,
+                  "description": "Amount in cents"
+                },
+                "paidCents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991,
+                  "description": "Paid in cents"
+                }
+              },
+              "required": [
+                "dueDate",
+                "amountCents",
+                "paidCents"
+              ]
+            },
+            "description": "Installments"
+          },
+          "channel": {
+            "type": "string",
+            "description": "Channel of the agent"
+          },
+          "agentVersion": {
+            "type": "string",
+            "description": "Version of the agent"
+          },
+          "conversationId": {
+            "type": "string",
+            "description": "Conversation"
+          }
+        },
+        "required": [
+          "id",
+          "createdAt",
+          "status",
+          "offerId",
+          "totalCents",
+          "discountCents",
+          "paymentMethod",
+          "installments",
+          "channel",
+          "agentVersion",
+          "conversationId"
+        ]
+      },
+      "LedgerOutputDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Output ID"
+          },
+          "kind": {
+            "type": "string",
+            "description": "Kind of output"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status of the output"
+          },
+          "amountCents": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Amount in cents"
+          },
+          "reference": {
+            "nullable": true,
+            "description": "Output reference",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "status",
+          "amountCents",
+          "reference"
+        ]
+      },
+      "DecisionsListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DecisionDto"
+            },
+            "description": "Decisions of the page, most recent first"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of elements of the whole list"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
+      "DecisionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Decision ID"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Instant of the decision"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/DecisionKindDto"
+          },
+          "outcome": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Outcome"
+          },
+          "ruleId": {
+            "nullable": true,
+            "description": "Rule applied",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "policyVersion": {
+            "nullable": true,
+            "description": "Policy version in force",
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Policy version ID"
+              },
+              "label": {
+                "type": "string",
+                "description": "Label"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ]
+          },
+          "probability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Probability of the decision (1 while the table is deterministic)"
+          },
+          "inputs": {
+            "maxItems": 200,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "description": "Name"
+                },
+                "value": {
+                  "type": "string",
+                  "maxLength": 500,
+                  "description": "Value"
+                }
+              },
+              "required": [
+                "name",
+                "value"
+              ]
+            },
+            "description": "Complete inputs of the decision"
+          },
+          "internalReason": {
+            "maxItems": 200,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "description": "Name"
+                },
+                "value": {
+                  "type": "string",
+                  "maxLength": 500,
+                  "description": "Value"
+                }
+              },
+              "required": [
+                "name",
+                "value"
+              ]
+            },
+            "description": "Internal reason, readable by the supervisor only"
+          },
+          "batchId": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid",
+            "description": "Batch"
+          }
+        },
+        "required": [
+          "id",
+          "decidedAt",
+          "kind",
+          "outcome",
+          "ruleId",
+          "policyVersion",
+          "probability",
+          "inputs",
+          "internalReason",
+          "batchId"
+        ]
+      },
+      "DecisionKindDto": {
+        "type": "string",
+        "enum": [
+          "daily_action",
+          "offer",
+          "commitment_check",
+          "threshold",
+          "prescription",
+          "exposure_ceiling"
+        ],
+        "description": "Kind of decision"
+      },
+      "StateHistoryResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StateTransitionDto"
+            },
+            "description": "Transitions of the page, most recent first"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of elements of the whole list"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
+      "StateTransitionDto": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Instant of the transition"
+          },
+          "from": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CaseStateDto"
+              }
+            ]
+          },
+          "to": {
+            "$ref": "#/components/schemas/CaseStateDto"
+          },
+          "cause": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Cause of the transition"
+          },
+          "actor": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Actor of the transition"
+          },
+          "reference": {
+            "nullable": true,
+            "description": "Business reference",
+            "type": "string"
+          }
+        },
+        "required": [
+          "at",
+          "from",
+          "to",
+          "cause",
+          "actor",
+          "reference"
+        ]
+      },
+      "CasesFiltersResponseDto": {
+        "type": "object",
+        "properties": {
+          "segments": {
+            "maxItems": 100000,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Segment"
+            },
+            "description": "Segments present in the cases, sorted"
+          },
+          "creditors": {
+            "maxItems": 100000,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "SIREN"
+            },
+            "description": "Creditor SIREN present in the cases, sorted"
+          }
+        },
+        "required": [
+          "segments",
+          "creditors"
+        ]
+      },
+      "QueueCountsResponseDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Number of open items"
+          },
+          "byType": {
+            "$ref": "#/components/schemas/QueueCountsByTypeDto"
+          }
+        },
+        "required": [
+          "total",
+          "byType"
+        ]
+      },
+      "QueueCountsByTypeDto": {
+        "type": "object",
+        "properties": {
+          "contestation": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Open items of type contestation"
+          },
+          "amount_over_threshold": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Open items of type amount_over_threshold"
+          },
+          "ladder_exhausted": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Open items of type ladder_exhausted"
+          },
+          "unassigned_payment": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Open items of type unassigned_payment"
+          },
+          "accounting_gap": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Open items of type accounting_gap"
+          },
+          "prescription_near": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Open items of type prescription_near"
+          },
+          "prescription_expired": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Open items of type prescription_expired"
+          },
+          "alert": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Open items of type alert"
+          },
+          "human_request": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Open items of type human_request"
+          },
+          "transfer_proposed": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Open items of type transfer_proposed"
+          }
+        },
+        "required": [
+          "contestation",
+          "amount_over_threshold",
+          "ladder_exhausted",
+          "unassigned_payment",
+          "accounting_gap",
+          "prescription_near",
+          "prescription_expired",
+          "alert",
+          "human_request",
+          "transfer_proposed"
+        ],
+        "description": "Open items by type"
+      },
+      "QueueTypeDto": {
+        "type": "string",
+        "enum": [
+          "contestation",
+          "amount_over_threshold",
+          "ladder_exhausted",
+          "unassigned_payment",
+          "accounting_gap",
+          "prescription_near",
+          "prescription_expired",
+          "alert",
+          "human_request",
+          "transfer_proposed"
+        ],
+        "description": "Type of an item of the queue of the supervisor"
+      },
+      "QueueItemsResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueueItemDto"
+            },
+            "description": "Items of the page"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of elements of the whole list"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
+      "QueueItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Item ID"
+          },
+          "type": {
+            "$ref": "#/components/schemas/QueueTypeDto"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "decided"
+            ],
+            "description": "The item is open or decided"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation instant"
+          },
+          "caseId": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid",
+            "description": "Case ID"
+          },
+          "debtorId": {
+            "nullable": true,
+            "description": "Customer identifier of the case, if any",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300,
+            "description": "Summary of the item (French)"
+          },
+          "details": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueueItemDetailDto"
+            },
+            "description": "What allows to decide (French, at most 20)"
+          },
+          "allowedDecisions": {
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50
+            },
+            "description": "Codes of the decisions the type allows; empty once decided"
+          },
+          "candidates": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueueCandidateDto"
+            },
+            "description": "Invoices a payment can be assigned to (open unassigned payment only)"
+          },
+          "decision": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QueueDecisionDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "status",
+          "createdAt",
+          "caseId",
+          "debtorId",
+          "summary",
+          "details",
+          "allowedDecisions",
+          "candidates",
+          "decision"
+        ]
+      },
+      "QueueItemDetailDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Label of the detail (1 to 100 characters)"
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 300,
+            "description": "Value of the detail (at most 300 characters)"
+          }
+        },
+        "required": [
+          "label",
+          "value"
+        ]
+      },
+      "QueueCandidateDto": {
+        "type": "object",
+        "properties": {
+          "invoiceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Invoice ID"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Case ID"
+          },
+          "debtorId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Customer identifier"
+          },
+          "number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Invoice number"
+          },
+          "creditorSiren": {
+            "type": "string",
+            "pattern": "^[0-9]{9}$",
+            "description": "SIREN of the creditor entity"
+          },
+          "balanceCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Balance in cents"
+          }
+        },
+        "required": [
+          "invoiceId",
+          "caseId",
+          "debtorId",
+          "number",
+          "creditorSiren",
+          "balanceCents"
+        ]
+      },
+      "QueueDecisionDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Code of the decision (`auto_closed` for an automatic closing)"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Reason of the decision (empty for an automatic closing)"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Instant of the decision"
+          },
+          "decidedBy": {
+            "nullable": true,
+            "description": "Author of the decision; null for an automatic closing",
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Account ID"
+              },
+              "email": {
+                "type": "string",
+                "description": "E-mail of the account"
+              }
+            },
+            "required": [
+              "id",
+              "email"
+            ]
+          }
+        },
+        "required": [
+          "code",
+          "reason",
+          "decidedAt",
+          "decidedBy"
+        ]
+      },
+      "DisputeOriginDto": {
+        "type": "string",
+        "enum": [
+          "import",
+          "contestation",
+          "service"
+        ],
+        "description": "Origin of the dispute: import, contestation (conversation) or service (opened by the litigation service)"
+      },
+      "DisputesListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisputeDto"
+            },
+            "description": "Disputes of the page"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of elements of the whole list"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
+      "DisputeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Dispute ID"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed"
+            ],
+            "description": "The dispute is open or closed"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/DisputeOriginDto"
+          },
+          "invoiceNumber": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Number of the invoice in dispute"
+          },
+          "creditorSiren": {
+            "type": "string",
+            "pattern": "^[0-9]{9}$",
+            "description": "SIREN of the creditor entity"
+          },
+          "balanceCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Balance of the invoice in cents"
+          },
+          "debtorId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Customer identifier"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Case ID"
+          },
+          "caseState": {
+            "$ref": "#/components/schemas/CaseStateDto"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "description": "Reason of the dispute (plain text)"
+          },
+          "owner": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Person in charge (plain text)"
+          },
+          "openedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Opening instant"
+          },
+          "closedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time",
+            "description": "Closing instant"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "origin",
+          "invoiceNumber",
+          "creditorSiren",
+          "balanceCents",
+          "debtorId",
+          "caseId",
+          "caseState",
+          "reason",
+          "owner",
+          "openedAt",
+          "closedAt"
+        ]
+      },
+      "DisputeResponseDto": {
+        "type": "object",
+        "properties": {
+          "dispute": {
+            "$ref": "#/components/schemas/DisputeDetailDto"
+          }
+        },
+        "required": [
+          "dispute"
+        ]
+      },
+      "DisputeDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Dispute ID"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed"
+            ],
+            "description": "The dispute is open or closed"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/DisputeOriginDto"
+          },
+          "invoiceNumber": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Number of the invoice in dispute"
+          },
+          "creditorSiren": {
+            "type": "string",
+            "pattern": "^[0-9]{9}$",
+            "description": "SIREN of the creditor entity"
+          },
+          "balanceCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Balance of the invoice in cents"
+          },
+          "debtorId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Customer identifier"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Case ID"
+          },
+          "caseState": {
+            "$ref": "#/components/schemas/CaseStateDto"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "description": "Reason of the dispute (plain text)"
+          },
+          "owner": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Person in charge (plain text)"
+          },
+          "openedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Opening instant"
+          },
+          "closedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time",
+            "description": "Closing instant"
+          },
+          "invoice": {
+            "$ref": "#/components/schemas/DisputeInvoiceDto"
+          },
+          "case": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Case ID"
+              },
+              "debtorId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "description": "Customer identifier"
+              },
+              "nature": {
+                "$ref": "#/components/schemas/DebtorNatureDto"
+              },
+              "state": {
+                "$ref": "#/components/schemas/CaseStateDto"
+              },
+              "openInvoices": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "Open invoices of the case"
+              },
+              "frozenInvoices": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "Open invoices of the case that carry a freeze"
+              }
+            },
+            "required": [
+              "id",
+              "debtorId",
+              "nature",
+              "state",
+              "openInvoices",
+              "frozenInvoices"
+            ]
+          },
+          "closeNote": {
+            "nullable": true,
+            "description": "Note of the closing (plain text)",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "closedBy": {
+            "nullable": true,
+            "description": "Who closed the dispute",
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Account ID"
+              },
+              "email": {
+                "type": "string",
+                "description": "E-mail of the account"
+              }
+            },
+            "required": [
+              "id",
+              "email"
+            ]
+          },
+          "openedBy": {
+            "nullable": true,
+            "description": "Who opened the dispute (null: import or agent)",
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Account ID"
+              },
+              "email": {
+                "type": "string",
+                "description": "E-mail of the account"
+              }
+            },
+            "required": [
+              "id",
+              "email"
+            ]
+          },
+          "contestation": {
+            "nullable": true,
+            "description": "The contestation behind the dispute (origin contestation)",
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Contestation ID"
+              },
+              "channel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 50,
+                "description": "Channel of the conversation"
+              },
+              "conversationId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "description": "Conversation of the contestation"
+              },
+              "statedAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Instant of the contestation"
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000,
+                "description": "Text of the contestation (plain text)"
+              }
+            },
+            "required": [
+              "id",
+              "channel",
+              "conversationId",
+              "statedAt",
+              "text"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "origin",
+          "invoiceNumber",
+          "creditorSiren",
+          "balanceCents",
+          "debtorId",
+          "caseId",
+          "caseState",
+          "reason",
+          "owner",
+          "openedAt",
+          "closedAt",
+          "invoice",
+          "case",
+          "closeNote",
+          "closedBy",
+          "openedBy",
+          "contestation"
+        ]
+      },
+      "DisputeInvoiceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Invoice ID"
+          },
+          "number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Invoice number"
+          },
+          "creditorSiren": {
+            "type": "string",
+            "pattern": "^[0-9]{9}$",
+            "description": "SIREN of the creditor entity"
+          },
+          "debtorId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Customer identifier"
+          },
+          "balanceCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Balance in cents"
+          },
+          "frozen": {
+            "type": "boolean",
+            "description": "The invoice carries an active freeze"
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "creditorSiren",
+          "debtorId",
+          "balanceCents",
+          "frozen"
+        ]
+      },
+      "DisputeInvoicesResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DisputeInvoiceDto"
+            },
+            "description": "Open invoices of the page, sorted by number"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of elements of the whole list"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
       "GroupsListResponseDto": {
         "type": "object",
         "properties": {
@@ -1445,6 +4934,1566 @@
           "group"
         ]
       },
+      "InvoicesSearchResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceRefDto"
+            },
+            "description": "Open invoices of the page"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of elements of the whole list"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
+      "InvoiceRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Invoice ID"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Case ID"
+          },
+          "debtorId": {
+            "type": "string",
+            "description": "Customer identifier"
+          },
+          "number": {
+            "type": "string",
+            "description": "Invoice number"
+          },
+          "creditorSiren": {
+            "type": "string",
+            "description": "SIREN of the creditor entity"
+          },
+          "balanceCents": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991,
+            "description": "Balance in cents"
+          },
+          "frozen": {
+            "type": "boolean",
+            "description": "The invoice carries an active freeze"
+          }
+        },
+        "required": [
+          "id",
+          "caseId",
+          "debtorId",
+          "number",
+          "creditorSiren",
+          "balanceCents",
+          "frozen"
+        ]
+      },
+      "PolicyStatusDto": {
+        "type": "string",
+        "enum": [
+          "imported",
+          "active",
+          "superseded"
+        ],
+        "description": "Status of a policy version"
+      },
+      "PolicyVersionsListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyVersionDto"
+            },
+            "description": "Versions of the page"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of elements of the whole list"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
+      "PolicyVersionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Version ID"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Label of the version"
+          },
+          "versionDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of the version"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PolicyStatusDto"
+          },
+          "fileHash": {
+            "type": "string",
+            "minLength": 64,
+            "maxLength": 64,
+            "description": "SHA-256 of the file, hexadecimal"
+          },
+          "importedBy": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Account ID"
+              },
+              "email": {
+                "type": "string",
+                "description": "E-mail of the account"
+              }
+            },
+            "required": [
+              "id",
+              "email"
+            ],
+            "description": "Supervisor who imported the file"
+          },
+          "importedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Import instant"
+          },
+          "activatedBy": {
+            "nullable": true,
+            "description": "Supervisor who activated the version",
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Account ID"
+              },
+              "email": {
+                "type": "string",
+                "description": "E-mail of the account"
+              }
+            },
+            "required": [
+              "id",
+              "email"
+            ]
+          },
+          "activatedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time",
+            "description": "Activation instant"
+          },
+          "checksPassed": {
+            "nullable": true,
+            "description": "Result of the six checks at the import (imported versions only)",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "versionDate",
+          "status",
+          "fileHash",
+          "importedBy",
+          "importedAt",
+          "activatedBy",
+          "activatedAt",
+          "checksPassed"
+        ]
+      },
+      "PolicyVersionDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "$ref": "#/components/schemas/PolicyVersionDetailDto"
+          }
+        },
+        "required": [
+          "version"
+        ]
+      },
+      "PolicyVersionDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Version ID"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Label of the version"
+          },
+          "versionDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of the version"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PolicyStatusDto"
+          },
+          "fileHash": {
+            "type": "string",
+            "minLength": 64,
+            "maxLength": 64,
+            "description": "SHA-256 of the file, hexadecimal"
+          },
+          "importedBy": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Account ID"
+              },
+              "email": {
+                "type": "string",
+                "description": "E-mail of the account"
+              }
+            },
+            "required": [
+              "id",
+              "email"
+            ],
+            "description": "Supervisor who imported the file"
+          },
+          "importedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Import instant"
+          },
+          "activatedBy": {
+            "nullable": true,
+            "description": "Supervisor who activated the version",
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Account ID"
+              },
+              "email": {
+                "type": "string",
+                "description": "E-mail of the account"
+              }
+            },
+            "required": [
+              "id",
+              "email"
+            ]
+          },
+          "activatedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time",
+            "description": "Activation instant"
+          },
+          "checksPassed": {
+            "nullable": true,
+            "description": "Result of the six checks at the import (imported versions only)",
+            "type": "boolean"
+          },
+          "global": {
+            "$ref": "#/components/schemas/PolicyGlobalDto"
+          },
+          "rules": {
+            "maxItems": 1000,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyRuleDto"
+            },
+            "description": "Rules, by segment then nature"
+          },
+          "checks": {
+            "maxItems": 6,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyCheckDto"
+            },
+            "description": "The six checks, recomputed at the reading"
+          },
+          "witnesses": {
+            "maxItems": 200,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyWitnessResultDto"
+            },
+            "description": "Results of the witness cases"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "versionDate",
+          "status",
+          "fileHash",
+          "importedBy",
+          "importedAt",
+          "activatedBy",
+          "activatedAt",
+          "checksPassed",
+          "global",
+          "rules",
+          "checks",
+          "witnesses"
+        ]
+      },
+      "PolicyGlobalDto": {
+        "type": "object",
+        "properties": {
+          "statementMaxAgeDays": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3650,
+            "description": "Oldest accepted bank statement, in days"
+          },
+          "ledgerMaxImports": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Receivable imports after which an approved output not noted becomes a gap"
+          },
+          "reviewSampleSize": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000,
+            "description": "Size of a review sample"
+          },
+          "paymentMethods": {
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Payment method code"
+            },
+            "description": "Payment methods"
+          },
+          "decisionTypeCapsBp": {
+            "type": "object",
+            "properties": {
+              "none": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000,
+                "description": "Cap of the share in a batch, in basis points"
+              },
+              "reminder": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000,
+                "description": "Cap of the share in a batch, in basis points"
+              },
+              "proposal": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000,
+                "description": "Cap of the share in a batch, in basis points"
+              },
+              "transfer_proposed": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000,
+                "description": "Cap of the share in a batch, in basis points"
+              }
+            },
+            "required": [
+              "none",
+              "reminder",
+              "proposal",
+              "transfer_proposed"
+            ]
+          },
+          "exposureCeilings": {
+            "maxItems": 500,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "agentVersion": {
+                  "type": "string",
+                  "description": "Version of the agent, or *"
+                },
+                "segment": {
+                  "type": "string",
+                  "description": "Segment, or *"
+                },
+                "maxCents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991,
+                  "description": "Ceiling in cents"
+                }
+              },
+              "required": [
+                "agentVersion",
+                "segment",
+                "maxCents"
+              ]
+            },
+            "description": "Exposure ceilings"
+          }
+        },
+        "required": [
+          "statementMaxAgeDays",
+          "ledgerMaxImports",
+          "reviewSampleSize",
+          "paymentMethods",
+          "decisionTypeCapsBp",
+          "exposureCeilings"
+        ]
+      },
+      "PolicyRuleDto": {
+        "type": "object",
+        "properties": {
+          "segment": {
+            "type": "string",
+            "description": "Segment"
+          },
+          "nature": {
+            "type": "string",
+            "enum": [
+              "family",
+              "company"
+            ],
+            "description": "Nature of the debtor"
+          },
+          "horizonDays": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3650,
+            "description": "Horizon in days"
+          },
+          "nextStep": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "external_collector",
+                  "litigation",
+                  "assignment"
+                ],
+                "description": "Kind of next step"
+              },
+              "expectedValueBp": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000,
+                "description": "Expected value of the next step (the floor), in basis points"
+              }
+            },
+            "required": [
+              "kind",
+              "expectedValueBp"
+            ]
+          },
+          "ladder": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyRungDto"
+            },
+            "description": "Offers, from the most to the least favourable"
+          },
+          "maxScheduleDays": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3650,
+            "description": "Longest duration of a schedule"
+          },
+          "thresholdCents": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000000000,
+            "description": "Negotiable amount above which the negotiation stops, in cents"
+          },
+          "requiredDocuments": {
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "contract",
+                "order",
+                "delivery_proof"
+              ]
+            },
+            "description": "Supporting documents required"
+          },
+          "limitation": {
+            "type": "object",
+            "properties": {
+              "delayDays": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 36500,
+                "description": "Days of the limitation period"
+              },
+              "startsFrom": {
+                "type": "string",
+                "enum": [
+                  "invoice_date",
+                  "due_date"
+                ],
+                "description": "Starting point of the period"
+              },
+              "alertDays": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 36500,
+                "description": "Days before the end of the period that raise the alert"
+              }
+            },
+            "required": [
+              "delayDays",
+              "startsFrom",
+              "alertDays"
+            ]
+          }
+        },
+        "required": [
+          "segment",
+          "nature",
+          "horizonDays",
+          "nextStep",
+          "ladder",
+          "maxScheduleDays",
+          "thresholdCents",
+          "requiredDocuments",
+          "limitation"
+        ]
+      },
+      "PolicyRungDto": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20,
+            "description": "Rank of the offer in the ladder (1 is the most favourable)"
+          },
+          "offerKind": {
+            "type": "string",
+            "enum": [
+              "lump_sum",
+              "schedule"
+            ],
+            "description": "Kind of offer"
+          },
+          "valueBp": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000,
+            "description": "Sum to pay, in basis points of the negotiable amount"
+          },
+          "payByDays": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 365,
+            "description": "Days before the first payment"
+          },
+          "installments": {
+            "nullable": true,
+            "description": "Installments (schedule offers)",
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 60,
+                "description": "Number of installments"
+              },
+              "intervalDays": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 365,
+                "description": "Days between installments"
+              }
+            },
+            "required": [
+              "count",
+              "intervalDays"
+            ]
+          },
+          "delayFeeBp": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000,
+            "description": "Fee or interest on a delay, in basis points"
+          },
+          "counterpart": {
+            "nullable": true,
+            "description": "Counterpart asked for the offer",
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "firm_date",
+                  "first_payment",
+                  "direct_debit"
+                ],
+                "description": "Type of counterpart"
+              },
+              "deadlineDays": {
+                "nullable": true,
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 365,
+                "description": "Days to the deadline (firm_date)"
+              },
+              "firstPaymentBp": {
+                "nullable": true,
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10000,
+                "description": "First payment in basis points (first_payment)"
+              }
+            },
+            "required": [
+              "type",
+              "deadlineDays",
+              "firstPaymentBp"
+            ]
+          }
+        },
+        "required": [
+          "rank",
+          "offerKind",
+          "valueBp",
+          "payByDays",
+          "installments",
+          "delayFeeBp",
+          "counterpart"
+        ]
+      },
+      "PolicyCheckDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/PolicyCheckCodeDto"
+          },
+          "passed": {
+            "type": "boolean",
+            "description": "The check passes"
+          },
+          "problems": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300,
+              "description": "Problem found"
+            },
+            "description": "Problems found (empty when passed)"
+          }
+        },
+        "required": [
+          "code",
+          "passed",
+          "problems"
+        ]
+      },
+      "PolicyCheckCodeDto": {
+        "type": "string",
+        "enum": [
+          "floor",
+          "decreasing_concessions",
+          "counterparts",
+          "schedule_limits",
+          "segments_covered",
+          "witnesses"
+        ],
+        "description": "Code of the check"
+      },
+      "PolicyWitnessResultDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Witness ID"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Description"
+          },
+          "expected": {
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "string",
+                "description": "Action"
+              },
+              "rule": {
+                "type": "string",
+                "description": "Rule identifier"
+              }
+            },
+            "required": [
+              "action",
+              "rule"
+            ],
+            "description": "Expected result"
+          },
+          "obtained": {
+            "nullable": true,
+            "description": "Result given by the engine (null when it failed)",
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "string",
+                "description": "Action"
+              },
+              "rule": {
+                "type": "string",
+                "description": "Rule identifier"
+              }
+            },
+            "required": [
+              "action",
+              "rule"
+            ]
+          },
+          "passed": {
+            "type": "boolean",
+            "description": "The engine gives exactly the expected result"
+          }
+        },
+        "required": [
+          "id",
+          "description",
+          "expected",
+          "obtained",
+          "passed"
+        ]
+      },
+      "PolicyVersionResponseDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "$ref": "#/components/schemas/PolicyVersionDto"
+          }
+        },
+        "required": [
+          "version"
+        ]
+      },
+      "PolicyPreviewDto": {
+        "type": "object",
+        "properties": {
+          "previewId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Preview ID"
+          },
+          "fileName": {
+            "type": "string",
+            "description": "Name of the file"
+          },
+          "fileHash": {
+            "type": "string",
+            "minLength": 64,
+            "maxLength": 64,
+            "description": "SHA-256 of the file"
+          },
+          "valid": {
+            "type": "boolean",
+            "description": "The file respects the format"
+          },
+          "errors": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200,
+                  "description": "JSON path"
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300,
+                  "description": "Reason"
+                }
+              },
+              "required": [
+                "path",
+                "reason"
+              ]
+            },
+            "description": "Faults of the file"
+          },
+          "label": {
+            "nullable": true,
+            "description": "Label (valid file)",
+            "type": "string"
+          },
+          "versionDate": {
+            "nullable": true,
+            "type": "string",
+            "format": "date",
+            "description": "Date of the version"
+          },
+          "global": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PolicyGlobalDto"
+              }
+            ]
+          },
+          "rules": {
+            "maxItems": 1000,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyRuleDto"
+            }
+          },
+          "checks": {
+            "maxItems": 6,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyCheckDto"
+            }
+          },
+          "witnesses": {
+            "maxItems": 200,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyWitnessResultDto"
+            }
+          }
+        },
+        "required": [
+          "previewId",
+          "fileName",
+          "fileHash",
+          "valid",
+          "errors",
+          "label",
+          "versionDate",
+          "global",
+          "rules",
+          "checks",
+          "witnesses"
+        ]
+      },
+      "ProfilesMeResponseDto": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProfileDto"
+              }
+            ]
+          },
+          "channel": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ChannelDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "profile",
+          "channel"
+        ]
+      },
+      "ProfileDto": {
+        "type": "string",
+        "enum": [
+          "supervisor",
+          "agent",
+          "litigation",
+          "indicators"
+        ],
+        "description": "Recovery profile"
+      },
+      "ChannelDto": {
+        "type": "string",
+        "enum": [
+          "voice",
+          "email_sms",
+          "mail"
+        ],
+        "description": "Channel of an agent account"
+      },
+      "RecoveryImportTypeDto": {
+        "type": "string",
+        "enum": [
+          "receivables",
+          "payments",
+          "disputes",
+          "contacts",
+          "documents"
+        ],
+        "description": "File type: receivables, payments, disputes, contacts or documents (Créances, Paiements, Litiges, Interlocuteurs, Pièces)"
+      },
+      "RecoveryImportConfirmDto": {
+        "type": "object",
+        "properties": {
+          "createdCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Rows written"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Valid rows not written (already known, duplicate or no longer possible)"
+          },
+          "effects": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200,
+                  "description": "What the confirmation did (French)"
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991,
+                  "description": "How many"
+                }
+              },
+              "required": [
+                "label",
+                "count"
+              ]
+            },
+            "description": "Effects of the confirmation"
+          }
+        },
+        "required": [
+          "createdCount",
+          "skippedCount",
+          "effects"
+        ]
+      },
+      "ImportErrorsListResponseDto": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportRowErrorDto"
+            },
+            "description": "One page of entries, by row then by column"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of entries of the whole list (not of the rows)"
+          }
+        },
+        "required": [
+          "errors",
+          "total"
+        ]
+      },
+      "ImportRowErrorDto": {
+        "type": "object",
+        "properties": {
+          "row": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 2147483647,
+            "description": "Spreadsheet row number (the header is row 1)"
+          },
+          "column": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Name of the faulty column"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "description": "What is wrong, in French"
+          }
+        },
+        "required": [
+          "row",
+          "column",
+          "reason"
+        ]
+      },
+      "ImportReportDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/RecoveryImportTypeDto"
+          },
+          "importId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifier of the import or of its preview"
+          },
+          "previous": {
+            "nullable": true,
+            "description": "Last confirmed import of the same type (null: everything is new)",
+            "type": "object",
+            "properties": {
+              "importId": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Identifier of the last confirmed import of the same type"
+              },
+              "fileName": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255,
+                "description": "Name of its file"
+              },
+              "confirmedAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Its confirmation instant"
+              }
+            },
+            "required": [
+              "importId",
+              "fileName",
+              "confirmedAt"
+            ]
+          },
+          "categories": {
+            "maxItems": 4,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "$ref": "#/components/schemas/ImportReportCategoryDto"
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "description": "French label"
+                },
+                "rows": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991,
+                  "description": "Lines of the category"
+                },
+                "cases": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991,
+                  "description": "Cases concerned"
+                }
+              },
+              "required": [
+                "code",
+                "label",
+                "rows",
+                "cases"
+              ]
+            },
+            "description": "Differences with the previous import"
+          },
+          "notes": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 50,
+                  "description": "Code of the note"
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200,
+                  "description": "French label"
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991,
+                  "description": "How many"
+                }
+              },
+              "required": [
+                "code",
+                "label",
+                "count"
+              ]
+            },
+            "description": "Remarks about the file"
+          }
+        },
+        "required": [
+          "type",
+          "importId",
+          "previous",
+          "categories",
+          "notes"
+        ]
+      },
+      "ImportReportCategoryDto": {
+        "type": "string",
+        "enum": [
+          "new",
+          "settled",
+          "modified",
+          "removed"
+        ],
+        "description": "Category of the report"
+      },
+      "ImportReportItemsResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportReportItemDto"
+            },
+            "description": "Lines of the page, sorted by key"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of elements of the whole list"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
+      "ImportReportItemDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Natural key of the line"
+          },
+          "debtorId": {
+            "nullable": true,
+            "description": "Customer identifier of the debtor concerned",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "detail": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300,
+            "description": "What changed (French)"
+          }
+        },
+        "required": [
+          "key",
+          "debtorId",
+          "detail"
+        ]
+      },
+      "RecoveryImportPreviewDto": {
+        "type": "object",
+        "properties": {
+          "importId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifier of the preview, to list its errors or confirm it"
+          },
+          "fileName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Name of the file as kept (directory part removed)"
+          },
+          "totalRows": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Non-blank data rows (validRows + errorRows)"
+          },
+          "validRows": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Rows that will be imported"
+          },
+          "errorRows": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Rows in error (a row counts once, whatever its number of faults)"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "End of the preview: after it, the file must be sent again"
+          },
+          "accepted": {
+            "type": "boolean",
+            "description": "The file can be confirmed (false when a file refused as a whole counts its error)"
+          },
+          "computedTotalCents": {
+            "nullable": true,
+            "description": "Sum of the balances of the file (receivables)",
+            "type": "integer",
+            "minimum": -10000000000000,
+            "maximum": 9007199254740991
+          },
+          "controlTotalCents": {
+            "nullable": true,
+            "description": "Control total entered (receivables)",
+            "type": "integer",
+            "minimum": -10000000000000,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "importId",
+          "fileName",
+          "totalRows",
+          "validRows",
+          "errorRows",
+          "expiresAt",
+          "accepted",
+          "computedTotalCents",
+          "controlTotalCents"
+        ]
+      },
+      "RecoveryImportSpecificationDto": {
+        "type": "object",
+        "properties": {
+          "columns": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImportColumnDto"
+            },
+            "description": "Columns the file may hold, in the order of the screen"
+          },
+          "maxFileSizeBytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991,
+            "description": "Largest file accepted, in bytes"
+          },
+          "maxRows": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991,
+            "description": "Largest number of data rows accepted"
+          },
+          "acceptedExtensions": {
+            "minItems": 1,
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "File extensions accepted, with their dot"
+          },
+          "refusedOnFirstError": {
+            "type": "boolean",
+            "description": "The whole file is refused at its first error (receivables and payments)"
+          },
+          "extraFields": {
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 50,
+                  "description": "Name of the query parameter"
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "description": "Label shown on the screen"
+                },
+                "required": {
+                  "type": "boolean",
+                  "description": "The field is mandatory"
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500,
+                  "description": "What the field holds"
+                }
+              },
+              "required": [
+                "name",
+                "label",
+                "required",
+                "description"
+              ]
+            },
+            "description": "Fields to send with the file, besides the file itself"
+          }
+        },
+        "required": [
+          "columns",
+          "maxFileSizeBytes",
+          "maxRows",
+          "acceptedExtensions",
+          "refusedOnFirstError",
+          "extraFields"
+        ]
+      },
+      "ImportColumnDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Name of the column in the header of the file"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Is the column mandatory?"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "description": "What the column holds and the rule applied to it (French)"
+          }
+        },
+        "required": [
+          "name",
+          "required",
+          "description"
+        ]
+      },
+      "RecoveryImportHistoryResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecoveryImportHistoryItemDto"
+            },
+            "description": "Confirmed imports of the page, newest first"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of elements of the whole list"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
+      "RecoveryImportHistoryItemDto": {
+        "type": "object",
+        "properties": {
+          "importId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Identifier of the import"
+          },
+          "type": {
+            "$ref": "#/components/schemas/RecoveryImportTypeDto"
+          },
+          "fileName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Name of the file"
+          },
+          "confirmedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Confirmation instant"
+          },
+          "confirmedBy": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Account ID"
+              },
+              "email": {
+                "type": "string",
+                "description": "E-mail of the account"
+              }
+            },
+            "required": [
+              "id",
+              "email"
+            ]
+          },
+          "totalRows": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Non-blank data rows"
+          },
+          "createdCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Rows written"
+          },
+          "skippedCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Rows not written"
+          }
+        },
+        "required": [
+          "importId",
+          "type",
+          "fileName",
+          "confirmedAt",
+          "confirmedBy",
+          "totalRows",
+          "createdCount",
+          "skippedCount"
+        ]
+      },
+      "RecoveryImportStatusDto": {
+        "type": "object",
+        "properties": {
+          "statement": {
+            "type": "object",
+            "properties": {
+              "lastStatementDate": {
+                "nullable": true,
+                "type": "string",
+                "format": "date",
+                "description": "Date of the last confirmed bank statement"
+              },
+              "maxAgeDays": {
+                "nullable": true,
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 3650,
+                "description": "Oldest accepted bank statement according to the active policy"
+              },
+              "fresh": {
+                "type": "boolean",
+                "description": "A confirmed statement exists and is not older than the maximum age"
+              }
+            },
+            "required": [
+              "lastStatementDate",
+              "maxAgeDays",
+              "fresh"
+            ]
+          },
+          "receivablesExtractionDate": {
+            "nullable": true,
+            "type": "string",
+            "format": "date",
+            "description": "Extraction date of the latest receivables snapshot"
+          },
+          "lastConfirmed": {
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "$ref": "#/components/schemas/RecoveryImportTypeDto"
+                },
+                "confirmedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Confirmation instant"
+                },
+                "fileName": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 255,
+                  "description": "Name of the file"
+                }
+              },
+              "required": [
+                "type",
+                "confirmedAt",
+                "fileName"
+              ]
+            },
+            "description": "The last confirmed import of each type"
+          }
+        },
+        "required": [
+          "statement",
+          "receivablesExtractionDate",
+          "lastConfirmed"
+        ]
+      },
       "ScopesListResponseDto": {
         "type": "object",
         "properties": {
@@ -1571,6 +6620,98 @@
         "required": [
           "status",
           "services"
+        ]
+      },
+      "UserProfilesListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserProfileDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Number of accounts that have a profile"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
+      "UserProfileDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Account ID"
+          },
+          "email": {
+            "type": "string",
+            "description": "E-mail of the account"
+          },
+          "profile": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProfileDto"
+              }
+            ]
+          },
+          "channel": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ChannelDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "userId",
+          "email",
+          "profile",
+          "channel"
+        ]
+      },
+      "SetUserProfileParamsDto": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "nullable": true,
+            "description": "The profile, or null to remove it",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProfileDto"
+              }
+            ]
+          },
+          "channel": {
+            "description": "Required for the agent profile, refused otherwise",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ChannelDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "profile"
+        ]
+      },
+      "SetUserProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "userProfile": {
+            "$ref": "#/components/schemas/UserProfileDto"
+          }
+        },
+        "required": [
+          "userProfile"
         ]
       },
       "UsersListResponseDto": {
@@ -1778,56 +6919,6 @@
           "fileName"
         ]
       },
-      "ImportErrorsListResponseDto": {
-        "type": "object",
-        "properties": {
-          "errors": {
-            "maxItems": 100,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ImportRowErrorDto"
-            },
-            "description": "One page of entries, by row then by column"
-          },
-          "total": {
-            "type": "integer",
-            "minimum": 0,
-            "description": "Number of entries of the whole list (not of the rows)"
-          }
-        },
-        "required": [
-          "errors",
-          "total"
-        ]
-      },
-      "ImportRowErrorDto": {
-        "type": "object",
-        "properties": {
-          "row": {
-            "type": "integer",
-            "minimum": 2,
-            "maximum": 2147483647,
-            "description": "Spreadsheet row number (the header is row 1)"
-          },
-          "column": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 100,
-            "description": "Name of the faulty column"
-          },
-          "reason": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 500,
-            "description": "What is wrong, in French"
-          }
-        },
-        "required": [
-          "row",
-          "column",
-          "reason"
-        ]
-      },
       "ImportPreviewDto": {
         "type": "object",
         "properties": {
@@ -1909,32 +7000,6 @@
           "maxFileSizeBytes",
           "maxRows",
           "acceptedExtensions"
-        ]
-      },
-      "ImportColumnDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 100,
-            "description": "Name of the column in the header of the file"
-          },
-          "required": {
-            "type": "boolean",
-            "description": "Is the column mandatory?"
-          },
-          "description": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 500,
-            "description": "What the column holds and the rule applied to it (French)"
-          }
-        },
-        "required": [
-          "name",
-          "required",
-          "description"
         ]
       }
     }
