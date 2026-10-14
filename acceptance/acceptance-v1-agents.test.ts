@@ -932,4 +932,41 @@ describe('Recouvrement - outils des agents (REST)', () => {
       expect(JSON.stringify(seen)).not.toMatch(/r-reminder|r-proposal|policyVersion|"floor"|"rank"/)
     })
   })
+
+  // ------------------------------------------------------------------ plafond d'encours et confirmation (déplacés du lot v1b-lot-du-jour : ils passent par POST /agent/conversations)
+
+  describe('plafond d\'encours et confirmation d\'engagement', () => {
+    const prepare = async () => ok(await w.prepareBatch()).batch
+
+    it('[rule-recouvrement-exposure-ceiling] when the ceiling of the agent version and segment is reached an alert item opens, once while the ceiling stays reached', async () => {
+      await setupWorld({
+        invoices: [{ numero: 'FA-001', debiteur: 'D1', montant: 100000 }],
+        policy: { global: { exposureCeilings: [{ agentVersion: 'agent-1.0', segment: 'standard', maxCents: 82000 }] } },
+      }, w)
+      const agent = new RestTools(await w.tok('agent'), 'voice')
+      const caseId = await w.caseId('D1')
+      await openConversation(agent, 'c-1', caseId, await w.contactId('D1'))
+      const offer = await descendTo(agent, 'c-1', caseId, 4)
+      expect((await agent.commit('c-1', caseId, commitmentFor(offer))).status).toBe(201)
+      await prepare()
+      expect((await w.queueCounts()).byType.alert).toBe(1)
+      await sql("update base.daily_batches set status = 'blocked'")
+      await prepare()
+      expect((await w.queueCounts()).byType.alert).toBe(1)
+    })
+
+    it('[rule-recouvrement-commitment-confirmation-immediate] a commitment emits at once a confirmation order outside any batch, planned, on an authorized and reachable channel', async () => {
+      await setupWorld({}, w)
+      const agent = new RestTools(await w.tok('agent'), 'voice')
+      const caseId = await w.caseId('D1')
+      await openConversation(agent, 'c-1', caseId, await w.contactId('D1'))
+      const offer = await descendTo(agent, 'c-1', caseId, 1)
+      const res = await agent.commit('c-1', caseId, commitmentFor(offer))
+      expect(res.body.confirmationOrder.status).toBe('planned')
+      const rows = await sql<any>("select * from base.send_orders where kind = 'commitment_confirmation'")
+      expect(rows).toHaveLength(1)
+      expect(rows[0].batch_id).toBeNull()
+      expect(rows[0].id).toBe(res.body.confirmationOrder.id)
+    })
+  })
 })

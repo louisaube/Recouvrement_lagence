@@ -32,5 +32,5 @@ Les autres fichiers `acceptance-v1-*` appartiennent aux lots suivants : ne pas l
 
 ## Règles de conduite
 - Pas de route provisoire (501, 404 de convenance) : une route d'un lot suivant n'existe pas encore.
-- Si un test de la porte ne peut passer que par une route d'un lot suivant, ne rien contourner : le dire en dernière ligne de la réponse (titre du test, route manquante) ; ne pas ouvrir de contestation pour cela.
+- Si un test de la porte ne peut passer que par une route d'un lot suivant (par exemple POST /agent/... pour les outils des agents), ne rien contourner et ouvrir une contestation `OPEN: <titre exact du test> : dépend de <route> (lot <slug>)` dans le DISPUTES.md de ce dossier : la QA déplace alors le test à l'identique, avec ses assertions et son identifiant, dans le fichier du lot concerné.
 - Le disque garde l'avancement : écrire par fonctionnalité et lancer ses tests après chacune.
