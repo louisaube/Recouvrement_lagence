@@ -969,4 +969,115 @@ describe('Recouvrement - outils des agents (REST)', () => {
       expect(rows[0].id).toBe(res.body.confirmationOrder.id)
     })
   })
+
+  // Tests de la file de décisions déplacés à l'identique depuis acceptance-v1-file-decisions.test.ts (arbitrage QA du lot v1c) : ils passent par les outils des agents.
+  describe('décisions de la file de décisions (effets sur les dossiers)', () => {
+    const decide = (id: string, decision: string, reason = 'Décision de recette', extra: object = {}) => post(`/decision-queue/items/${id}/decision`, sup, { decision, reason, ...extra })
+    const open = async (debtor: string, conv = `c-${debtor}`) => {
+      const caseId = await w.caseId(debtor)
+      await openConversation(agent, conv, caseId, await w.contactId(debtor))
+      return { caseId, conv }
+    }
+    const only = async (type: string) => {
+      const items = await w.queueItems(`&type=${type}`)
+      expect(items).toHaveLength(1)
+      return items[0]
+    }
+    const gros = (n = 50000) => ruleFor('gros', 'family', { thresholdCents: n })
+    const BIG: Inv[] = [{ numero: 'FA-001', debiteur: 'D1', montant: 90000, segment: 'gros' }]
+    async function world(invoices: Inv[], policy: any = {}) {
+      await setupWorld({ invoices, policy }, w)
+      sup = await w.tok('sup')
+      agent = new RestTools(await w.tok('agent'), 'voice')
+    }
+    async function sql_clear_today_batch() {
+      await sql("update base.daily_batches set status = 'blocked' where status = 'ready' and batch_date = current_date")
+    }
+    async function only_decided(type: string) {
+      return (await w.queueItems(`&status=decided&type=${type}`))[0]
+    }
+
+    it('[rule-recouvrement-queue-allowed-decisions] each type allows exactly the decisions of the referential and refuses another with 409 queue.decision_not_allowed', async () => {
+      await world([
+        { numero: 'FA-001', debiteur: 'D1', montant: 90000, segment: 'gros' }, { numero: 'FA-002', debiteur: 'D2', montant: 100000, late: 120 },
+        { numero: 'FA-003', debiteur: 'D3', montant: 10000 },
+      ], { extraRules: [gros()] })
+      await w.prepareBatch()
+      const over = await only('amount_over_threshold')
+      expect(over.allowedDecisions.sort()).toEqual(['authorize', 'transfer'])
+      const proposed = await only('transfer_proposed')
+      expect(proposed.allowedDecisions.sort()).toEqual(['approve_transfer', 'reject_transfer'])
+      const { caseId, conv } = await open('D3')
+      await agent.contest(conv, caseId, { reason: 'Je conteste', invoiceNumbers: ['FA-003'] })
+      expect((await only('contestation')).allowedDecisions).toEqual(['acknowledge'])
+      for (const [item, wrong] of [[over, 'keep'], [over, 'acknowledge'], [proposed, 'authorize'], [proposed, 'transfer']] as const) {
+        const res = await decide(item.id, wrong)
+        expect([item.type, wrong, res.status, res.body.code]).toEqual([item.type, wrong, 409, 'queue.decision_not_allowed'])
+      }
+      expect((await only('amount_over_threshold')).status).toBe('open')
+    })
+
+    it('[rule-recouvrement-queue-effects] « authorize » memorizes the authorized negotiable amount: the case goes back to the open state and is no longer put in the queue for the threshold while its amount does not exceed it; the agent can negotiate', async () => {
+      await world(BIG, { extraRules: [gros()] })
+      await w.prepareBatch()
+      expect((await w.caseDetail('D1')).state).toBe('supervisor_queue')
+      const { caseId, conv } = await open('D1')
+      expect((await agent.nextOffer(conv, caseId, {})).body.code).toBe('negotiation.stopped')
+      await decide((await only('amount_over_threshold')).id, 'authorize')
+      expect((await w.caseDetail('D1')).state).toBe('open')
+      const history = ok(await get(`/cases/${caseId}/state-history`, sup)).items
+      expect(history[0]).toMatchObject({ from: 'supervisor_queue', to: 'open', cause: 'queue_item_decided', actor: expect.any(String) })
+      expect((await agent.nextOffer(conv, caseId, {})).body.status).toBe('offer')
+      await sql_clear_today_batch()
+      await w.prepareBatch()
+      expect((await w.queueItems('&type=amount_over_threshold'))).toHaveLength(0)
+      expect((await w.caseDetail('D1')).state).not.toBe('supervisor_queue')
+    })
+
+    it('[rule-recouvrement-queue-effects][rule-recouvrement-family-transfer-never-executed] « transfer » (and « approve_transfer ») brings the case to transferred (cause transfer_approved), a final state', async () => {
+      await world([{ numero: 'FA-001', debiteur: 'D1', montant: 90000, segment: 'gros' }, { numero: 'FA-002', debiteur: 'D2', montant: 100000, late: 120 }], { extraRules: [gros()] })
+      await w.prepareBatch()
+      await decide((await only('amount_over_threshold')).id, 'transfer')
+      await decide((await only('transfer_proposed')).id, 'approve_transfer')
+      for (const d of ['D1', 'D2']) {
+        const detail = await w.caseDetail(d)
+        expect(detail.state).toBe('transferred')
+        const history = ok(await get(`/cases/${detail.id}/state-history`, sup)).items
+        expect(history[0]).toMatchObject({ to: 'transferred', cause: 'transfer_approved' })
+      }
+      expect((await agent.open('c-final', { caseId: (await w.caseDetail('D1')).id, interlocutorId: await w.contactId('D1'), aiDisclosureGiven: true })).body.code).toBe('cases.not_found')
+    })
+
+    it('[rule-recouvrement-queue-effects][rule-recouvrement-human-request] « resume » lifts the suspension of the negotiation; « transfer » transfers the case', async () => {
+      await world([{ numero: 'FA-001', debiteur: 'D1', montant: 100000 }, { numero: 'FA-002', debiteur: 'D2', montant: 100000 }])
+      const one = await open('D1')
+      const two = await open('D2')
+      await agent.human(one.conv, one.caseId, {})
+      await agent.human(two.conv, two.caseId, {})
+      const items = await w.queueItems('&type=human_request')
+      expect(items.map((i: any) => i.allowedDecisions.sort())).toEqual([['resume', 'transfer'], ['resume', 'transfer']])
+      const d1 = items.find((i: any) => i.debtorId === 'D1')
+      const d2 = items.find((i: any) => i.debtorId === 'D2')
+      await decide(d1.id, 'resume')
+      await decide(d2.id, 'transfer')
+      expect((await w.caseDetail('D1')).state).toBe('open')
+      expect((await w.caseDetail('D2')).state).toBe('transferred')
+      expect((await agent.nextOffer(one.conv, one.caseId, {})).body.status).toBe('offer')
+    })
+
+    it('[rule-recouvrement-queue-effects] « acknowledge » and « keep » only close the item: the state of the case does not change by themselves', async () => {
+      await world([{ numero: 'FA-001', debiteur: 'D1', montant: 100000 }, { numero: 'FA-002', debiteur: 'D2', montant: 100000 }])
+      const one = await open('D1')
+      await agent.contest(one.conv, one.caseId, { reason: 'Je conteste', invoiceNumbers: ['FA-001'] })
+      await decide((await only('contestation')).id, 'acknowledge')
+      expect((await w.caseDetail('D1')).state).toBe('frozen')
+      const two = await open('D2')
+      await descendTo(agent, two.conv, two.caseId, 4)
+      await agent.nextOffer(two.conv, two.caseId, { counterpart: { type: 'direct_debit' } })
+      const item = await only('ladder_exhausted')
+      expect(item.allowedDecisions.sort()).toEqual(['keep', 'transfer'])
+      await decide(item.id, 'keep')
+      expect((await only_decided('ladder_exhausted')).decision.code).toBe('keep')
+    })
+  })
 })
