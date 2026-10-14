@@ -17,6 +17,6 @@ Profil Superviseur seulement. Code : `features/imports/pages/ImportsPage.tsx`, `
 `rule-recouvrement-import-green-light`, `-import-refuse-whole`, `-import-report`, `-receivables-control-total`, `-statement-fresh`, `-lettrage-*`, `-disputes-import-freeze` (voir `module-recouvrement.summary.md`).
 
 ## Limites connues
-- Le lien « File de décisions » du résultat mène à l'accueil : l'écran n'est pas construit dans ce lot.
+- Le lien « File de décisions » du résultat mène à `/file-de-decisions` (`page-file-de-decisions.summary.md`).
 - Un relevé sans aucun mouvement ne peut pas être déposé (le socle refuse un fichier sans ligne de données).
 - Pas d'édition de fichier ni de double validation : la trace d'audit suffit.

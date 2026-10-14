@@ -1,26 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { sql } from 'drizzle-orm'
 import { Database, DB } from '../../platform/database/database.module'
+import { notFound } from '../../platform/http/errors'
 import { pageOf } from '../../platform/validation/common'
 import { isoInstant } from '../recovery-common/sql'
+import { ALLOWED_DECISIONS } from './decision-queue.constants'
 import { QUEUE_TYPES, type QueueType } from './decision-queue.tables'
-import type { QueueItemsQuery } from './decision-queue.schemas'
+import type { QueueItemDto, QueueItemsQuery } from './decision-queue.schemas'
 
 type Row = Record<string, unknown>
 
-/** Decisions allowed by type (referentiel-etats-et-transitions §4, rule-recouvrement-queue-allowed-decisions). */
-export const ALLOWED_DECISIONS: Record<QueueType, string[]> = {
-  contestation: ['acknowledge'],
-  amount_over_threshold: ['authorize', 'transfer'],
-  ladder_exhausted: ['keep', 'transfer'],
-  unassigned_payment: ['assign'],
-  accounting_gap: ['reapprove'],
-  prescription_near: ['acknowledge', 'transfer'],
-  prescription_expired: ['acknowledge', 'transfer'],
-  alert: ['acknowledge'],
-  human_request: ['resume', 'transfer'],
-  transfer_proposed: ['approve_transfer', 'reject_transfer'],
-}
+const ITEM_COLUMNS = sql`q.id, q.type, q.status, q.created_at, q.case_id, q.object_key, q.summary, q.details,
+  q.decided_at, q.decision_code, q.decision_reason, q.decided_by, c.debtor_id, u.email as decided_by_email`
 
 const detailsOf = (raw: unknown): { label: string; value: string }[] =>
   (Array.isArray(raw) ? raw : [])
@@ -40,8 +31,7 @@ export class QueueReadService {
     const order = query.status === 'open' ? sql`q.created_at asc, q.id` : sql`q.decided_at desc, q.id`
     const rows = (
       await this.db.execute(sql`
-        select q.id, q.type, q.status, q.created_at, q.case_id, q.object_key, q.summary, q.details,
-          q.decided_at, q.decision_code, q.decision_reason, q.decided_by, c.debtor_id, u.email as decided_by_email
+        select ${ITEM_COLUMNS}
         from base.queue_items q
         left join base.cases c on c.id = q.case_id
         left join base.users u on u.id = q.decided_by
@@ -49,8 +39,26 @@ export class QueueReadService {
       `)
     ).rows as Row[]
     const [count] = (await this.db.execute(sql`select count(*)::int as total from base.queue_items q where ${where}`)).rows as Row[]
+    return { items: await this.toDtos(rows), total: Number(count?.total ?? 0) }
+  }
 
-    const items = []
+  /** One item as the queue reads it (the state after a decision); 404 when unknown. */
+  async get(id: string): Promise<QueueItemDto> {
+    const rows = (
+      await this.db.execute(sql`
+        select ${ITEM_COLUMNS}
+        from base.queue_items q
+        left join base.cases c on c.id = q.case_id
+        left join base.users u on u.id = q.decided_by
+        where q.id = ${id}::uuid
+      `)
+    ).rows as Row[]
+    if (rows.length === 0) throw notFound()
+    return (await this.toDtos(rows))[0]
+  }
+
+  private async toDtos(rows: Row[]): Promise<QueueItemDto[]> {
+    const items: QueueItemDto[] = []
     for (const r of rows) {
       const open = r.status === 'open'
       items.push({
@@ -74,7 +82,7 @@ export class QueueReadService {
             },
       })
     }
-    return { items, total: Number(count?.total ?? 0) }
+    return items
   }
 
   /** Open invoices of the cases frozen by the unassigned payment (rule-recouvrement-unassigned-payment-freeze). */

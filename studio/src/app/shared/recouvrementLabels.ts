@@ -38,6 +38,48 @@ export const exclusionReasonLabel = lookup({
   covered_by_outputs: 'Part couverte par une sortie comptable',
 })
 
+/** Types and decisions of the supervisor queue (`referentiel-etats-et-transitions.md` §4). rule-recouvrement-screen-queue-no-local-rules */
+export const QUEUE_TYPES = [
+  'contestation',
+  'amount_over_threshold',
+  'ladder_exhausted',
+  'unassigned_payment',
+  'accounting_gap',
+  'prescription_near',
+  'prescription_expired',
+  'alert',
+  'human_request',
+  'transfer_proposed',
+] as const
+export const queueTypeLabel = lookup({
+  contestation: 'Contestation',
+  amount_over_threshold: 'Montant au-delà du seuil',
+  ladder_exhausted: 'Échelle épuisée',
+  unassigned_payment: 'Paiement non affecté',
+  accounting_gap: 'Sortie comptable en écart',
+  prescription_near: 'Prescription proche',
+  prescription_expired: 'Prescription échue',
+  alert: 'Alerte',
+  human_request: "Demande d'intervention humaine",
+  transfer_proposed: 'Transfert proposé',
+})
+const queueDecisionTable = lookup({
+  acknowledge: 'Prendre acte',
+  authorize: 'Autoriser la négociation',
+  transfer: "Transférer à l'étape suivante",
+  keep: 'Maintenir le dossier',
+  assign: 'Affecter à une facture',
+  reapprove: 'Remettre en attente de constatation',
+  resume: 'Rendre le dossier au cerveau',
+  approve_transfer: 'Approuver le transfert',
+  reject_transfer: 'Refuser le transfert',
+  auto_closed: 'Clôture automatique',
+})
+/** rule-recouvrement-screen-queue-label-by-type: « Acquitter » for an alert, « Prendre acte » for any other type. */
+export function queueDecisionLabel(code: string, type: string): string {
+  return code === 'acknowledge' && type === 'alert' ? 'Acquitter' : queueDecisionTable(code)
+}
+
 /** « Compte agent · Voix » for an agent, the profile label otherwise. */
 export function profileWithChannelLabel(profile: string, channel: string | null | undefined): string {
   return profile === 'agent' && channel ? `${profileLabel(profile)} · ${channelLabel(channel)}` : profileLabel(profile)

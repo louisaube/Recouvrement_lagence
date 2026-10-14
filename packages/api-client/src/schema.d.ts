@@ -273,6 +273,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/decision-queue/items/{id}/decision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Use this API action to decide an item of the decision queue with a reason, among the decisions its type allows (supervisor profile) */
+        post: operations["QueueDecisionController_decide"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/disputes": {
         parameters: {
             query?: never;
@@ -1646,6 +1663,20 @@ export interface components {
                 /** @description E-mail of the account */
                 email: string;
             } | null;
+        };
+        QueueDecisionParamsDto: {
+            /** @description Code of the decision, one of `allowedDecisions` of the item (1 to 50 characters) */
+            decision: string;
+            /** @description Reason of the decision (1 to 1000 characters once trimmed) */
+            reason: string;
+            /**
+             * Format: uuid
+             * @description Invoice the payment is assigned to (required with `assign`, forbidden otherwise)
+             */
+            invoiceId?: string;
+        };
+        QueueDecisionResponseDto: {
+            item: components["schemas"]["QueueItemDto"];
         };
         /**
          * @description Origin of the dispute: import, contestation (conversation) or service (opened by the litigation service)
@@ -3382,6 +3413,68 @@ export interface operations {
             };
             /** @description Forbidden - insufficient role permissions */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QueueDecisionController_decide: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Item ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QueueDecisionParamsDto"];
+            };
+        };
+        responses: {
+            /** @description The item after the decision */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QueueDecisionResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Conflict - queue.already_decided, queue.decision_not_allowed (also a transfer of a frozen or settled case), queue.invoice_not_open */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

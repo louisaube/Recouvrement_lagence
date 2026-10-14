@@ -57,6 +57,30 @@ export const queueItemSchema = z
     decision: decisionSchema.nullable(),
   })
   .meta({ id: 'QueueItemDto' })
+export type QueueItemDto = z.infer<typeof queueItemSchema>
+
+export const queueItemParamsSchema = z.object({ id: uuidField('Item ID') })
+export type QueueItemParams = z.infer<typeof queueItemParamsSchema>
+
+/**
+ * rule-recouvrement-queue-decision-motivated: the reason is trimmed, 1 to 1000 characters, the body strict.
+ * `invoiceId` goes with `assign` and with it alone (rule-recouvrement-queue-effects).
+ */
+export const queueDecisionBodySchema = z
+  .strictObject({
+    decision: z.string().min(1).max(50).meta({ description: 'Code of the decision, one of `allowedDecisions` of the item (1 to 50 characters)' }),
+    reason: z.string().trim().min(1).max(1000).meta({ description: 'Reason of the decision (1 to 1000 characters once trimmed)' }),
+    invoiceId: uuidField('Invoice the payment is assigned to (required with `assign`, forbidden otherwise)').optional(),
+  })
+  .superRefine((body, ctx) => {
+    if (body.decision === 'assign' && body.invoiceId === undefined) ctx.addIssue({ code: 'custom', path: ['invoiceId'], message: 'invoiceId is required with the decision assign' })
+    if (body.decision !== 'assign' && body.invoiceId !== undefined) ctx.addIssue({ code: 'custom', path: ['invoiceId'], message: 'invoiceId is only for the decision assign' })
+  })
+  .meta({ id: 'QueueDecisionParamsDto', additionalProperties: undefined })
+export type QueueDecisionBody = z.infer<typeof queueDecisionBodySchema>
+
+export const queueDecisionResponseSchema = z.object({ item: queueItemSchema }).meta({ id: 'QueueDecisionResponseDto' })
+
 export const queueItemsResponseSchema = listOf(queueItemSchema, 'QueueItemsResponseDto', 'Items of the page')
 
 export const queueCountsResponseSchema = z

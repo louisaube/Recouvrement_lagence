@@ -14,6 +14,8 @@ import { WholeFileImportService } from './whole-file-import.service'
   imports: [ImportsModule, CasesModule, DecisionQueueModule, PoliciesModule],
   controllers: [RecoveryImportsController],
   providers: [RecoveryImportsService, WholeFileImportService, ImportReportService, LettrageService],
+  // the decisions of the supervisor replay the lettrage after an assignment (rule-recouvrement-queue-effects)
+  exports: [LettrageService],
 })
 export class RecoveryImportsModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {

@@ -107,6 +107,28 @@ export class CaseStateService {
     return changes
   }
 
+  /**
+   * rule-recouvrement-queue-effects: the supervisor transfers the case to the next step (cause `transfer_approved`).
+   * The referential allows it from `open`, `negotiating`, `committed` and `supervisor_queue` only: `blocked` is answered for
+   * a frozen or settled case, `already` for one that is transferred (nothing to do).
+   */
+  async transfer(tx: ImportExecutor, caseId: string, kind: string | null, ctx: StateContext): Promise<'done' | 'already' | 'blocked'> {
+    const [row] = (await tx.execute(sql`select state from base.cases where id = ${caseId}::uuid for update`)).rows as { state: CaseState }[]
+    if (!row) return 'blocked'
+    if (row.state === 'transferred') return 'already'
+    if (allowedCauses(row.state, 'transferred').length === 0) return 'blocked'
+    await tx.execute(sql`
+      insert into base.case_state_history (case_id, from_state, to_state, cause, actor, reference)
+      values (${caseId}::uuid, ${row.state}, 'transferred', 'transfer_approved', ${ctx.actor}, ${ctx.reference ?? null})
+    `)
+    await tx.execute(sql`
+      update base.cases
+      set state = 'transferred', state_since = now(), transferred_at = now(), transfer_kind = ${kind}, updated_at = now()
+      where id = ${caseId}::uuid
+    `)
+    return 'done'
+  }
+
   /** The first state of a case that has just been created (history row `null -> state`). */
   async recordCreation(tx: ImportExecutor, caseIds: string[], ctx: StateContext): Promise<void> {
     if (caseIds.length === 0) return
