@@ -29,7 +29,7 @@ describe('Recouvrement - lot du jour', () => {
   const prepare = async () => ok(await w.prepareBatch()).batch
   const check = (batch: any, code: string) => batch.checks.find((c: any) => c.code === code)
   const excluded = (batch: any, reason: string) => batch.excluded.find((e: any) => e.reason === reason)?.count ?? 0
-  const orders = async (batchId: string, q = '') => ok(await get(`/daily-batches/${batchId}/orders?size=100${q}`, sup))
+  const orders = async (batchId: string, q = '') => ok(await get(`/daily-batches/${batchId}/orders?${/(^|&)size=/.test(q) ? '' : 'size=100'}${q}`.replace('?&', '?'), sup))
 
   // ------------------------------------------------------------------ accès
 
@@ -191,12 +191,12 @@ describe('Recouvrement - lot du jour', () => {
       await setupWorld({
         invoices: [{ numero: 'FA-001', debiteur: 'D1', montant: 100000, late: 10 }, { numero: 'FA-002', debiteur: 'D2', montant: 100000, late: 10 }],
         policy: { extraRules: [exigeant] },
-        documents: [{ numero: 'FA-002', type: 'contract', reference: 'CT-2' }],
+        documents: [{ numero: 'FA-002', type: 'contrat', reference: 'CT-2' }],
       }, w)
       const batch = await prepare()
       expect((await orders(batch.id)).items.map((o: any) => o.debtorId)).toEqual(['D2'])
       expect(excluded(batch, 'documents_missing')).toBe(1)
-      await importOk(sup, 'documents', strip([DOCUMENTS_HEADER, ['FA-001', SIREN_A, 'contract', 'CT-1'], ['FA-002', SIREN_A, 'contract', 'CT-2']]))
+      await importOk(sup, 'documents', strip([DOCUMENTS_HEADER, ['FA-001', SIREN_A, 'contrat', 'CT-1'], ['FA-002', SIREN_A, 'contrat', 'CT-2']]))
       const again = await prepare()
       expect(again.id).not.toBe(batch.id)
       expect((await orders(again.id)).items.map((o: any) => o.debtorId)).toEqual(['D1', 'D2'])
@@ -304,13 +304,13 @@ describe('Recouvrement - lot du jour', () => {
       const blocked = await prepare()
       await post(`/daily-batches/${blocked.id}/release`, sup, { reason: 'Décision du superviseur' })
       const log = await get('/audit-logs?size=100', sup)
-      const prepared = log.body.items.find((e: any) => e.action === 'batches:prepare')
-      const released = log.body.items.find((e: any) => e.action === 'batches:release')
+      const prepared = log.body.entries.find((e: any) => e.action === 'batches:prepare')
+      const released = log.body.entries.find((e: any) => e.action === 'batches:release')
       expect(prepared).toBeDefined()
       expect(released).toBeDefined()
       expect(prepared.summary).toMatch(/^Lot du jour du \d{2}\/\d{2}\/\d{4} préparé : \d+ ordres?, bloqué\.$/)
       expect(released.summary).toMatch(/^Lot du jour du \d{2}\/\d{2}\/\d{4} libéré par décision du superviseur\.$/)
-      expect(JSON.stringify(log.body.items)).not.toContain('Décision du superviseur')
+      expect(JSON.stringify(log.body.entries)).not.toContain('Décision du superviseur')
     })
   })
 
