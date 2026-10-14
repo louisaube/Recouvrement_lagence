@@ -196,10 +196,20 @@ describe('Recouvrement - lot du jour', () => {
       const batch = await prepare()
       expect((await orders(batch.id)).items.map((o: any) => o.debtorId)).toEqual(['D2'])
       expect(excluded(batch, 'documents_missing')).toBe(1)
+      // Le lot ci-dessus est prêt : un seul lot actif par jour (rule-recouvrement-batch-one-per-day), on repart donc d'un monde neuf
+      // où le document manquant est indexé avant la préparation.
+      await resetData()
+      w = new World()
+      sup = await w.tok('sup')
+      await setupWorld({
+        invoices: [{ numero: 'FA-001', debiteur: 'D1', montant: 100000, late: 10 }, { numero: 'FA-002', debiteur: 'D2', montant: 100000, late: 10 }],
+        policy: { extraRules: [exigeant] },
+        documents: [{ numero: 'FA-002', type: 'contrat', reference: 'CT-2' }],
+      }, w)
       await importOk(sup, 'documents', strip([DOCUMENTS_HEADER, ['FA-001', SIREN_A, 'contrat', 'CT-1'], ['FA-002', SIREN_A, 'contrat', 'CT-2']]))
-      const again = await prepare()
-      expect(again.id).not.toBe(batch.id)
-      expect((await orders(again.id)).items.map((o: any) => o.debtorId)).toEqual(['D1', 'D2'])
+      const indexed = await prepare()
+      expect(excluded(indexed, 'documents_missing')).toBe(0)
+      expect((await orders(indexed.id)).items.map((o: any) => o.debtorId)).toEqual(['D1', 'D2'])
     })
 
     it('[rule-recouvrement-batch-statement-fresh] without a fresh bank statement the batch is blocked with no order, every case excluded statement_stale and the check failed with its problems in French', async () => {
