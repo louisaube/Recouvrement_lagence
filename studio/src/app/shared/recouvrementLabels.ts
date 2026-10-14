@@ -18,6 +18,26 @@ export const checkLabel = lookup({
 })
 export const importTypeLabel = lookup({ receivables: 'Créances', payments: 'Paiements', disputes: 'Litiges', contacts: 'Interlocuteurs', documents: 'Pièces' })
 
+export const interlocutorRoleLabel = lookup({ accounts_payable: 'Comptabilité fournisseurs', buyer: 'Acheteur', approver: 'Valideur', payer: 'Payeur' })
+export const orderTypeLabel = lookup({ reminder: 'Relance', proposal: 'Proposition', commitment_confirmation: "Confirmation d'engagement" })
+export const orderStatusLabel = lookup({ planned: 'Prévu', blocked: 'Bloqué', cancelled: 'Annulé' })
+export const batchStatusLabel = lookup({ blocked: 'Bloqué', ready: 'Prêt', replaced: 'Remplacé' })
+export const batchCheckLabel = lookup({
+  statement_fresh: 'Relevé bancaire frais',
+  witnesses_replayed: 'Dossiers témoins rejoués sans écart',
+  decision_share: 'Part de chaque type de décision dans la limite',
+  no_duplicate_order: 'Aucun ordre en double (dossier, type, jour)',
+})
+export const exclusionReasonLabel = lookup({
+  documents_missing: 'Pièce exigée absente',
+  channel_suspended: 'Canal suspendu',
+  channel_not_authorized: 'Canal non autorisé',
+  no_contact: 'Aucun interlocuteur joignable',
+  frozen: 'Dossier gelé',
+  statement_stale: 'Relevé périmé',
+  covered_by_outputs: 'Part couverte par une sortie comptable',
+})
+
 /** « Compte agent · Voix » for an agent, the profile label otherwise. */
 export function profileWithChannelLabel(profile: string, channel: string | null | undefined): string {
   return profile === 'agent' && channel ? `${profileLabel(profile)} · ${channelLabel(channel)}` : profileLabel(profile)

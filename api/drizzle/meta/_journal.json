@@ -43,6 +43,13 @@
       "when": 1791960005540,
       "tag": "0005_recouvrement_triggers",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791970402358,
+      "tag": "0006_harsh_dreadnoughts",
+      "breakpoints": true
     }
   ]
 }

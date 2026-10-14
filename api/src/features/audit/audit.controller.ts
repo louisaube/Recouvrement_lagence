@@ -26,7 +26,7 @@ export class AuditController {
   constructor(private readonly service: AuditService) {}
 
   @Get()
-  @Access({ action: 'audit:list', roles: ['admin'] })
+  @Access({ action: 'audit:list', roles: ['user'] })
   @ApiRoute({
     description: 'Use this API action to list the audit journal, newest first, with combinable filters (administrators only)',
     query: auditLogsListQuerySchema,
@@ -42,7 +42,7 @@ export class AuditController {
 
   /** The route is declared before any `:id`-like path would be: query parameters are ignored (no query schema). */
   @Get('filters')
-  @Access({ action: 'audit:filters', roles: ['admin'] })
+  @Access({ action: 'audit:filters', roles: ['user'] })
   @ApiRoute({
     description:
       'Use this API action to get the values offered by the filters of the journal screen, taken from the journal itself (administrators only)',

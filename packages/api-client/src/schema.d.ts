@@ -170,6 +170,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/daily-batches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to list the daily batches, the most recent first (supervisor profile) */
+        get: operations["BatchesController_list"];
+        put?: never;
+        /** @description Use this API action to prepare the daily batch: the brain decides every case, the orders are built and the checks run (supervisor profile) */
+        post: operations["BatchesController_prepare"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/daily-batches/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to read a daily batch with its checks, shares, exclusions and orders by type (supervisor profile) */
+        get: operations["BatchesController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/daily-batches/{id}/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to browse the send orders of a daily batch, by customer identifier then type (supervisor profile) */
+        get: operations["BatchesController_orders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/daily-batches/{id}/release": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Use this API action to release a blocked daily batch by a reasoned decision; the failed checks stay displayed (supervisor profile) */
+        post: operations["BatchesController_release"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/decision-queue/counts": {
         parameters: {
             query?: never;
@@ -1217,6 +1286,246 @@ export interface components {
             segments: string[];
             /** @description Creditor SIREN present in the cases, sorted */
             creditors: string[];
+        };
+        DailyBatchesListResponseDto: {
+            /** @description Batches of the page */
+            items: components["schemas"]["DailyBatchSummaryDto"][];
+            /** @description Number of elements of the whole list */
+            total: number;
+        };
+        DailyBatchSummaryDto: {
+            /**
+             * Format: uuid
+             * @description Batch ID
+             */
+            id: string;
+            /**
+             * Format: date
+             * @description Date of the batch
+             */
+            date: string;
+            status: components["schemas"]["BatchStatusDto"];
+            /** @description Supervisor who prepared the batch */
+            preparedBy: components["schemas"]["AccountRefDto"];
+            /**
+             * Format: date-time
+             * @description Preparation instant
+             */
+            createdAt: string;
+            /** @description Number of cases decided */
+            caseCount: number;
+            /** @description Number of orders of the batch */
+            orderCount: number;
+            /** @description Number of checks in failure */
+            failedChecks: number;
+            /** @description Supervisor who released a blocked batch (null for an automatic release) */
+            releasedBy: components["schemas"]["AccountRefDto"] | null;
+            /**
+             * Format: date-time
+             * @description Release instant
+             */
+            releasedAt: string | null;
+        };
+        /**
+         * @description Status of a daily batch
+         * @enum {string}
+         */
+        BatchStatusDto: "blocked" | "ready" | "replaced";
+        AccountRefDto: {
+            /**
+             * Format: uuid
+             * @description Account ID
+             */
+            id: string;
+            /** @description E-mail of the account */
+            email: string;
+        };
+        DailyBatchResponseDto: {
+            batch: components["schemas"]["DailyBatchDetailDto"];
+        };
+        DailyBatchDetailDto: {
+            /**
+             * Format: uuid
+             * @description Batch ID
+             */
+            id: string;
+            /**
+             * Format: date
+             * @description Date of the batch
+             */
+            date: string;
+            status: components["schemas"]["BatchStatusDto"];
+            /** @description Supervisor who prepared the batch */
+            preparedBy: components["schemas"]["AccountRefDto"];
+            /**
+             * Format: date-time
+             * @description Preparation instant
+             */
+            createdAt: string;
+            /** @description Number of cases decided */
+            caseCount: number;
+            /** @description Number of orders of the batch */
+            orderCount: number;
+            /** @description Number of checks in failure */
+            failedChecks: number;
+            /** @description Supervisor who released a blocked batch (null for an automatic release) */
+            releasedBy: components["schemas"]["AccountRefDto"] | null;
+            /**
+             * Format: date-time
+             * @description Release instant
+             */
+            releasedAt: string | null;
+            /** @description The four checks */
+            checks: components["schemas"]["BatchCheckDto"][];
+            /** @description Share of each type of decision */
+            shares: components["schemas"]["DecisionShareDto"][];
+            /** @description Cases that received no order, by reason */
+            excluded: components["schemas"]["BatchExclusionDto"][];
+            /** @description Orders by type */
+            ordersByType: components["schemas"]["BatchOrderCountDto"][];
+            /** @description Reason of the release decision */
+            releaseReason: string | null;
+            /**
+             * Format: uuid
+             * @description Batch that replaced this one
+             */
+            replacedBy: string | null;
+            /** @description Version of the policy that decided the batch */
+            policyVersion: {
+                /**
+                 * Format: uuid
+                 * @description Policy version ID
+                 */
+                id: string;
+                /** @description Label of the version */
+                label: string;
+            } | null;
+        };
+        BatchCheckDto: {
+            /**
+             * @description Code of the check
+             * @enum {string}
+             */
+            code: "statement_fresh" | "witnesses_replayed" | "decision_share" | "no_duplicate_order";
+            /**
+             * @description Result of the check
+             * @enum {string}
+             */
+            status: "passed" | "failed";
+            /** @description Problems found (at most 50) */
+            problems: string[];
+        };
+        DecisionShareDto: {
+            /**
+             * @description Type of decision
+             * @enum {string}
+             */
+            type: "none" | "reminder" | "proposal" | "transfer_proposed";
+            /** @description Number of decisions of this type in the batch */
+            count: number;
+            /** @description Share of the decided cases, in basis points */
+            shareBp: number;
+            /**
+             * @description Fixed cap of the policy before ten previous batches, statistical after
+             * @enum {string}
+             */
+            mode: "fixed_cap" | "statistical";
+            /** @description Fixed cap of the type, in basis points (fixed_cap mode) */
+            capBp: number | null;
+            /** @description Mean share of the previous batches, in basis points (statistical mode) */
+            meanBp: number | null;
+            /** @description Standard deviation of the population of the previous batches (statistical mode) */
+            sigmaBp: number | null;
+            /** @description Three standard deviations (statistical mode) */
+            thresholdBp: number | null;
+            /** @description The share blocks the batch */
+            exceeded: boolean;
+        };
+        BatchExclusionDto: {
+            /**
+             * @description Reason why the cases received no order
+             * @enum {string}
+             */
+            reason: "documents_missing" | "channel_suspended" | "channel_not_authorized" | "no_contact" | "frozen" | "statement_stale" | "covered_by_outputs";
+            /** @description Number of cases excluded for this reason */
+            count: number;
+        };
+        BatchOrderCountDto: {
+            type: components["schemas"]["OrderTypeDto"];
+            /** @description Number of orders of this type */
+            count: number;
+        };
+        /**
+         * @description Type of a send order
+         * @enum {string}
+         */
+        OrderTypeDto: "reminder" | "proposal" | "commitment_confirmation";
+        /**
+         * @description Channel of a send order
+         * @enum {string}
+         */
+        OrderChannelDto: "voice" | "email_sms" | "mail";
+        BatchOrdersListResponseDto: {
+            /** @description Orders of the page */
+            items: components["schemas"]["OrderDto"][];
+            /** @description Number of elements of the whole list */
+            total: number;
+        };
+        OrderDto: {
+            /**
+             * Format: uuid
+             * @description Order ID
+             */
+            id: string;
+            type: components["schemas"]["OrderTypeDto"];
+            status: components["schemas"]["OrderStatusDto"];
+            /**
+             * Format: uuid
+             * @description Case ID
+             */
+            caseId: string;
+            /** @description Customer identifier */
+            debtorId: string;
+            /**
+             * Format: uuid
+             * @description Interlocutor ID
+             */
+            interlocutorId: string;
+            /**
+             * @description Role of the interlocutor
+             * @enum {string}
+             */
+            interlocutorRole: "accounts_payable" | "buyer" | "approver" | "payer";
+            channel: components["schemas"]["OrderChannelDto"];
+            /** @description Amounts, due dates, offer: never a drafted text */
+            conditions: components["schemas"]["OrderConditionDto"][];
+            /** @description Why the order is blocked */
+            blockReason: string | null;
+            /**
+             * Format: date
+             * @description Date of the order
+             */
+            orderDate: string;
+            /**
+             * Format: uuid
+             * @description Batch ID
+             */
+            batchId: string | null;
+        };
+        /**
+         * @description Status of a send order
+         * @enum {string}
+         */
+        OrderStatusDto: "planned" | "blocked" | "cancelled";
+        OrderConditionDto: {
+            /** @description Name of the condition */
+            name: string;
+            /** @description Value of the condition (amount, due date, offer) */
+            value: string;
+        };
+        ReleaseBatchParamsDto: {
+            /** @description Reason of the decision (1 to 1000 characters once trimmed) */
+            reason: string;
         };
         QueueCountsResponseDto: {
             /** @description Number of open items */
@@ -2732,6 +3041,263 @@ export interface operations {
             };
             /** @description Forbidden - insufficient role permissions */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BatchesController_list: {
+        parameters: {
+            query?: {
+                /** @description The index of the first element to return (integer from 0 to 2147483647, default 0) */
+                from?: number;
+                /** @description The number of elements to return (integer from 1 to 100, default 10) */
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Batches of the page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DailyBatchesListResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BatchesController_prepare: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The batch, ready when every check passes, blocked otherwise */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DailyBatchResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Conflict - batches.already_released (the batch of the day is ready), batches.no_active_policy */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BatchesController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The batch */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DailyBatchResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BatchesController_orders: {
+        parameters: {
+            query?: {
+                /** @description The index of the first element to return (integer from 0 to 2147483647, default 0) */
+                from?: number;
+                /** @description The number of elements to return (integer from 1 to 100, default 10) */
+                size?: number;
+                /** @description Only the orders of this type */
+                type?: components["schemas"]["OrderTypeDto"];
+                /** @description Only the orders of this channel */
+                channel?: components["schemas"]["OrderChannelDto"];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Orders of the page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BatchOrdersListResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    BatchesController_release: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReleaseBatchParamsDto"];
+            };
+        };
+        responses: {
+            /** @description The batch, ready */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DailyBatchResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Conflict - batches.not_releasable (the batch is not blocked) */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -12,6 +12,7 @@ Code : `features/home/pages/HomePage.tsx`, `features/auth/components/AppLayout.t
 - Formats français partout (`rule-recouvrement-ui-formats`, inferred).
 
 ## Limites connues
-- Les routes `/ledger-outputs/counts` et `/daily-batches` n'existent pas dans ce lot : les cartes « Sorties comptables » et « Lot du jour » affichent « Indisponible ».
-- Les écrans cibles de la plupart des onglets et cartes (lot du jour, sorties comptables, file de décisions, dossiers, relecture, indicateurs, litiges) ne sont pas construits : l'adresse retombe sur l'accueil.
+- La carte « Lot du jour » lit `GET /daily-batches` (premier lot de la liste) : « Prêt » ou « Bloqué » si ce lot porte la date du jour (Europe/Paris), « Pas encore préparé » sinon ; elle mène à `/lot-du-jour` (`page-lot-du-jour.summary.md`). Un lot remplacé ne s'y lit pas comme tel : le plus récent l'emporte.
+- La route `/ledger-outputs/counts` n'existe pas : la carte « Sorties comptables » affiche « Indisponible ».
+- Les écrans cibles des autres onglets et cartes (sorties comptables, file de décisions, dossiers, relecture, indicateurs, litiges) ne sont pas construits : l'adresse retombe sur l'accueil.
 - Pas d'actualisation automatique ; un changement de profil n'est vu qu'au rechargement.

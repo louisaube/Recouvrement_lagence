@@ -519,7 +519,30 @@ How the first lot of the module plugs into the foundation (no foundation file wa
 - **Tests**: `recovery-common/tests/support.ts` builds accounts with a profile, CSV uploads, a receivables file and a minimal
   policy file.
 
+## Module recouvrement, lot v1b (daily batch)
+
+How the second lot plugs in (no foundation file was changed; `features/cases` and `features/policies` gained one export each):
+
+- **Features**: `brain` (no route: `BrainService.evaluateMany` = prescription, amount threshold, then the state of each case;
+  `DecisionJournal` = the append-only `decisions`; `offers.ts` prices the anchor in integer cents; `active-policy.ts` reads the
+  active version) and `batches` (5 routes, profile `supervisor`). `BatchPreparationService.prepare` does everything in the
+  transaction of the traced route: replace a blocked batch of the day, evaluate every non final case, decide the action of the
+  day with the JDM table (`PolicyEngineService.evaluateMany`, graph loaded once), journal each decision, open the
+  `transfer_proposed` items, build the orders, run the four checks, set the status (`ready` when all pass, else `blocked`).
+- **Tables** (`batches.tables.ts`): `daily_batches` (unique partial index on `batch_date` where status is not `replaced`) and
+  `send_orders` (column `kind`; unique partial index on case, kind and `order_date` where status is not `cancelled`: the
+  database refuses a duplicate). The orders of a blocked batch are `blocked` until the supervisor releases it.
+- **Orders** carry `conditions` as `[{ name, value }]` only (amounts as decimal euros `1000,00`, ISO dates), never a text.
+  The eligibility, channel and interlocutor choice are pure functions in `order-builder.ts`; the shares and the automatic stop
+  in `batch-checks.ts`; the only numeric constants (3 sigma, 20 batches, 10 batches, channel and role order) in
+  `batches.constants.ts`.
+- **Not in this lot**: the exposure ceiling and the confirmation order of a commitment need the commitments (lot of the agent
+  tools); the table `send_orders` already allows `commitment_confirmation`.
+
 ## Known deviations and open points
+
+Lot v1b: see `specifications/recouvrement/implementation-plans/v1b-lot-du-jour/DISPUTES.md` (three acceptance tests of the lot
+contradict the specification or a frozen file; two tests wait for the routes of the agent tools).
 
 Lot v1a: see `specifications/recouvrement/implementation-plans/v1a-referentiel/DISPUTES.md` (open: the acceptance policy tests
 share and mutate one document object).

@@ -19,7 +19,7 @@ const iso = isoInstant
  * rule-recouvrement-negotiable-amount and rule-recouvrement-negotiable-credit-notes (only open invoices, not frozen, not
  * expired). The part covered by accounting outputs (rule-recouvrement-negotiable-outputs) is zero until the lot of the outputs.
  */
-const facts = (today: string): SQL => sql`
+export const facts = (today: string): SQL => sql`
   rules as (
     select r->>'segment' as segment, r->>'nature' as nature,
       (r->'limitation'->>'delayDays')::int as delay_days,
@@ -29,7 +29,7 @@ const facts = (today: string): SQL => sql`
     where pv.status = 'active'
   ),
   base_facts as (
-    select i.id, i.case_id, i.kind, i.number, i.creditor_siren, i.amount_cents, i.balance_cents, i.invoice_date, i.due_date,
+    select i.id, i.case_id, i.kind, i.number, i.creditor_siren, i.amount_cents, i.balance_cents, i.invoice_date, i.due_date, i.channels,
       (i.kind = 'invoice' and i.balance_cents > 0) as is_open,
       case when i.kind = 'invoice' and i.balance_cents > 0 and ru.delay_days is not null
         then (case when ru.starts_from = 'invoice_date' then i.invoice_date else i.due_date end) + ru.delay_days end as presc_date,

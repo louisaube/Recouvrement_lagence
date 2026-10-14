@@ -5,6 +5,7 @@ import { AppLayout } from './features/auth/components/AppLayout'
 import { RequireSession } from './features/auth/components/RequireSession'
 import { SessionProvider } from './features/auth/hooks/useSession'
 import { RequireAdmin } from './features/auth/components/RequireAdmin'
+import { DailyBatchPage } from './features/batches/pages/DailyBatchPage'
 import { ImportsPage } from './features/imports/pages/ImportsPage'
 import { PoliciesPage } from './features/policies/pages/PoliciesPage'
 import { RequireProfile } from './features/profiles/components/RequireProfile'
@@ -47,6 +48,10 @@ export function App() {
                     <Route element={<RequireProfile profiles={['supervisor']} />}>
                       <Route path="/imports" element={<ImportsPage />} />
                       <Route path="/politique" element={<PoliciesPage />} />
+                    </Route>
+                    <Route element={<RequireProfile profiles={['supervisor']} />}>
+                      {/* rule-recouvrement-screen-batch */}
+                      <Route path="/lot-du-jour" element={<DailyBatchPage />} />
                     </Route>
                     {/* Later lots add their protected pages here. */}
                     <Route path="*" element={<Navigate to="/" replace />} />

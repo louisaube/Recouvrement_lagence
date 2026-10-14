@@ -67,6 +67,21 @@ export class PolicyEngineService {
     return { action: result.action, rule: result.rule }
   }
 
+  /** The same answer as `evaluate` for many inputs, the graph being loaded once (the daily batch decides every case). */
+  async evaluateMany(graph: Record<string, unknown>, inputs: EngineInput[]): Promise<ActionRule[]> {
+    const decision = this.engine.createDecision(graph as never)
+    const answers: ActionRule[] = []
+    for (const input of inputs) {
+      const { result } = (await decision.evaluate(input as never)) as { result?: Partial<ActionRule> }
+      answers.push(
+        result && typeof result.action === 'string' && typeof result.rule === 'string'
+          ? { action: result.action, rule: result.rule }
+          : { action: 'none', rule: 'no_rule' },
+      )
+    }
+    return answers
+  }
+
   /** Runs every witness case of the file: the result is the one of the engine, never a guess. */
   async runWitnesses(file: Pick<PolicyFile, 'decision' | 'witnesses' | 'parameters'>): Promise<PolicyWitnessResultDto[]> {
     const results: PolicyWitnessResultDto[] = []
