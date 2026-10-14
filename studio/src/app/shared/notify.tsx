@@ -1,13 +1,14 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import { Alert, Snackbar } from '@mui/material'
 
-type Notify = (message: string, severity?: 'success' | 'error') => void
+type Severity = 'success' | 'error' | 'warning'
+type Notify = (message: string, severity?: Severity) => void
 
 const NotifyContext = createContext<Notify>(() => undefined)
 
 /** Notifications ("Utilisateur créé." …), success unless stated otherwise. */
 export function NotifyProvider({ children }: { children: ReactNode }) {
-  const [current, setCurrent] = useState<{ message: string; severity: 'success' | 'error' } | null>(null)
+  const [current, setCurrent] = useState<{ message: string; severity: Severity } | null>(null)
   const notify = useCallback<Notify>((message, severity = 'success') => setCurrent({ message, severity }), [])
   const value = useMemo(() => notify, [notify])
   return (

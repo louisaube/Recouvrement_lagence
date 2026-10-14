@@ -5,6 +5,8 @@ export interface Failure {
   /** HTTP status, 0 for a network error. */
   status: number
   code?: string
+  /** `details` of the error body, when the API gives some (validation, activation checks). */
+  details?: { path: string; reason: string }[]
 }
 
 export type Outcome<T> = { ok: true; data: T } | { ok: false; failure: Failure }
@@ -37,8 +39,12 @@ export function useCall() {
       try {
         const result = await fn()
         if (result.response.ok && result.data !== undefined) return { ok: true, data: result.data }
-        const code = (result.error as { code?: unknown } | undefined)?.code
-        const failure: Failure = { status: result.response.status, code: typeof code === 'string' ? code : undefined }
+        const body = result.error as { code?: unknown; details?: unknown } | undefined
+        const code = body?.code
+        const details = Array.isArray(body?.details)
+          ? (body.details as unknown[]).filter((d): d is { path: string; reason: string } => typeof (d as { path?: unknown })?.path === 'string' && typeof (d as { reason?: unknown })?.reason === 'string')
+          : undefined
+        const failure: Failure = { status: result.response.status, code: typeof code === 'string' ? code : undefined, ...(details ? { details } : {}) }
         // Short grace so the screen does not flash away mid-render; the session still ends right after.
         if (failure.status === 401) setTimeout(expire, 300)
         return { ok: false, failure }

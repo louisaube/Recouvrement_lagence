@@ -6,19 +6,27 @@ interface Props {
   validRows: number
   errorRows: number
   submitting: boolean
+  /** Overrides of the wording (rule-recouvrement-import-flow-reuse). */
+  title?: string
+  text?: string
+  confirmLabel?: string
   onCancel: () => void
   onConfirm: () => void
 }
 
 /** « Confirmer l'import »: the only way to write anything (rule-foundation-import-two-steps). */
-export function ImportConfirmDialog({ noun, validRows, errorRows, submitting, onCancel, onConfirm }: Props) {
+export function ImportConfirmDialog({ noun, validRows, errorRows, submitting, title = "Confirmer l'import", text, confirmLabel = "Confirmer l'import", onCancel, onConfirm }: Props) {
   return (
     <Dialog open onClose={submitting ? undefined : onCancel} aria-labelledby="import-confirm-title">
-      <DialogTitle id="import-confirm-title">Confirmer l'import</DialogTitle>
+      <DialogTitle id="import-confirm-title">{title}</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          {formatCount(validRows)} {noun}(s) seront créés.
-          {errorRows > 0 ? ` ${formatCount(errorRows)} ligne(s) en erreur seront ignorées et ne seront pas importées.` : ''} Cette action est tracée au journal d'audit.
+          {text ?? (
+            <>
+              {formatCount(validRows)} {noun}(s) seront créés.
+              {errorRows > 0 ? ` ${formatCount(errorRows)} ligne(s) en erreur seront ignorées et ne seront pas importées.` : ''} Cette action est tracée au journal d'audit.
+            </>
+          )}
         </DialogContentText>
         {submitting && (
           <Typography color="text.secondary" sx={{ mt: 2 }}>
@@ -31,7 +39,7 @@ export function ImportConfirmDialog({ noun, validRows, errorRows, submitting, on
           Annuler
         </Button>
         <Button variant="contained" onClick={onConfirm} disabled={submitting}>
-          Confirmer l'import
+          {confirmLabel}
         </Button>
       </DialogActions>
     </Dialog>

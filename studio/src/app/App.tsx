@@ -5,6 +5,10 @@ import { AppLayout } from './features/auth/components/AppLayout'
 import { RequireSession } from './features/auth/components/RequireSession'
 import { SessionProvider } from './features/auth/hooks/useSession'
 import { RequireAdmin } from './features/auth/components/RequireAdmin'
+import { ImportsPage } from './features/imports/pages/ImportsPage'
+import { PoliciesPage } from './features/policies/pages/PoliciesPage'
+import { RequireProfile } from './features/profiles/components/RequireProfile'
+import { RequireProfileLoaded } from './features/profiles/hooks/useProfile'
 import { LoginPage } from './features/auth/pages/LoginPage'
 import { JournalPage } from './features/audit/pages/JournalPage'
 import { GroupsPage } from './features/groups/pages/GroupsPage'
@@ -26,17 +30,27 @@ export function App() {
             <Routes>
               <Route path="/connexion" element={<LoginPage />} />
               <Route element={<RequireSession />}>
-                <Route element={<AppLayout />}>
-                  <Route path="/" element={<HomePage />} />
-                  <Route element={<RequireAdmin />}>
-                    <Route path="/utilisateurs" element={<UsersPage />} />
-                    <Route path="/groupes" element={<GroupsPage />} />
-                    <Route path="/perimetres" element={<ScopesPage />} />
-                    <Route path="/journal" element={<JournalPage />} />
-                    <Route path="/utilisateurs/import" element={<UsersImportPage />} />
+                {/* rule-recouvrement-session-profile: the profile is known before any protected render. */}
+                <Route element={<RequireProfileLoaded />}>
+                  <Route element={<AppLayout />}>
+                    <Route path="/" element={<HomePage />} />
+                    <Route element={<RequireAdmin />}>
+                      <Route path="/utilisateurs" element={<UsersPage />} />
+                      <Route path="/groupes" element={<GroupsPage />} />
+                      <Route path="/perimetres" element={<ScopesPage />} />
+                      <Route path="/utilisateurs/import" element={<UsersImportPage />} />
+                    </Route>
+                    {/* rule-recouvrement-screen-guard: the Journal is open to the administrator and the supervisor. */}
+                    <Route element={<RequireProfile profiles={['supervisor']} admin />}>
+                      <Route path="/journal" element={<JournalPage />} />
+                    </Route>
+                    <Route element={<RequireProfile profiles={['supervisor']} />}>
+                      <Route path="/imports" element={<ImportsPage />} />
+                      <Route path="/politique" element={<PoliciesPage />} />
+                    </Route>
+                    {/* Later lots add their protected pages here. */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
                   </Route>
-                  {/* Later lots add their protected pages here. */}
-                  <Route path="*" element={<Navigate to="/" replace />} />
                 </Route>
               </Route>
             </Routes>

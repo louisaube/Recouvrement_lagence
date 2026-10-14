@@ -34,3 +34,32 @@ export function RequireProfile(...allowed: Profile[]): Type<CanActivate> {
   cache.set(key, guard)
   return guard
 }
+
+const adminOrCache = new Map<string, Type<CanActivate>>()
+
+/**
+ * rule-recouvrement-journal-supervisor, rule-recouvrement-journal-others-refused: the `admin` role of the foundation, or
+ * one of the given profiles read from the database at every request. Any other account is refused (`403`).
+ */
+export function RequireAdminOrProfile(...allowed: Profile[]): Type<CanActivate> {
+  const key = [...allowed].sort().join('|')
+  const known = adminOrCache.get(key)
+  if (known) return known
+
+  @Injectable()
+  class RequireAdminOrProfileGuard implements CanActivate {
+    constructor(@Inject(DB) readonly db: Database) {}
+
+    async canActivate(context: ExecutionContext): Promise<boolean> {
+      const req = context.switchToHttp().getRequest<ApiRequest>()
+      if (!req.user) throw accessDenied()
+      if (req.user.role === 'admin') return true
+      const [row] = await this.db.select({ profile: userProfiles.profile }).from(userProfiles).where(eq(userProfiles.userId, req.user.id))
+      if (!row || !(allowed as string[]).includes(row.profile)) throw accessDenied()
+      return true
+    }
+  }
+  const guard = mixin(RequireAdminOrProfileGuard)
+  adminOrCache.set(key, guard)
+  return guard
+}

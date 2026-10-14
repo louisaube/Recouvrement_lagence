@@ -85,6 +85,176 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to list and filter the debtor cases, by negotiable amount then customer identifier (supervisor profile) */
+        get: operations["CasesController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to read the sheet of a case: invoices, freezes, offers, commitments, outputs (supervisor profile) */
+        get: operations["CasesController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{id}/decisions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to read the decisions of the brain about a case, most recent first (supervisor profile) */
+        get: operations["CasesController_decisions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/{id}/state-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to read the state transitions of a case, most recent first (supervisor profile) */
+        get: operations["CasesController_stateHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cases/filters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to read the segments and creditor entities present in the cases (supervisor profile) */
+        get: operations["CasesController_filters"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/decision-queue/counts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to count the open items of the decision queue by type (supervisor profile) */
+        get: operations["DecisionQueueController_counts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/decision-queue/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to list the items of the decision queue, open ones oldest first by default (supervisor profile) */
+        get: operations["DecisionQueueController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/disputes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to list the disputes (open by default), with their invoice and the state of their case (litigation profile) */
+        get: operations["DisputesController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/disputes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to read a dispute with its invoice, the summary of its case and its contestation (litigation profile) */
+        get: operations["DisputesController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/disputes/invoices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to search the open invoices by the beginning of their number, to open a dispute (litigation profile) */
+        get: operations["DisputesController_invoices"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/groups": {
         parameters: {
             query?: never;
@@ -120,6 +290,108 @@ export interface paths {
         patch: operations["GroupsController_update"];
         trace?: never;
     };
+    "/invoices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to search the open invoices by the beginning of their number (supervisor profile) */
+        get: operations["CasesController_searchInvoices"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policy-versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to list the versions of the recovery policy, newest first (supervisor profile) */
+        get: operations["PoliciesController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policy-versions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to read a policy version with its rules, its six checks and its witnesses (supervisor profile) */
+        get: operations["PoliciesController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policy-versions/{id}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Use this API action to activate a policy version once its six checks pass; the previous active version is superseded */
+        post: operations["PoliciesController_activate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policy-versions/previews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Use this API action to analyse a policy file (JSON) with its six activation checks and witness cases, without creating a version */
+        post: operations["PoliciesController_preview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policy-versions/previews/{previewId}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Use this API action to create the version of a policy preview (once per file) */
+        post: operations["PoliciesController_confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/profiles/me": {
         parameters: {
             query?: never;
@@ -129,6 +401,142 @@ export interface paths {
         };
         /** @description Use this API action to read the recovery profile and the channel of the connected account */
         get: operations["ProfilesController_me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recovery-imports/{type}/{importId}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Use this API action to give the green light to a preview: the file is applied (once per file) */
+        post: operations["RecoveryImportsController_confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recovery-imports/{type}/{importId}/errors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to list the errors of a preview, by row */
+        get: operations["RecoveryImportsController_errors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recovery-imports/{type}/{importId}/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to read the differences of a preview (or of a confirmed import) with the previous import of the same type */
+        get: operations["RecoveryImportsController_report"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recovery-imports/{type}/{importId}/report/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to list the lines of one category of the report */
+        get: operations["RecoveryImportsController_reportItems"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recovery-imports/{type}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Use this API action to analyse a file of a type without writing anything but its temporary preview */
+        post: operations["RecoveryImportsController_preview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recovery-imports/{type}/specification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to read the columns, the limits and the extra fields of a file type */
+        get: operations["RecoveryImportsController_specification"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recovery-imports/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to list the confirmed imports of the module, newest first (supervisor profile) */
+        get: operations["RecoveryImportsController_history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recovery-imports/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Use this API action to know whether the bank statement is fresh, the date of the receivables extraction and the last import of each type */
+        get: operations["RecoveryImportsController_status"];
         put?: never;
         post?: never;
         delete?: never;
@@ -436,6 +844,676 @@ export interface components {
              */
             token?: string;
         };
+        /**
+         * @description State of a case (referential of the states)
+         * @enum {string}
+         */
+        CaseStateDto: "open" | "negotiating" | "committed" | "frozen" | "supervisor_queue" | "transferred" | "settled";
+        /**
+         * @description Nature of the debtor
+         * @enum {string}
+         */
+        DebtorNatureDto: "family" | "company";
+        CasesListResponseDto: {
+            /** @description Cases of the page */
+            items: components["schemas"]["CaseSummaryDto"][];
+            /** @description Number of elements of the whole list */
+            total: number;
+        };
+        CaseSummaryDto: {
+            /**
+             * Format: uuid
+             * @description Case ID
+             */
+            id: string;
+            /** @description Customer identifier of the debtor */
+            debtorId: string;
+            nature: components["schemas"]["DebtorNatureDto"];
+            /** @description Segment of the debtor */
+            segment: string;
+            /** @description Creditor entities of the case, sorted */
+            creditors: string[];
+            state: components["schemas"]["CaseStateDto"];
+            /** @description Negotiable amount in cents (rule-recouvrement-negotiable-amount) */
+            negotiableCents: number;
+            /** @description Sum of the balances of the open invoices, in cents */
+            openBalanceCents: number;
+            /** @description Number of open invoices */
+            openInvoices: number;
+            /** @description Greatest number of days late of an open invoice */
+            maxDaysLate: number;
+            /**
+             * Format: date-time
+             * @description Last change of the case
+             */
+            updatedAt: string;
+        };
+        CaseResponseDto: {
+            case: components["schemas"]["CaseDetailDto"];
+        };
+        CaseDetailDto: {
+            /**
+             * Format: uuid
+             * @description Case ID
+             */
+            id: string;
+            /** @description Customer identifier of the debtor */
+            debtorId: string;
+            nature: components["schemas"]["DebtorNatureDto"];
+            /** @description Segment of the debtor */
+            segment: string;
+            /** @description Creditor entities of the case, sorted */
+            creditors: string[];
+            state: components["schemas"]["CaseStateDto"];
+            /** @description Negotiable amount in cents (rule-recouvrement-negotiable-amount) */
+            negotiableCents: number;
+            /** @description Sum of the balances of the open invoices, in cents */
+            openBalanceCents: number;
+            /** @description Number of open invoices */
+            openInvoices: number;
+            /** @description Greatest number of days late of an open invoice */
+            maxDaysLate: number;
+            /**
+             * Format: date-time
+             * @description Last change of the case
+             */
+            updatedAt: string;
+            /** @description SIREN of the debtor (company only) */
+            debtorSiren: string | null;
+            /** @description Invoices and credit notes of the case */
+            invoices: components["schemas"]["InvoiceDto"][];
+            /** @description Active freezes */
+            freezes: components["schemas"]["FreezeDto"][];
+            /** @description Offers unlocked */
+            unlockedOffers: components["schemas"]["UnlockedOfferDto"][];
+            /** @description Commitments */
+            commitments: components["schemas"]["CommitmentDto"][];
+            /** @description Accounting outputs */
+            ledgerOutputs: components["schemas"]["LedgerOutputDto"][];
+            /** @description Open items of the queue about the case */
+            openQueueItems: {
+                /**
+                 * Format: uuid
+                 * @description Item ID
+                 */
+                id: string;
+                /** @description Type of the item */
+                type: string;
+            }[];
+            /** @description Active policy version */
+            activePolicy: {
+                /**
+                 * Format: uuid
+                 * @description Policy version ID
+                 */
+                id: string;
+                /** @description Label */
+                label: string;
+            } | null;
+        };
+        InvoiceDto: {
+            /**
+             * Format: uuid
+             * @description Invoice ID
+             */
+            id: string;
+            kind: components["schemas"]["InvoiceKindDto"];
+            /** @description Invoice number */
+            number: string;
+            /** @description SIREN of the creditor entity */
+            creditorSiren: string;
+            /** @description Amount in cents */
+            amountCents: number;
+            /** @description Current balance in cents (negative for a credit note) */
+            balanceCents: number;
+            /**
+             * Format: date
+             * @description Invoice date
+             */
+            invoiceDate: string;
+            /**
+             * Format: date
+             * @description Due date
+             */
+            dueDate: string;
+            /** @description Days late (0 when not due or not open) */
+            daysLate: number;
+            /** @description The invoice carries an active freeze */
+            frozen: boolean;
+            /** @description Codes of the active freezes that concern the invoice */
+            freezeCodes: components["schemas"]["FreezeCodeDto"][];
+            prescription: components["schemas"]["PrescriptionDto"];
+            /**
+             * Format: date
+             * @description Prescription date
+             */
+            prescriptionDate: string | null;
+            /** @description Part covered by accounting outputs not yet noted, in cents */
+            coveredByOutputsCents: number;
+            /** @description The balance enters the negotiable amount */
+            negotiable: boolean;
+        };
+        /**
+         * @description Invoice or credit note
+         * @enum {string}
+         */
+        InvoiceKindDto: "invoice" | "credit_note";
+        /**
+         * @description Code of a freeze
+         * @enum {string}
+         */
+        FreezeCodeDto: "dispute" | "contestation" | "unassigned_payment";
+        /**
+         * @description Prescription status
+         * @enum {string}
+         */
+        PrescriptionDto: "none" | "near" | "expired";
+        FreezeDto: {
+            code: components["schemas"]["FreezeCodeDto"];
+            scope: components["schemas"]["FreezeScopeDto"];
+            /** @description Number of the invoice (scope invoice) */
+            invoiceNumber: string | null;
+            /**
+             * Format: date-time
+             * @description Start of the freeze
+             */
+            since: string;
+            /** @description Reason of the dispute, reference of the payment */
+            reference: string;
+        };
+        /**
+         * @description Scope of the freeze
+         * @enum {string}
+         */
+        FreezeScopeDto: "invoice" | "case";
+        UnlockedOfferDto: {
+            /**
+             * Format: uuid
+             * @description Offer ID
+             */
+            id: string;
+            /**
+             * Format: date-time
+             * @description Instant the offer was unlocked
+             */
+            unlockedAt: string;
+            /**
+             * @description Status of the offer
+             * @enum {string}
+             */
+            status: "current" | "superseded" | "accepted" | "revoked";
+            /** @description Total to pay, in cents */
+            totalCents: number;
+            /** @description Discount granted, in cents */
+            discountCents: number;
+            /** @description Installments */
+            installments: {
+                /**
+                 * Format: date
+                 * @description Due date
+                 */
+                dueDate: string;
+                /** @description Amount in cents */
+                amountCents: number;
+            }[];
+            /** @description Counterpart asked for the offer */
+            counterpart: {
+                /** @description Type of counterpart */
+                type: string;
+                /**
+                 * Format: date
+                 * @description Deadline
+                 */
+                deadlineDate: string | null;
+                /** @description First payment in cents */
+                firstPaymentCents: number | null;
+            } | null;
+            /** @description Conversation that unlocked the offer */
+            conversationId: string | null;
+        };
+        CommitmentDto: {
+            /**
+             * Format: uuid
+             * @description Commitment ID
+             */
+            id: string;
+            /**
+             * Format: date-time
+             * @description Registration instant
+             */
+            createdAt: string;
+            /**
+             * @description Status of the commitment
+             * @enum {string}
+             */
+            status: "pending" | "held" | "broken";
+            /**
+             * Format: uuid
+             * @description Offer ID
+             */
+            offerId: string;
+            /** @description Total, in cents */
+            totalCents: number;
+            /** @description Discount, in cents */
+            discountCents: number;
+            /** @description Payment method */
+            paymentMethod: string;
+            /** @description Installments */
+            installments: {
+                /**
+                 * Format: date
+                 * @description Due date
+                 */
+                dueDate: string;
+                /** @description Amount in cents */
+                amountCents: number;
+                /** @description Paid in cents */
+                paidCents: number;
+            }[];
+            /** @description Channel of the agent */
+            channel: string;
+            /** @description Version of the agent */
+            agentVersion: string;
+            /** @description Conversation */
+            conversationId: string;
+        };
+        LedgerOutputDto: {
+            /**
+             * Format: uuid
+             * @description Output ID
+             */
+            id: string;
+            /** @description Kind of output */
+            kind: string;
+            /** @description Status of the output */
+            status: string;
+            /** @description Amount in cents */
+            amountCents: number;
+            /** @description Output reference */
+            reference: string | null;
+        };
+        DecisionsListResponseDto: {
+            /** @description Decisions of the page, most recent first */
+            items: components["schemas"]["DecisionDto"][];
+            /** @description Number of elements of the whole list */
+            total: number;
+        };
+        DecisionDto: {
+            /**
+             * Format: uuid
+             * @description Decision ID
+             */
+            id: string;
+            /**
+             * Format: date-time
+             * @description Instant of the decision
+             */
+            decidedAt: string;
+            kind: components["schemas"]["DecisionKindDto"];
+            /** @description Outcome */
+            outcome: string;
+            /** @description Rule applied */
+            ruleId: string | null;
+            /** @description Policy version in force */
+            policyVersion: {
+                /**
+                 * Format: uuid
+                 * @description Policy version ID
+                 */
+                id: string;
+                /** @description Label */
+                label: string;
+            } | null;
+            /** @description Probability of the decision (1 while the table is deterministic) */
+            probability: number;
+            /** @description Complete inputs of the decision */
+            inputs: {
+                /** @description Name */
+                name: string;
+                /** @description Value */
+                value: string;
+            }[];
+            /** @description Internal reason, readable by the supervisor only */
+            internalReason: {
+                /** @description Name */
+                name: string;
+                /** @description Value */
+                value: string;
+            }[];
+            /**
+             * Format: uuid
+             * @description Batch
+             */
+            batchId: string | null;
+        };
+        /**
+         * @description Kind of decision
+         * @enum {string}
+         */
+        DecisionKindDto: "daily_action" | "offer" | "commitment_check" | "threshold" | "prescription" | "exposure_ceiling";
+        StateHistoryResponseDto: {
+            /** @description Transitions of the page, most recent first */
+            items: components["schemas"]["StateTransitionDto"][];
+            /** @description Number of elements of the whole list */
+            total: number;
+        };
+        StateTransitionDto: {
+            /**
+             * Format: date-time
+             * @description Instant of the transition
+             */
+            at: string;
+            from: components["schemas"]["CaseStateDto"] | null;
+            to: components["schemas"]["CaseStateDto"];
+            /** @description Cause of the transition */
+            cause: string;
+            /** @description Actor of the transition */
+            actor: string;
+            /** @description Business reference */
+            reference: string | null;
+        };
+        CasesFiltersResponseDto: {
+            /** @description Segments present in the cases, sorted */
+            segments: string[];
+            /** @description Creditor SIREN present in the cases, sorted */
+            creditors: string[];
+        };
+        QueueCountsResponseDto: {
+            /** @description Number of open items */
+            total: number;
+            byType: components["schemas"]["QueueCountsByTypeDto"];
+        };
+        /** @description Open items by type */
+        QueueCountsByTypeDto: {
+            /** @description Open items of type contestation */
+            contestation: number;
+            /** @description Open items of type amount_over_threshold */
+            amount_over_threshold: number;
+            /** @description Open items of type ladder_exhausted */
+            ladder_exhausted: number;
+            /** @description Open items of type unassigned_payment */
+            unassigned_payment: number;
+            /** @description Open items of type accounting_gap */
+            accounting_gap: number;
+            /** @description Open items of type prescription_near */
+            prescription_near: number;
+            /** @description Open items of type prescription_expired */
+            prescription_expired: number;
+            /** @description Open items of type alert */
+            alert: number;
+            /** @description Open items of type human_request */
+            human_request: number;
+            /** @description Open items of type transfer_proposed */
+            transfer_proposed: number;
+        };
+        /**
+         * @description Type of an item of the queue of the supervisor
+         * @enum {string}
+         */
+        QueueTypeDto: "contestation" | "amount_over_threshold" | "ladder_exhausted" | "unassigned_payment" | "accounting_gap" | "prescription_near" | "prescription_expired" | "alert" | "human_request" | "transfer_proposed";
+        QueueItemsResponseDto: {
+            /** @description Items of the page */
+            items: components["schemas"]["QueueItemDto"][];
+            /** @description Number of elements of the whole list */
+            total: number;
+        };
+        QueueItemDto: {
+            /**
+             * Format: uuid
+             * @description Item ID
+             */
+            id: string;
+            type: components["schemas"]["QueueTypeDto"];
+            /**
+             * @description The item is open or decided
+             * @enum {string}
+             */
+            status: "open" | "decided";
+            /**
+             * Format: date-time
+             * @description Creation instant
+             */
+            createdAt: string;
+            /**
+             * Format: uuid
+             * @description Case ID
+             */
+            caseId: string | null;
+            /** @description Customer identifier of the case, if any */
+            debtorId: string | null;
+            /** @description Summary of the item (French) */
+            summary: string;
+            /** @description What allows to decide (French, at most 20) */
+            details: components["schemas"]["QueueItemDetailDto"][];
+            /** @description Codes of the decisions the type allows; empty once decided */
+            allowedDecisions: string[];
+            /** @description Invoices a payment can be assigned to (open unassigned payment only) */
+            candidates: components["schemas"]["QueueCandidateDto"][];
+            decision: components["schemas"]["QueueDecisionDto"] | null;
+        };
+        QueueItemDetailDto: {
+            /** @description Label of the detail (1 to 100 characters) */
+            label: string;
+            /** @description Value of the detail (at most 300 characters) */
+            value: string;
+        };
+        QueueCandidateDto: {
+            /**
+             * Format: uuid
+             * @description Invoice ID
+             */
+            invoiceId: string;
+            /**
+             * Format: uuid
+             * @description Case ID
+             */
+            caseId: string;
+            /** @description Customer identifier */
+            debtorId: string;
+            /** @description Invoice number */
+            number: string;
+            /** @description SIREN of the creditor entity */
+            creditorSiren: string;
+            /** @description Balance in cents */
+            balanceCents: number;
+        };
+        QueueDecisionDto: {
+            /** @description Code of the decision (`auto_closed` for an automatic closing) */
+            code: string;
+            /** @description Reason of the decision (empty for an automatic closing) */
+            reason: string;
+            /**
+             * Format: date-time
+             * @description Instant of the decision
+             */
+            decidedAt: string;
+            /** @description Author of the decision; null for an automatic closing */
+            decidedBy: {
+                /**
+                 * Format: uuid
+                 * @description Account ID
+                 */
+                id: string;
+                /** @description E-mail of the account */
+                email: string;
+            } | null;
+        };
+        /**
+         * @description Origin of the dispute: import, contestation (conversation) or service (opened by the litigation service)
+         * @enum {string}
+         */
+        DisputeOriginDto: "import" | "contestation" | "service";
+        DisputesListResponseDto: {
+            /** @description Disputes of the page */
+            items: components["schemas"]["DisputeDto"][];
+            /** @description Number of elements of the whole list */
+            total: number;
+        };
+        DisputeDto: {
+            /**
+             * Format: uuid
+             * @description Dispute ID
+             */
+            id: string;
+            /**
+             * @description The dispute is open or closed
+             * @enum {string}
+             */
+            status: "open" | "closed";
+            origin: components["schemas"]["DisputeOriginDto"];
+            /** @description Number of the invoice in dispute */
+            invoiceNumber: string;
+            /** @description SIREN of the creditor entity */
+            creditorSiren: string;
+            /** @description Balance of the invoice in cents */
+            balanceCents: number;
+            /** @description Customer identifier */
+            debtorId: string;
+            /**
+             * Format: uuid
+             * @description Case ID
+             */
+            caseId: string;
+            caseState: components["schemas"]["CaseStateDto"];
+            /** @description Reason of the dispute (plain text) */
+            reason: string;
+            /** @description Person in charge (plain text) */
+            owner: string;
+            /**
+             * Format: date-time
+             * @description Opening instant
+             */
+            openedAt: string;
+            /**
+             * Format: date-time
+             * @description Closing instant
+             */
+            closedAt: string | null;
+        };
+        DisputeResponseDto: {
+            dispute: components["schemas"]["DisputeDetailDto"];
+        };
+        DisputeDetailDto: {
+            /**
+             * Format: uuid
+             * @description Dispute ID
+             */
+            id: string;
+            /**
+             * @description The dispute is open or closed
+             * @enum {string}
+             */
+            status: "open" | "closed";
+            origin: components["schemas"]["DisputeOriginDto"];
+            /** @description Number of the invoice in dispute */
+            invoiceNumber: string;
+            /** @description SIREN of the creditor entity */
+            creditorSiren: string;
+            /** @description Balance of the invoice in cents */
+            balanceCents: number;
+            /** @description Customer identifier */
+            debtorId: string;
+            /**
+             * Format: uuid
+             * @description Case ID
+             */
+            caseId: string;
+            caseState: components["schemas"]["CaseStateDto"];
+            /** @description Reason of the dispute (plain text) */
+            reason: string;
+            /** @description Person in charge (plain text) */
+            owner: string;
+            /**
+             * Format: date-time
+             * @description Opening instant
+             */
+            openedAt: string;
+            /**
+             * Format: date-time
+             * @description Closing instant
+             */
+            closedAt: string | null;
+            invoice: components["schemas"]["DisputeInvoiceDto"];
+            case: {
+                /**
+                 * Format: uuid
+                 * @description Case ID
+                 */
+                id: string;
+                /** @description Customer identifier */
+                debtorId: string;
+                nature: components["schemas"]["DebtorNatureDto"];
+                state: components["schemas"]["CaseStateDto"];
+                /** @description Open invoices of the case */
+                openInvoices: number;
+                /** @description Open invoices of the case that carry a freeze */
+                frozenInvoices: number;
+            };
+            /** @description Note of the closing (plain text) */
+            closeNote: string | null;
+            /** @description Who closed the dispute */
+            closedBy: {
+                /**
+                 * Format: uuid
+                 * @description Account ID
+                 */
+                id: string;
+                /** @description E-mail of the account */
+                email: string;
+            } | null;
+            /** @description Who opened the dispute (null: import or agent) */
+            openedBy: {
+                /**
+                 * Format: uuid
+                 * @description Account ID
+                 */
+                id: string;
+                /** @description E-mail of the account */
+                email: string;
+            } | null;
+            /** @description The contestation behind the dispute (origin contestation) */
+            contestation: {
+                /**
+                 * Format: uuid
+                 * @description Contestation ID
+                 */
+                id: string;
+                /** @description Channel of the conversation */
+                channel: string;
+                /** @description Conversation of the contestation */
+                conversationId: string;
+                /**
+                 * Format: date-time
+                 * @description Instant of the contestation
+                 */
+                statedAt: string;
+                /** @description Text of the contestation (plain text) */
+                text: string;
+            } | null;
+        };
+        DisputeInvoiceDto: {
+            /**
+             * Format: uuid
+             * @description Invoice ID
+             */
+            id: string;
+            /** @description Invoice number */
+            number: string;
+            /** @description SIREN of the creditor entity */
+            creditorSiren: string;
+            /** @description Customer identifier */
+            debtorId: string;
+            /** @description Balance in cents */
+            balanceCents: number;
+            /** @description The invoice carries an active freeze */
+            frozen: boolean;
+        };
+        DisputeInvoicesResponseDto: {
+            /** @description Open invoices of the page, sorted by number */
+            items: components["schemas"]["DisputeInvoiceDto"][];
+            /** @description Number of elements of the whole list */
+            total: number;
+        };
         GroupsListResponseDto: {
             groups: components["schemas"]["GroupDto"][];
             /**
@@ -514,6 +1592,323 @@ export interface components {
         GroupsUpdateResponseDto: {
             group: components["schemas"]["GroupDto"];
         };
+        InvoicesSearchResponseDto: {
+            /** @description Open invoices of the page */
+            items: components["schemas"]["InvoiceRefDto"][];
+            /** @description Number of elements of the whole list */
+            total: number;
+        };
+        InvoiceRefDto: {
+            /**
+             * Format: uuid
+             * @description Invoice ID
+             */
+            id: string;
+            /**
+             * Format: uuid
+             * @description Case ID
+             */
+            caseId: string;
+            /** @description Customer identifier */
+            debtorId: string;
+            /** @description Invoice number */
+            number: string;
+            /** @description SIREN of the creditor entity */
+            creditorSiren: string;
+            /** @description Balance in cents */
+            balanceCents: number;
+            /** @description The invoice carries an active freeze */
+            frozen: boolean;
+        };
+        /**
+         * @description Status of a policy version
+         * @enum {string}
+         */
+        PolicyStatusDto: "imported" | "active" | "superseded";
+        PolicyVersionsListResponseDto: {
+            /** @description Versions of the page */
+            items: components["schemas"]["PolicyVersionDto"][];
+            /** @description Number of elements of the whole list */
+            total: number;
+        };
+        PolicyVersionDto: {
+            /**
+             * Format: uuid
+             * @description Version ID
+             */
+            id: string;
+            /** @description Label of the version */
+            label: string;
+            /**
+             * Format: date
+             * @description Date of the version
+             */
+            versionDate: string;
+            status: components["schemas"]["PolicyStatusDto"];
+            /** @description SHA-256 of the file, hexadecimal */
+            fileHash: string;
+            /** @description Supervisor who imported the file */
+            importedBy: {
+                /**
+                 * Format: uuid
+                 * @description Account ID
+                 */
+                id: string;
+                /** @description E-mail of the account */
+                email: string;
+            };
+            /**
+             * Format: date-time
+             * @description Import instant
+             */
+            importedAt: string;
+            /** @description Supervisor who activated the version */
+            activatedBy: {
+                /**
+                 * Format: uuid
+                 * @description Account ID
+                 */
+                id: string;
+                /** @description E-mail of the account */
+                email: string;
+            } | null;
+            /**
+             * Format: date-time
+             * @description Activation instant
+             */
+            activatedAt: string | null;
+            /** @description Result of the six checks at the import (imported versions only) */
+            checksPassed: boolean | null;
+        };
+        PolicyVersionDetailResponseDto: {
+            version: components["schemas"]["PolicyVersionDetailDto"];
+        };
+        PolicyVersionDetailDto: {
+            /**
+             * Format: uuid
+             * @description Version ID
+             */
+            id: string;
+            /** @description Label of the version */
+            label: string;
+            /**
+             * Format: date
+             * @description Date of the version
+             */
+            versionDate: string;
+            status: components["schemas"]["PolicyStatusDto"];
+            /** @description SHA-256 of the file, hexadecimal */
+            fileHash: string;
+            /** @description Supervisor who imported the file */
+            importedBy: {
+                /**
+                 * Format: uuid
+                 * @description Account ID
+                 */
+                id: string;
+                /** @description E-mail of the account */
+                email: string;
+            };
+            /**
+             * Format: date-time
+             * @description Import instant
+             */
+            importedAt: string;
+            /** @description Supervisor who activated the version */
+            activatedBy: {
+                /**
+                 * Format: uuid
+                 * @description Account ID
+                 */
+                id: string;
+                /** @description E-mail of the account */
+                email: string;
+            } | null;
+            /**
+             * Format: date-time
+             * @description Activation instant
+             */
+            activatedAt: string | null;
+            /** @description Result of the six checks at the import (imported versions only) */
+            checksPassed: boolean | null;
+            global: components["schemas"]["PolicyGlobalDto"];
+            /** @description Rules, by segment then nature */
+            rules: components["schemas"]["PolicyRuleDto"][];
+            /** @description The six checks, recomputed at the reading */
+            checks: components["schemas"]["PolicyCheckDto"][];
+            /** @description Results of the witness cases */
+            witnesses: components["schemas"]["PolicyWitnessResultDto"][];
+        };
+        PolicyGlobalDto: {
+            /** @description Oldest accepted bank statement, in days */
+            statementMaxAgeDays: number;
+            /** @description Receivable imports after which an approved output not noted becomes a gap */
+            ledgerMaxImports: number;
+            /** @description Size of a review sample */
+            reviewSampleSize: number;
+            /** @description Payment methods */
+            paymentMethods: string[];
+            decisionTypeCapsBp: {
+                /** @description Cap of the share in a batch, in basis points */
+                none: number;
+                /** @description Cap of the share in a batch, in basis points */
+                reminder: number;
+                /** @description Cap of the share in a batch, in basis points */
+                proposal: number;
+                /** @description Cap of the share in a batch, in basis points */
+                transfer_proposed: number;
+            };
+            /** @description Exposure ceilings */
+            exposureCeilings: {
+                /** @description Version of the agent, or * */
+                agentVersion: string;
+                /** @description Segment, or * */
+                segment: string;
+                /** @description Ceiling in cents */
+                maxCents: number;
+            }[];
+        };
+        PolicyRuleDto: {
+            /** @description Segment */
+            segment: string;
+            /**
+             * @description Nature of the debtor
+             * @enum {string}
+             */
+            nature: "family" | "company";
+            /** @description Horizon in days */
+            horizonDays: number;
+            nextStep: {
+                /**
+                 * @description Kind of next step
+                 * @enum {string}
+                 */
+                kind: "external_collector" | "litigation" | "assignment";
+                /** @description Expected value of the next step (the floor), in basis points */
+                expectedValueBp: number;
+            };
+            /** @description Offers, from the most to the least favourable */
+            ladder: components["schemas"]["PolicyRungDto"][];
+            /** @description Longest duration of a schedule */
+            maxScheduleDays: number;
+            /** @description Negotiable amount above which the negotiation stops, in cents */
+            thresholdCents: number;
+            /** @description Supporting documents required */
+            requiredDocuments: ("contract" | "order" | "delivery_proof")[];
+            limitation: {
+                /** @description Days of the limitation period */
+                delayDays: number;
+                /**
+                 * @description Starting point of the period
+                 * @enum {string}
+                 */
+                startsFrom: "invoice_date" | "due_date";
+                /** @description Days before the end of the period that raise the alert */
+                alertDays: number;
+            };
+        };
+        PolicyRungDto: {
+            /** @description Rank of the offer in the ladder (1 is the most favourable) */
+            rank: number;
+            /**
+             * @description Kind of offer
+             * @enum {string}
+             */
+            offerKind: "lump_sum" | "schedule";
+            /** @description Sum to pay, in basis points of the negotiable amount */
+            valueBp: number;
+            /** @description Days before the first payment */
+            payByDays: number;
+            /** @description Installments (schedule offers) */
+            installments: {
+                /** @description Number of installments */
+                count: number;
+                /** @description Days between installments */
+                intervalDays: number;
+            } | null;
+            /** @description Fee or interest on a delay, in basis points */
+            delayFeeBp: number;
+            /** @description Counterpart asked for the offer */
+            counterpart: {
+                /**
+                 * @description Type of counterpart
+                 * @enum {string}
+                 */
+                type: "firm_date" | "first_payment" | "direct_debit";
+                /** @description Days to the deadline (firm_date) */
+                deadlineDays: number | null;
+                /** @description First payment in basis points (first_payment) */
+                firstPaymentBp: number | null;
+            } | null;
+        };
+        PolicyCheckDto: {
+            code: components["schemas"]["PolicyCheckCodeDto"];
+            /** @description The check passes */
+            passed: boolean;
+            /** @description Problems found (empty when passed) */
+            problems: string[];
+        };
+        /**
+         * @description Code of the check
+         * @enum {string}
+         */
+        PolicyCheckCodeDto: "floor" | "decreasing_concessions" | "counterparts" | "schedule_limits" | "segments_covered" | "witnesses";
+        PolicyWitnessResultDto: {
+            /** @description Witness ID */
+            id: string;
+            /** @description Description */
+            description: string;
+            /** @description Expected result */
+            expected: {
+                /** @description Action */
+                action: string;
+                /** @description Rule identifier */
+                rule: string;
+            };
+            /** @description Result given by the engine (null when it failed) */
+            obtained: {
+                /** @description Action */
+                action: string;
+                /** @description Rule identifier */
+                rule: string;
+            } | null;
+            /** @description The engine gives exactly the expected result */
+            passed: boolean;
+        };
+        PolicyVersionResponseDto: {
+            version: components["schemas"]["PolicyVersionDto"];
+        };
+        PolicyPreviewDto: {
+            /**
+             * Format: uuid
+             * @description Preview ID
+             */
+            previewId: string;
+            /** @description Name of the file */
+            fileName: string;
+            /** @description SHA-256 of the file */
+            fileHash: string;
+            /** @description The file respects the format */
+            valid: boolean;
+            /** @description Faults of the file */
+            errors: {
+                /** @description JSON path */
+                path: string;
+                /** @description Reason */
+                reason: string;
+            }[];
+            /** @description Label (valid file) */
+            label: string | null;
+            /**
+             * Format: date
+             * @description Date of the version
+             */
+            versionDate: string | null;
+            global: components["schemas"]["PolicyGlobalDto"] | null;
+            rules: components["schemas"]["PolicyRuleDto"][];
+            checks: components["schemas"]["PolicyCheckDto"][];
+            witnesses: components["schemas"]["PolicyWitnessResultDto"][];
+        };
         ProfilesMeResponseDto: {
             profile: components["schemas"]["ProfileDto"] | null;
             channel: components["schemas"]["ChannelDto"] | null;
@@ -528,6 +1923,221 @@ export interface components {
          * @enum {string}
          */
         ChannelDto: "voice" | "email_sms" | "mail";
+        /**
+         * @description File type: receivables, payments, disputes, contacts or documents (Créances, Paiements, Litiges, Interlocuteurs, Pièces)
+         * @enum {string}
+         */
+        RecoveryImportTypeDto: "receivables" | "payments" | "disputes" | "contacts" | "documents";
+        RecoveryImportConfirmDto: {
+            /** @description Rows written */
+            createdCount: number;
+            /** @description Valid rows not written (already known, duplicate or no longer possible) */
+            skippedCount: number;
+            /** @description Effects of the confirmation */
+            effects: {
+                /** @description What the confirmation did (French) */
+                label: string;
+                /** @description How many */
+                count: number;
+            }[];
+        };
+        ImportErrorsListResponseDto: {
+            /** @description One page of entries, by row then by column */
+            errors: components["schemas"]["ImportRowErrorDto"][];
+            /** @description Number of entries of the whole list (not of the rows) */
+            total: number;
+        };
+        ImportRowErrorDto: {
+            /** @description Spreadsheet row number (the header is row 1) */
+            row: number;
+            /** @description Name of the faulty column */
+            column: string;
+            /** @description What is wrong, in French */
+            reason: string;
+        };
+        ImportReportDto: {
+            type: components["schemas"]["RecoveryImportTypeDto"];
+            /**
+             * Format: uuid
+             * @description Identifier of the import or of its preview
+             */
+            importId: string;
+            /** @description Last confirmed import of the same type (null: everything is new) */
+            previous: {
+                /**
+                 * Format: uuid
+                 * @description Identifier of the last confirmed import of the same type
+                 */
+                importId: string;
+                /** @description Name of its file */
+                fileName: string;
+                /**
+                 * Format: date-time
+                 * @description Its confirmation instant
+                 */
+                confirmedAt: string;
+            } | null;
+            /** @description Differences with the previous import */
+            categories: {
+                code: components["schemas"]["ImportReportCategoryDto"];
+                /** @description French label */
+                label: string;
+                /** @description Lines of the category */
+                rows: number;
+                /** @description Cases concerned */
+                cases: number;
+            }[];
+            /** @description Remarks about the file */
+            notes: {
+                /** @description Code of the note */
+                code: string;
+                /** @description French label */
+                label: string;
+                /** @description How many */
+                count: number;
+            }[];
+        };
+        /**
+         * @description Category of the report
+         * @enum {string}
+         */
+        ImportReportCategoryDto: "new" | "settled" | "modified" | "removed";
+        ImportReportItemsResponseDto: {
+            /** @description Lines of the page, sorted by key */
+            items: components["schemas"]["ImportReportItemDto"][];
+            /** @description Number of elements of the whole list */
+            total: number;
+        };
+        ImportReportItemDto: {
+            /** @description Natural key of the line */
+            key: string;
+            /** @description Customer identifier of the debtor concerned */
+            debtorId: string | null;
+            /** @description What changed (French) */
+            detail: string;
+        };
+        RecoveryImportPreviewDto: {
+            /**
+             * Format: uuid
+             * @description Identifier of the preview, to list its errors or confirm it
+             */
+            importId: string;
+            /** @description Name of the file as kept (directory part removed) */
+            fileName: string;
+            /** @description Non-blank data rows (validRows + errorRows) */
+            totalRows: number;
+            /** @description Rows that will be imported */
+            validRows: number;
+            /** @description Rows in error (a row counts once, whatever its number of faults) */
+            errorRows: number;
+            /**
+             * Format: date-time
+             * @description End of the preview: after it, the file must be sent again
+             */
+            expiresAt: string;
+            /** @description The file can be confirmed (false when a file refused as a whole counts its error) */
+            accepted: boolean;
+            /** @description Sum of the balances of the file (receivables) */
+            computedTotalCents: number | null;
+            /** @description Control total entered (receivables) */
+            controlTotalCents: number | null;
+        };
+        RecoveryImportSpecificationDto: {
+            /** @description Columns the file may hold, in the order of the screen */
+            columns: components["schemas"]["ImportColumnDto"][];
+            /** @description Largest file accepted, in bytes */
+            maxFileSizeBytes: number;
+            /** @description Largest number of data rows accepted */
+            maxRows: number;
+            /** @description File extensions accepted, with their dot */
+            acceptedExtensions: string[];
+            /** @description The whole file is refused at its first error (receivables and payments) */
+            refusedOnFirstError: boolean;
+            /** @description Fields to send with the file, besides the file itself */
+            extraFields: {
+                /** @description Name of the query parameter */
+                name: string;
+                /** @description Label shown on the screen */
+                label: string;
+                /** @description The field is mandatory */
+                required: boolean;
+                /** @description What the field holds */
+                description: string;
+            }[];
+        };
+        ImportColumnDto: {
+            /** @description Name of the column in the header of the file */
+            name: string;
+            /** @description Is the column mandatory? */
+            required: boolean;
+            /** @description What the column holds and the rule applied to it (French) */
+            description: string;
+        };
+        RecoveryImportHistoryResponseDto: {
+            /** @description Confirmed imports of the page, newest first */
+            items: components["schemas"]["RecoveryImportHistoryItemDto"][];
+            /** @description Number of elements of the whole list */
+            total: number;
+        };
+        RecoveryImportHistoryItemDto: {
+            /**
+             * Format: uuid
+             * @description Identifier of the import
+             */
+            importId: string;
+            type: components["schemas"]["RecoveryImportTypeDto"];
+            /** @description Name of the file */
+            fileName: string;
+            /**
+             * Format: date-time
+             * @description Confirmation instant
+             */
+            confirmedAt: string;
+            confirmedBy: {
+                /**
+                 * Format: uuid
+                 * @description Account ID
+                 */
+                id: string;
+                /** @description E-mail of the account */
+                email: string;
+            };
+            /** @description Non-blank data rows */
+            totalRows: number;
+            /** @description Rows written */
+            createdCount: number;
+            /** @description Rows not written */
+            skippedCount: number;
+        };
+        RecoveryImportStatusDto: {
+            statement: {
+                /**
+                 * Format: date
+                 * @description Date of the last confirmed bank statement
+                 */
+                lastStatementDate: string | null;
+                /** @description Oldest accepted bank statement according to the active policy */
+                maxAgeDays: number | null;
+                /** @description A confirmed statement exists and is not older than the maximum age */
+                fresh: boolean;
+            };
+            /**
+             * Format: date
+             * @description Extraction date of the latest receivables snapshot
+             */
+            receivablesExtractionDate: string | null;
+            /** @description The last confirmed import of each type */
+            lastConfirmed: {
+                type: components["schemas"]["RecoveryImportTypeDto"];
+                /**
+                 * Format: date-time
+                 * @description Confirmation instant
+                 */
+                confirmedAt: string;
+                /** @description Name of the file */
+                fileName: string;
+            }[];
+        };
         ScopesListResponseDto: {
             scopes: components["schemas"]["ScopeDto"][];
             /**
@@ -695,20 +2305,6 @@ export interface components {
             /** @description Name of the imported file */
             fileName: string;
         };
-        ImportErrorsListResponseDto: {
-            /** @description One page of entries, by row then by column */
-            errors: components["schemas"]["ImportRowErrorDto"][];
-            /** @description Number of entries of the whole list (not of the rows) */
-            total: number;
-        };
-        ImportRowErrorDto: {
-            /** @description Spreadsheet row number (the header is row 1) */
-            row: number;
-            /** @description Name of the faulty column */
-            column: string;
-            /** @description What is wrong, in French */
-            reason: string;
-        };
         ImportPreviewDto: {
             /**
              * Format: uuid
@@ -738,14 +2334,6 @@ export interface components {
             maxRows: number;
             /** @description File extensions accepted, with their dot */
             acceptedExtensions: string[];
-        };
-        ImportColumnDto: {
-            /** @description Name of the column in the header of the file */
-            name: string;
-            /** @description Is the column mandatory? */
-            required: boolean;
-            /** @description What the column holds and the rule applied to it (French) */
-            description: string;
         };
     };
     responses: never;
@@ -902,6 +2490,489 @@ export interface operations {
             };
         };
     };
+    CasesController_list: {
+        parameters: {
+            query?: {
+                /** @description The index of the first element to return (integer from 0 to 2147483647, default 0) */
+                from?: number;
+                /** @description The number of elements to return (integer from 1 to 100, default 10) */
+                size?: number;
+                /** @description State of the case */
+                state?: components["schemas"]["CaseStateDto"];
+                nature?: components["schemas"]["DebtorNatureDto"];
+                /** @description Segment of the debtor (1 to 50 characters) */
+                segment?: string;
+                /** @description SIREN of a creditor entity (9 digits) */
+                creditor?: string;
+                /** @description Part of the customer identifier, case-insensitive (1 to 50 characters) */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The cases of the page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CasesListResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CasesController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The case */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CasesController_decisions: {
+        parameters: {
+            query?: {
+                /** @description The index of the first element to return (integer from 0 to 2147483647, default 0) */
+                from?: number;
+                /** @description The number of elements to return (integer from 1 to 100, default 10) */
+                size?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The decisions of the page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionsListResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CasesController_stateHistory: {
+        parameters: {
+            query?: {
+                /** @description The index of the first element to return (integer from 0 to 2147483647, default 0) */
+                from?: number;
+                /** @description The number of elements to return (integer from 1 to 100, default 10) */
+                size?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The transitions of the page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StateHistoryResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CasesController_filters: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sorted values */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CasesFiltersResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DecisionQueueController_counts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Open items by type */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QueueCountsResponseDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DecisionQueueController_list: {
+        parameters: {
+            query?: {
+                /** @description The index of the first element to return (integer from 0 to 2147483647, default 0) */
+                from?: number;
+                /** @description The number of elements to return (integer from 1 to 100, default 10) */
+                size?: number;
+                /** @description Open items (default) or decided ones */
+                status?: "open" | "decided";
+                /** @description Only the items of this type */
+                type?: components["schemas"]["QueueTypeDto"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Items of the page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QueueItemsResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DisputesController_list: {
+        parameters: {
+            query?: {
+                /** @description The index of the first element to return (integer from 0 to 2147483647, default 0) */
+                from?: number;
+                /** @description The number of elements to return (integer from 1 to 100, default 10) */
+                size?: number;
+                /** @description Open disputes (default), closed ones or all */
+                status?: "open" | "closed" | "all";
+                /** @description Only the disputes of this origin */
+                origin?: components["schemas"]["DisputeOriginDto"];
+                /** @description Invoice number or customer identifier, case-insensitive substring (1 to 50 characters) */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Disputes of the page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DisputesListResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DisputesController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The dispute */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DisputeResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DisputesController_invoices: {
+        parameters: {
+            query: {
+                /** @description The index of the first element to return (integer from 0 to 2147483647, default 0) */
+                from?: number;
+                /** @description The number of elements to return (integer from 1 to 100, default 10) */
+                size?: number;
+                /** @description Beginning of the invoice number, case-insensitive (1 to 50 characters) */
+                number: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Invoices of the page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DisputeInvoicesResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     GroupsController_list: {
         parameters: {
             query?: {
@@ -1019,6 +3090,329 @@ export interface operations {
             };
         };
     };
+    CasesController_searchInvoices: {
+        parameters: {
+            query: {
+                /** @description The index of the first element to return (integer from 0 to 2147483647, default 0) */
+                from?: number;
+                /** @description The number of elements to return (integer from 1 to 100, default 10) */
+                size?: number;
+                /** @description Beginning of the invoice number, case-insensitive (1 to 50 characters) */
+                number: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Open invoices of the page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoicesSearchResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PoliciesController_list: {
+        parameters: {
+            query?: {
+                /** @description The index of the first element to return (integer from 0 to 2147483647, default 0) */
+                from?: number;
+                /** @description The number of elements to return (integer from 1 to 100, default 10) */
+                size?: number;
+                /** @description Status of the versions */
+                status?: components["schemas"]["PolicyStatusDto"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Versions of the page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyVersionsListResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PoliciesController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The version */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyVersionDetailResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PoliciesController_activate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The version, active */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyVersionResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Conflict - policies.activation_blocked (details: one entry per failed check), policies.not_activatable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PoliciesController_preview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The analysis of the file and the identifier of the preview */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyPreviewDto"];
+                };
+            };
+            /** @description Bad request - policies.invalid_file_type or the body is not a multipart upload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Conflict - policies.already_imported */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Payload too large - policies.file_too_large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PoliciesController_confirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Preview ID */
+                previewId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The version, imported */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyVersionResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found - policies.preview_not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Conflict - policies.invalid_file, policies.already_imported */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     ProfilesController_me: {
         parameters: {
             query?: never;
@@ -1039,6 +3433,420 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RecoveryImportsController_confirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type: components["schemas"]["RecoveryImportTypeDto"];
+                importId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description What the confirmation did */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecoveryImportConfirmDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Conflict - imports.file_refused, imports.stale_extraction, imports.already_imported */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RecoveryImportsController_errors: {
+        parameters: {
+            query?: {
+                /** @description Index of the first entry to return (default 0) */
+                from?: number;
+                /** @description Number of entries to return (default 10) */
+                size?: number;
+            };
+            header?: never;
+            path: {
+                type: components["schemas"]["RecoveryImportTypeDto"];
+                importId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Errors of the page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportErrorsListResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RecoveryImportsController_report: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type: components["schemas"]["RecoveryImportTypeDto"];
+                importId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The report */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportReportDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RecoveryImportsController_reportItems: {
+        parameters: {
+            query: {
+                /** @description The index of the first element to return (integer from 0 to 2147483647, default 0) */
+                from?: number;
+                /** @description The number of elements to return (integer from 1 to 100, default 10) */
+                size?: number;
+                category: components["schemas"]["ImportReportCategoryDto"];
+            };
+            header?: never;
+            path: {
+                type: components["schemas"]["RecoveryImportTypeDto"];
+                importId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lines of the page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportReportItemsResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RecoveryImportsController_preview: {
+        parameters: {
+            query?: {
+                /** @description Control total of the receivables file: balance of the customer account at the extraction date (required for receivables, refused for the other types) */
+                controlTotal?: string;
+            };
+            header?: never;
+            path: {
+                type: components["schemas"]["RecoveryImportTypeDto"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The analysis of the file and the identifier of the preview */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecoveryImportPreviewDto"];
+                };
+            };
+            /** @description Bad request - imports.invalid_file_type, imports.control_total_required, imports.control_total_invalid or invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Conflict - imports.already_imported */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Payload too large - imports.file_too_large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RecoveryImportsController_specification: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type: components["schemas"]["RecoveryImportTypeDto"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Specification of the file */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecoveryImportSpecificationDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RecoveryImportsController_history: {
+        parameters: {
+            query?: {
+                /** @description The index of the first element to return (integer from 0 to 2147483647, default 0) */
+                from?: number;
+                /** @description The number of elements to return (integer from 1 to 100, default 10) */
+                size?: number;
+                /** @description Only the imports of this type */
+                type?: components["schemas"]["RecoveryImportTypeDto"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Imports of the page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecoveryImportHistoryResponseDto"];
+                };
+            };
+            /** @description Bad request - validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RecoveryImportsController_status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description State of the imports */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecoveryImportStatusDto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden - insufficient role permissions */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

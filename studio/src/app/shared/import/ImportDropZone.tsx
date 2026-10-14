@@ -5,12 +5,14 @@ import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutl
 interface Props {
   disabled: boolean
   accept: string
+  /** Invitation text; « Glissez un fichier .xlsx ou .csv ici » by default. */
+  label?: string
   /** The first file given, and whether more than one was given. */
   onFile: (file: File, extra: boolean) => void
 }
 
 /** Dashed drop area with a hidden file field; the field is reset after each choice. */
-export function ImportDropZone({ disabled, accept, onFile }: Props) {
+export function ImportDropZone({ disabled, accept, label = 'Glissez un fichier .xlsx ou .csv ici', onFile }: Props) {
   const input = useRef<HTMLInputElement>(null)
   const [over, setOver] = useState(false)
 
@@ -63,7 +65,7 @@ export function ImportDropZone({ disabled, accept, onFile }: Props) {
       }}
     >
       <InsertDriveFileOutlinedIcon fontSize="large" color="action" />
-      <Typography>Glissez un fichier .xlsx ou .csv ici</Typography>
+      <Typography>{label}</Typography>
       <Button variant="outlined" disabled={disabled} onClick={() => input.current?.click()}>
         Choisir un fichier
       </Button>

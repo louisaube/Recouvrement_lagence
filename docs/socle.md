@@ -493,7 +493,36 @@ Stack: React 18, MUI 6, React Router, French labels, `<html lang="fr">`, types f
 - **Acceptance** (`acceptance/`, `pnpm acceptance`) and **browser tests** (`acceptance/e2e/`, Playwright): owned by QA; to
   contest one, append an `OPEN:` line to the `DISPUTES.md` of the current plans folder.
 
+## Module recouvrement, lot v1a (referential)
+
+How the first lot of the module plugs into the foundation (no foundation file was changed):
+
+- **Features**: `cases` (read routes, `CaseStateService` = the only writer of `cases.state` and of the history,
+  `ClockService` = the Paris date), `policies` (versioned policy, six activation checks, witnesses run by
+  `@gorules/zen-engine`), `recovery-imports` (the five pivot files), `disputes` (read routes), `decision-queue` (tables and
+  `QueueService`, no route yet), `recovery-common` (Zod helpers, `textArray`/`uuidArray` for raw SQL arrays, `isoInstant`).
+  Profiles come from `profiles` (`RequireProfile('supervisor' | 'litigation')`, guard before validation: 403 before 400).
+- **Raw queries**: results are read from `db.execute(sql…).rows`; bigint columns come back as strings (`Number(...)`), instants
+  as strings (`isoInstant`). A JS array is not a single parameter: use `textArray` / `uuidArray`.
+- **Imports**: Contacts, Documents and Disputes use `ImportsService` with an `ImportDefinition` each
+  (`row-import-definitions.ts`); the facade `RecoveryImportsService` completes the confirmation in the same transaction
+  (replacement of the contacts and documents through the `last_import_id` marker; author and states for the disputes) and puts
+  the error rows back, since the foundation drops them at the confirmation and the result screen still lists them. Receivables
+  and Payments are refused as a whole at the first fault (`WholeFileImportService`, which reuses the foundation's reception and
+  preview tables); their confirmation rebuilds the lettrage (`LettrageService`) and recomputes the states.
+- **One confirmation route, five audit object types**: `POST /recovery-imports/:type/:importId/confirm` is one action
+  (`recovery-imports:confirm`); its `@Audited` declaration has a getter `objectType` that reads the type set around the request
+  by `ImportTypeMiddleware` (AsyncLocalStorage), because the platform reads the declaration before and after the handler.
+- **States**: a state is derived from the facts (settled, transferred, frozen, supervisor queue, committed, negotiating, open)
+  and written only through `CaseStateService.recomputeMany`; the history is append-only. The referential gained the transition
+  `supervisor_queue → frozen` (a dispute opened on a case waiting for the supervisor).
+- **Tests**: `recovery-common/tests/support.ts` builds accounts with a profile, CSV uploads, a receivables file and a minimal
+  policy file.
+
 ## Known deviations and open points
+
+Lot v1a: see `specifications/recouvrement/implementation-plans/v1a-referentiel/DISPUTES.md` (open: the acceptance policy tests
+share and mutate one document object).
 
 `specifications/socle/DISPUTES.md` (all arbitrated): `POST /users` exists from lot r0 because `acceptance-session.test.ts`
 requires its 401 / 403; it keeps the component names of the contract of record (`UsersCreateParamsDto`,

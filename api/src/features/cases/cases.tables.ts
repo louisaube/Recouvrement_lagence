@@ -94,6 +94,8 @@ export const invoices = base.table(
     firstSeenOn: date('first_seen_on', { mode: 'string' }).notNull(),
     firstSeenBalanceCents: cents('first_seen_balance_cents').notNull(),
     lastExtractionDate: date('last_extraction_date', { mode: 'string' }).notNull(),
+    /** `reference_sortie` of the last snapshot (stable identifier of an accounting output; read by the ledger lot). */
+    outputReference: text('output_reference'),
   },
   (table) => [
     check('invoices_kind_check', sql`${table.kind} in ('invoice', 'credit_note')`),
@@ -177,14 +179,22 @@ export const caseStateHistory = base.table(
   ],
 )
 
-/** Confirmed receivable snapshots (the core keeps the confirmed row of `import_previews`). */
-export const receivableSnapshots = base.table('receivable_snapshots', {
-  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
-  importId: uuid('import_id')
-    .notNull()
-    .references(() => importPreviews.id),
-  extractionDate: date('extraction_date', { mode: 'string' }).notNull().unique(),
-  controlTotalCents: cents('control_total_cents').notNull(),
-  totalCents: cents('total_cents').notNull(),
-  confirmedAt: timestamp('confirmed_at', { withTimezone: true }).notNull().defaultNow(),
-})
+/**
+ * Confirmed receivable snapshots (the core keeps the confirmed row of `import_previews`).
+ * The extraction date is not unique: a snapshot of the same day may be confirmed again (only an older one is refused,
+ * `rule-recouvrement-receivables-extraction-date`); the latest snapshot is the greatest date, then the last confirmed.
+ */
+export const receivableSnapshots = base.table(
+  'receivable_snapshots',
+  {
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    importId: uuid('import_id')
+      .notNull()
+      .references(() => importPreviews.id),
+    extractionDate: date('extraction_date', { mode: 'string' }).notNull(),
+    controlTotalCents: cents('control_total_cents').notNull(),
+    totalCents: cents('total_cents').notNull(),
+    confirmedAt: timestamp('confirmed_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('receivable_snapshots_extraction_idx').on(table.extractionDate, table.confirmedAt)],
+)

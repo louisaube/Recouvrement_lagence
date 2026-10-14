@@ -1,6 +1,7 @@
-import { Controller, Get } from '@nestjs/common'
+import { Controller, Get, UseGuards } from '@nestjs/common'
 import { Access } from '../../platform/access/access.decorators'
 import { ApiRoute, ApiTag } from '../../platform/openapi/route-contract'
+import { RequireAdminOrProfile } from '../profiles/profile.guard'
 import { ValidQuery } from '../../platform/validation/zod-validation.interceptor'
 import {
   AuditLogsListQuery,
@@ -20,6 +21,7 @@ const UNAUTHORIZED = { description: 'Unauthorized' }
  */
 @Controller('audit-logs')
 @ApiTag('Audit')
+@UseGuards(RequireAdminOrProfile('supervisor'))
 export class AuditController {
   constructor(private readonly service: AuditService) {}
 

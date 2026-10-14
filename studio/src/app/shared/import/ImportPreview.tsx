@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { Alert, Box, Button, Card, CircularProgress, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Typography } from '@mui/material'
 import { failureMessage } from '../useCall'
 import { usePagedList, type PageLoader } from '../usePagedList'
@@ -10,10 +10,16 @@ interface Props {
   loadErrors: PageLoader<ImportRowError>
   /** The preview is gone (404): back to the drop step. */
   onExpired: () => void
+  /** Extra lines under the counters (control totals…). */
+  afterCounters?: ReactNode
+  /** Replaces the default verdict (refusal of a whole file…). */
+  verdict?: ReactNode
+  /** Extra content under the table of faults (difference report…). */
+  afterErrors?: ReactNode
 }
 
 /** Step 2: counters, verdict and, when needed, the paginated table of faults. */
-export function ImportPreview({ preview, loadErrors, onExpired }: Props) {
+export function ImportPreview({ preview, loadErrors, onExpired, afterCounters, verdict: verdictOverride, afterErrors }: Props) {
   const { totalRows, validRows, errorRows } = preview
   const verdict =
     errorRows === 0
@@ -36,8 +42,10 @@ export function ImportPreview({ preview, loadErrors, onExpired }: Props) {
         <Typography color={errorRows > 0 ? 'error.main' : undefined}>Lignes en erreur : {formatCount(errorRows)}</Typography>
       </Stack>
       <Typography color="text.secondary">Rien n'a encore été enregistré.</Typography>
-      <Alert severity={verdict.severity}>{verdict.text}</Alert>
+      {afterCounters}
+      {verdictOverride ?? <Alert severity={verdict.severity}>{verdict.text}</Alert>}
       {errorRows > 0 && <ErrorsTable loadErrors={loadErrors} onExpired={onExpired} />}
+      {afterErrors}
     </Stack>
   )
 }

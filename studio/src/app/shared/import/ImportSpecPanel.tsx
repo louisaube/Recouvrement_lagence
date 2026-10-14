@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Alert, Box, Button, CircularProgress, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
 import type { ImportSpecification } from './importTypes'
 import { formatCount, formatMegabytes } from './importMessages'
@@ -5,7 +6,7 @@ import { formatCount, formatMegabytes } from './importMessages'
 export type SpecState = { status: 'loading' } | { status: 'error' } | { status: 'ready'; spec: ImportSpecification }
 
 /** « Colonnes attendues »: shown once the specification has settled, so the size limit is known before any drop. */
-export function ImportSpecPanel({ state, onRetry }: { state: SpecState; onRetry: () => void }) {
+export function ImportSpecPanel({ state, onRetry, note }: { state: SpecState; onRetry: () => void; note?: ReactNode }) {
   if (state.status === 'loading') {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
@@ -33,6 +34,7 @@ export function ImportSpecPanel({ state, onRetry }: { state: SpecState; onRetry:
             La première ligne du fichier doit contenir les noms de colonnes ci-dessous. Formats acceptés : {state.spec.acceptedExtensions.join(' et ')}, maximum{' '}
             {formatMegabytes(state.spec.maxFileSizeBytes)} Mo et {formatCount(state.spec.maxRows)} lignes.
           </Typography>
+          {note && <Typography sx={{ mb: 1.5, fontWeight: 600 }}>{note}</Typography>}
           <TableContainer>
             <Table size="small">
               <TableHead>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Alert, Box, Button, Card, LinearProgress, Stack, Step, StepLabel, Stepper, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { formatCount, analysisMessage, confirmMessage, isAlreadyImported, isExpired, precheck, DEFAULT_EXTENSIONS, MESSAGE_EXPIRED } from './importMessages'
@@ -10,11 +10,38 @@ import type { ImportApi, ImportConfirmation, ImportPreviewSummary, ImportRowErro
 import type { Failure } from '../useCall'
 import type { PageLoader } from '../usePagedList'
 
+/** rule-recouvrement-import-flow-reuse: the foundation flow extended by properties, never forked. */
+export interface ImportFlowExtension {
+  /** Field(s) shown above the drop area (control total…). */
+  beforeDeposit?: ReactNode
+  /** A message refuses the deposit before any call. */
+  depositGuard?: () => string | undefined
+  /** Invitation text of the drop area. */
+  dropLabel?: string
+  /** Mention above the table of expected columns. */
+  specNote?: ReactNode
+  /** The file is refused as a whole: no green light. */
+  refused?: (preview: ImportPreviewSummary) => boolean
+  previewAfterCounters?: (preview: ImportPreviewSummary) => ReactNode
+  previewVerdict?: (preview: ImportPreviewSummary) => ReactNode
+  previewAfterErrors?: (preview: ImportPreviewSummary) => ReactNode
+  confirmButton?: (validRows: number) => string
+  dialog?: { title: string; text: (validRows: number, errorRows: number, wholeFile: boolean) => string; confirmLabel: string }
+  /** A message of this screen for a refusal; undefined falls back to the foundation wording. */
+  failureMessage?: (failure: Failure, step: 'analysis' | 'confirm') => string | undefined
+  /** A refusal of the confirmation that a retry cannot change: the only way out is a new deposit. */
+  confirmFailureRestarts?: (failure: Failure) => boolean
+  /** Replaces the foundation result. */
+  renderResult?: (result: ImportConfirmation, restart: () => void) => ReactNode
+  onConfirmed?: (result: ImportConfirmation) => void
+}
+
 interface Props {
   api: ImportApi
   /** Singular name of the created objects (« compte »). */
   noun: string
   exit: { label: string; to: string }
+  extension?: ImportFlowExtension
 }
 
 type Phase = { name: 'deposit' } | { name: 'analyzing' } | { name: 'preview'; preview: ImportPreviewSummary } | { name: 'done'; result: ImportConfirmation }
@@ -23,7 +50,8 @@ type Phase = { name: 'deposit' } | { name: 'analyzing' } | { name: 'preview'; pr
  * Generic three-step import (dépôt, aperçu, confirmation), reusable by any feature: only the API
  * calls, the noun of the objects and the exit link change.
  */
-export function ImportFlow({ api, noun, exit }: Props) {
+export function ImportFlow({ api, noun, exit, extension = {} }: Props) {
+  const ext = extension
   const theme = useTheme()
   const narrow = useMediaQuery(theme.breakpoints.down('sm'))
   const [spec, setSpec] = useState<SpecState>({ status: 'loading' })
@@ -57,7 +85,7 @@ export function ImportFlow({ api, noun, exit }: Props) {
   }
 
   const analyse = async (file: File, extra: boolean) => {
-    const message = precheck(file, specification)
+    const message = ext.depositGuard?.() ?? precheck(file, specification)
     setOneFileNote(extra ? `Un seul fichier à la fois : seul « ${file.name} » a été retenu.` : undefined)
     if (message) {
       setNotice(message)
@@ -73,7 +101,7 @@ export function ImportFlow({ api, noun, exit }: Props) {
     if (outcome.ok) setPhase({ name: 'preview', preview: outcome.data })
     else {
       setPhase({ name: 'deposit' })
-      setNotice(analysisMessage(outcome.failure, specification))
+      setNotice(ext.failureMessage?.(outcome.failure, 'analysis') ?? analysisMessage(outcome.failure, specification))
     }
   }
 
@@ -86,8 +114,10 @@ export function ImportFlow({ api, noun, exit }: Props) {
     sending.current = false
     setSubmitting(false)
     setDialogOpen(false)
-    if (outcome.ok) setPhase({ name: 'done', result: outcome.data })
-    else setConfirmFailure(outcome.failure)
+    if (outcome.ok) {
+      setPhase({ name: 'done', result: outcome.data })
+      ext.onConfirmed?.(outcome.data)
+    } else setConfirmFailure(outcome.failure)
   }
 
   const loadErrors: PageLoader<ImportRowError> = useCallback(
@@ -98,6 +128,8 @@ export function ImportFlow({ api, noun, exit }: Props) {
     [api, phase],
   )
   const expire = useCallback(() => backToDeposit(MESSAGE_EXPIRED), []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const wholeFileRefused = (preview: ImportPreviewSummary) => ext.refused?.(preview) ?? false
 
   const step = phase.name === 'done' || submitting ? 2 : phase.name === 'preview' ? 1 : 0
   const depositing = phase.name === 'deposit' || phase.name === 'analyzing'
@@ -125,7 +157,9 @@ export function ImportFlow({ api, noun, exit }: Props) {
               {notice}
             </Alert>
           )}
+          {ext.beforeDeposit}
           <ImportDropZone
+            label={ext.dropLabel}
             disabled={phase.name === 'analyzing'}
             accept={(specification?.acceptedExtensions ?? DEFAULT_EXTENSIONS).join(',')}
             onFile={(file, extra) => void analyse(file, extra)}
@@ -140,7 +174,7 @@ export function ImportFlow({ api, noun, exit }: Props) {
               </Button>
             </Stack>
           )}
-          <ImportSpecPanel state={spec} onRetry={loadSpec} />
+          <ImportSpecPanel state={spec} onRetry={loadSpec} note={ext.specNote} />
         </>
       )}
 
@@ -150,7 +184,7 @@ export function ImportFlow({ api, noun, exit }: Props) {
             <Alert
               severity="error"
               action={
-                isExpired(confirmFailure) || isAlreadyImported(confirmFailure) ? (
+                isExpired(confirmFailure) || isAlreadyImported(confirmFailure) || ext.confirmFailureRestarts?.(confirmFailure) ? (
                   <Button color="inherit" size="small" onClick={() => backToDeposit()}>
                     Déposer un fichier
                   </Button>
@@ -161,13 +195,22 @@ export function ImportFlow({ api, noun, exit }: Props) {
                 )
               }
             >
-              {confirmMessage(confirmFailure)}
+              {ext.failureMessage?.(confirmFailure, 'confirm') ?? confirmMessage(confirmFailure)}
             </Alert>
           )}
-          <ImportPreview preview={phase.preview} loadErrors={loadErrors} onExpired={expire} />
+          <ImportPreview
+            preview={phase.preview}
+            loadErrors={loadErrors}
+            onExpired={expire}
+            afterCounters={ext.previewAfterCounters?.(phase.preview)}
+            verdict={ext.previewVerdict?.(phase.preview)}
+            afterErrors={ext.previewAfterErrors?.(phase.preview)}
+          />
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-            <Button variant="contained" disabled={phase.preview.validRows === 0} onClick={() => setDialogOpen(true)}>
-              {phase.preview.validRows === 0 ? 'Aucune ligne valide : rien à importer.' : `Importer ${formatCount(phase.preview.validRows)} ${noun}(s)`}
+            <Button variant="contained" disabled={phase.preview.validRows === 0 || wholeFileRefused(phase.preview)} onClick={() => setDialogOpen(true)}>
+              {phase.preview.validRows === 0
+                ? 'Aucune ligne valide : rien à importer.'
+                : (ext.confirmButton?.(phase.preview.validRows) ?? `Importer ${formatCount(phase.preview.validRows)} ${noun}(s)`)}
             </Button>
             <Button variant="outlined" onClick={() => backToDeposit()}>
               Choisir un autre fichier
@@ -178,6 +221,9 @@ export function ImportFlow({ api, noun, exit }: Props) {
               noun={noun}
               validRows={phase.preview.validRows}
               errorRows={phase.preview.errorRows}
+              title={ext.dialog?.title}
+              text={ext.dialog?.text(phase.preview.validRows, phase.preview.errorRows, ext.refused !== undefined)}
+              confirmLabel={ext.dialog?.confirmLabel}
               submitting={submitting}
               onCancel={() => setDialogOpen(false)}
               onConfirm={() => void confirm(phase.preview)}
@@ -186,7 +232,8 @@ export function ImportFlow({ api, noun, exit }: Props) {
         </Stack>
       )}
 
-      {phase.name === 'done' && (
+      {phase.name === 'done' && ext.renderResult?.(phase.result, () => backToDeposit())}
+      {phase.name === 'done' && !ext.renderResult && (
         <Stack spacing={2}>
           <Alert severity="success">{`${formatCount(phase.result.createdCount)} ${noun}(s) créé(s).`}</Alert>
           {phase.result.skippedCount > 0 && (

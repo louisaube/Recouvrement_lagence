@@ -19,6 +19,10 @@ export interface ImportPreviewSummary {
   totalRows: number
   validRows: number
   errorRows: number
+  /** Recovery imports: false when a file refused as a whole counts its error (rule-recouvrement-import-flow-reuse). */
+  accepted?: boolean
+  computedTotalCents?: number | null
+  controlTotalCents?: number | null
 }
 
 export interface ImportRowError {
@@ -30,6 +34,8 @@ export interface ImportRowError {
 export interface ImportConfirmation {
   createdCount: number
   skippedCount: number
+  /** Recovery imports: what the confirmation did, in French. */
+  effects?: { label: string; count: number }[]
 }
 
 /** The four API calls of an import; a feature supplies its own (rule-foundation-import-two-steps). */
