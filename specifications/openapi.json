@@ -591,6 +591,316 @@
         ]
       }
     },
+    "/daily-batches": {
+      "get": {
+        "description": "Use this API action to list the daily batches, the most recent first (supervisor profile)",
+        "operationId": "BatchesController_list",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "The index of the first element to return (integer from 0 to 2147483647, default 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of elements to return (integer from 1 to 100, default 10)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Batches of the page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyBatchesListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Daily batches"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      },
+      "post": {
+        "description": "Use this API action to prepare the daily batch: the brain decides every case, the orders are built and the checks run (supervisor profile)",
+        "operationId": "BatchesController_prepare",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "The batch, ready when every check passes, blocked otherwise",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyBatchResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "409": {
+            "description": "Conflict - batches.already_released (the batch of the day is ready), batches.no_active_policy"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Daily batches"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/daily-batches/{id}": {
+      "get": {
+        "description": "Use this API action to read a daily batch with its checks, shares, exclusions and orders by type (supervisor profile)",
+        "operationId": "BatchesController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The batch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyBatchResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Daily batches"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/daily-batches/{id}/orders": {
+      "get": {
+        "description": "Use this API action to browse the send orders of a daily batch, by customer identifier then type (supervisor profile)",
+        "operationId": "BatchesController_orders",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "The index of the first element to return (integer from 0 to 2147483647, default 0)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "The number of elements to return (integer from 1 to 100, default 10)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "Only the orders of this type",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/OrderTypeDto"
+                }
+              ]
+            }
+          },
+          {
+            "name": "channel",
+            "required": false,
+            "in": "query",
+            "description": "Only the orders of this channel",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/OrderChannelDto"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Orders of the page",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOrdersListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Daily batches"
+        ],
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
+    "/daily-batches/{id}/release": {
+      "post": {
+        "description": "Use this API action to release a blocked daily batch by a reasoned decision; the failed checks stay displayed (supervisor profile)",
+        "operationId": "BatchesController_release",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The batch, ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyBatchResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation failed"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden - insufficient role permissions"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "409": {
+            "description": "Conflict - batches.not_releasable (the batch is not blocked)"
+          }
+        },
+        "summary": "",
+        "tags": [
+          "Daily batches"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReleaseBatchParamsDto"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          },
+          {
+            "cookie": []
+          }
+        ]
+      }
+    },
     "/decision-queue/counts": {
       "get": {
         "description": "Use this API action to count the open items of the decision queue by type (supervisor profile)",
@@ -3964,6 +4274,618 @@
         "required": [
           "segments",
           "creditors"
+        ]
+      },
+      "DailyBatchesListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailyBatchSummaryDto"
+            },
+            "description": "Batches of the page"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of elements of the whole list"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
+      "DailyBatchSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Batch ID"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of the batch"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BatchStatusDto"
+          },
+          "preparedBy": {
+            "description": "Supervisor who prepared the batch",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountRefDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Preparation instant"
+          },
+          "caseCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of cases decided"
+          },
+          "orderCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of orders of the batch"
+          },
+          "failedChecks": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4,
+            "description": "Number of checks in failure"
+          },
+          "releasedBy": {
+            "nullable": true,
+            "description": "Supervisor who released a blocked batch (null for an automatic release)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountRefDto"
+              }
+            ]
+          },
+          "releasedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time",
+            "description": "Release instant"
+          }
+        },
+        "required": [
+          "id",
+          "date",
+          "status",
+          "preparedBy",
+          "createdAt",
+          "caseCount",
+          "orderCount",
+          "failedChecks",
+          "releasedBy",
+          "releasedAt"
+        ]
+      },
+      "BatchStatusDto": {
+        "type": "string",
+        "enum": [
+          "blocked",
+          "ready",
+          "replaced"
+        ],
+        "description": "Status of a daily batch"
+      },
+      "AccountRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Account ID"
+          },
+          "email": {
+            "type": "string",
+            "description": "E-mail of the account"
+          }
+        },
+        "required": [
+          "id",
+          "email"
+        ]
+      },
+      "DailyBatchResponseDto": {
+        "type": "object",
+        "properties": {
+          "batch": {
+            "$ref": "#/components/schemas/DailyBatchDetailDto"
+          }
+        },
+        "required": [
+          "batch"
+        ]
+      },
+      "DailyBatchDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Batch ID"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of the batch"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BatchStatusDto"
+          },
+          "preparedBy": {
+            "description": "Supervisor who prepared the batch",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountRefDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Preparation instant"
+          },
+          "caseCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of cases decided"
+          },
+          "orderCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of orders of the batch"
+          },
+          "failedChecks": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4,
+            "description": "Number of checks in failure"
+          },
+          "releasedBy": {
+            "nullable": true,
+            "description": "Supervisor who released a blocked batch (null for an automatic release)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AccountRefDto"
+              }
+            ]
+          },
+          "releasedAt": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time",
+            "description": "Release instant"
+          },
+          "checks": {
+            "maxItems": 4,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatchCheckDto"
+            },
+            "description": "The four checks"
+          },
+          "shares": {
+            "maxItems": 4,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DecisionShareDto"
+            },
+            "description": "Share of each type of decision"
+          },
+          "excluded": {
+            "maxItems": 7,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatchExclusionDto"
+            },
+            "description": "Cases that received no order, by reason"
+          },
+          "ordersByType": {
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BatchOrderCountDto"
+            },
+            "description": "Orders by type"
+          },
+          "releaseReason": {
+            "nullable": true,
+            "description": "Reason of the release decision",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "replacedBy": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid",
+            "description": "Batch that replaced this one"
+          },
+          "policyVersion": {
+            "nullable": true,
+            "description": "Version of the policy that decided the batch",
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Policy version ID"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "description": "Label of the version"
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "date",
+          "status",
+          "preparedBy",
+          "createdAt",
+          "caseCount",
+          "orderCount",
+          "failedChecks",
+          "releasedBy",
+          "releasedAt",
+          "checks",
+          "shares",
+          "excluded",
+          "ordersByType",
+          "releaseReason",
+          "replacedBy",
+          "policyVersion"
+        ]
+      },
+      "BatchCheckDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "statement_fresh",
+              "witnesses_replayed",
+              "decision_share",
+              "no_duplicate_order"
+            ],
+            "description": "Code of the check"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "passed",
+              "failed"
+            ],
+            "description": "Result of the check"
+          },
+          "problems": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300,
+              "description": "Problem found, in French"
+            },
+            "description": "Problems found (at most 50)"
+          }
+        },
+        "required": [
+          "code",
+          "status",
+          "problems"
+        ]
+      },
+      "DecisionShareDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "none",
+              "reminder",
+              "proposal",
+              "transfer_proposed"
+            ],
+            "description": "Type of decision"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of decisions of this type in the batch"
+          },
+          "shareBp": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000,
+            "description": "Share of the decided cases, in basis points"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "fixed_cap",
+              "statistical"
+            ],
+            "description": "Fixed cap of the policy before ten previous batches, statistical after"
+          },
+          "capBp": {
+            "nullable": true,
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000,
+            "description": "Fixed cap of the type, in basis points (fixed_cap mode)"
+          },
+          "meanBp": {
+            "nullable": true,
+            "description": "Mean share of the previous batches, in basis points (statistical mode)",
+            "type": "number"
+          },
+          "sigmaBp": {
+            "nullable": true,
+            "description": "Standard deviation of the population of the previous batches (statistical mode)",
+            "type": "number"
+          },
+          "thresholdBp": {
+            "nullable": true,
+            "description": "Three standard deviations (statistical mode)",
+            "type": "number"
+          },
+          "exceeded": {
+            "type": "boolean",
+            "description": "The share blocks the batch"
+          }
+        },
+        "required": [
+          "type",
+          "count",
+          "shareBp",
+          "mode",
+          "capBp",
+          "meanBp",
+          "sigmaBp",
+          "thresholdBp",
+          "exceeded"
+        ]
+      },
+      "BatchExclusionDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": [
+              "documents_missing",
+              "channel_suspended",
+              "channel_not_authorized",
+              "no_contact",
+              "frozen",
+              "statement_stale",
+              "covered_by_outputs"
+            ],
+            "description": "Reason why the cases received no order"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of cases excluded for this reason"
+          }
+        },
+        "required": [
+          "reason",
+          "count"
+        ]
+      },
+      "BatchOrderCountDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/OrderTypeDto"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of orders of this type"
+          }
+        },
+        "required": [
+          "type",
+          "count"
+        ]
+      },
+      "OrderTypeDto": {
+        "type": "string",
+        "enum": [
+          "reminder",
+          "proposal",
+          "commitment_confirmation"
+        ],
+        "description": "Type of a send order"
+      },
+      "OrderChannelDto": {
+        "type": "string",
+        "enum": [
+          "voice",
+          "email_sms",
+          "mail"
+        ],
+        "description": "Channel of a send order"
+      },
+      "BatchOrdersListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderDto"
+            },
+            "description": "Orders of the page"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Number of elements of the whole list"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ]
+      },
+      "OrderDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Order ID"
+          },
+          "type": {
+            "$ref": "#/components/schemas/OrderTypeDto"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrderStatusDto"
+          },
+          "caseId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Case ID"
+          },
+          "debtorId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Customer identifier"
+          },
+          "interlocutorId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Interlocutor ID"
+          },
+          "interlocutorRole": {
+            "type": "string",
+            "enum": [
+              "accounts_payable",
+              "buyer",
+              "approver",
+              "payer"
+            ],
+            "description": "Role of the interlocutor"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/OrderChannelDto"
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderConditionDto"
+            },
+            "description": "Amounts, due dates, offer: never a drafted text"
+          },
+          "blockReason": {
+            "nullable": true,
+            "description": "Why the order is blocked",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "orderDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of the order"
+          },
+          "batchId": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid",
+            "description": "Batch ID"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "status",
+          "caseId",
+          "debtorId",
+          "interlocutorId",
+          "interlocutorRole",
+          "channel",
+          "conditions",
+          "blockReason",
+          "orderDate",
+          "batchId"
+        ]
+      },
+      "OrderStatusDto": {
+        "type": "string",
+        "enum": [
+          "planned",
+          "blocked",
+          "cancelled"
+        ],
+        "description": "Status of a send order"
+      },
+      "OrderConditionDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Name of the condition"
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 300,
+            "description": "Value of the condition (amount, due date, offer)"
+          }
+        },
+        "required": [
+          "name",
+          "value"
+        ]
+      },
+      "ReleaseBatchParamsDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000,
+            "description": "Reason of the decision (1 to 1000 characters once trimmed)"
+          }
+        },
+        "required": [
+          "reason"
         ]
       },
       "QueueCountsResponseDto": {
